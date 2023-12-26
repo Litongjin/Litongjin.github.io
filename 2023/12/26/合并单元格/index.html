@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="表格合并单元格操作                                  const rowIndexArr &#x3D; ref([] as any[]);     let flag &#x3D; 0;     interface SpanMethodProps {     row: any;     column: TableColumnCtx;     rowIndex: number;     c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2023/12/26/%E5%90%88%E5%B9%B6%E5%8D%95%E5%85%83%E6%A0%BC/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="表格合并单元格操作                                  const rowIndexArr &#x3D; ref([] as any[]);     let flag &#x3D; 0;     interface SpanMethodProps {     row: any;     column: TableColumnCtx;     rowIndex: number;     c">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-12-26T03:57:06.416Z">
+<meta property="article:modified_time" content="2023-12-12T08:01:03.668Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-合并单元格" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/12/26/%E5%90%88%E5%B9%B6%E5%8D%95%E5%85%83%E6%A0%BC/" class="article-date">
+  <time class="dt-published" datetime="2023-12-26T03:57:06.416Z" itemprop="datePublished">2023-12-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>表格合并单元格操作<br><template><br>  <el-table :data="tableData"
+            :span-method="objectSpanMethodAuto"
+            border
+            style="width: 100%"><br>    <el-table-column prop="date"
+                     label="日期"
+                     width="180"><br>    </el-table-column><br>    <el-table-column prop="name"
+                     label="姓名"
+                     width="180"><br>    </el-table-column><br>    <el-table-column prop="address"
+                     label="地址"><br>    </el-table-column><br>  </el-table><br></template></p>
+<script setup lang="ts">
+    const rowIndexArr = ref([] as any[]);
+    let flag = 0;
+    interface SpanMethodProps {
+    row: any;
+    column: TableColumnCtx<any>;
+    rowIndex: number;
+    columnIndex: number;
+    }
+    const objectSpanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
+    if (isBatch.value ? columnIndex === 1 || columnIndex === 2 : columnIndex === 0 || columnIndex === 1) {
+        //合并的列号
+        let _row = rowIndexArr.value[rowIndex];
+        return {
+            rowspan: _row,
+            colspan: 1
+        };
+    }
+    const getData = async () => {
+        //设置
+        rowIndexArr.value = [];
+        loading.value = true;
+        if (isBatch.value) {
+            params.status = 1;
+        }
+        const res = await getSparePartPurchaseByPageQuery(params);
+        if (res.code == 0) {
+            tableData.value = res.data.records;
+            total.value = res.data.total;
+            loading.value = false;
+            // 将单元格合并的起始位0放到数组中
+            // 每次出现两个采购申请单id不相等时，说明之前的采购申请单id是相等的，此时需要合并，保存这个拐点的index，作为下一个合并的开始位置
+            tableData.value.forEach((item: any, index: number) => {
+                if (index === 0) {
+                    rowIndexArr.value.push(1);
+                    flag = 0;
+                } else {
+                    if (
+                        //此处为判断是否合并逻辑
+                        item?.sparePartPurchaseApplicationInfo?.id ===
+                        tableData.value[index - 1]?.sparePartPurchaseApplicationInfo?.id
+                    ) {
+                        rowIndexArr.value[flag] += 1;
+                        rowIndexArr.value.push(0);
+                    } else {
+                        rowIndexArr.value.push(1);
+                        flag = index;
+                    }
+                }
+            });
+        } else {
+            loading.value = false;
+        }
+    };
+};
+</script>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/12/26/%E5%90%88%E5%B9%B6%E5%8D%95%E5%85%83%E6%A0%BC/" data-id="clqm3l9oy000004v90fe537vp" data-title="" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">December 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/12/26/%E5%90%88%E5%B9%B6%E5%8D%95%E5%85%83%E6%A0%BC/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/12/26/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
