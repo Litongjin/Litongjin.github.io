@@ -4,21 +4,19 @@
   <meta charset="utf-8">
   
   
-  <title>Hexo</title>
+  <title>父子组件调用问题 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="&#x2F;&#x2F;加载渲染过程父组件 beforeCreate父组件 created父组件 beforeMount子组件 beforeCreate子组件 created子组件 beforeMount子组件 mounted父组件 mounted&#x2F;&#x2F;更新过程父组件 beforeUpdate子组件 beforeUpdate子组件 updated父组件 updated&#x2F;">
+  <meta name="description" content="12345678910111213141516171819&#x2F;&#x2F;vue 加载渲染过程父组件 beforeCreate父组件 created父组件 beforeMount子组件 beforeCreate子组件 created子组件 beforeMount子组件 mounted父组件 mounted&#x2F;&#x2F;更新过程父组件 beforeUpdate子组件 beforeUpdate子组件 updated父组件">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="父子组件调用问题">
 <meta property="og:url" content="http://example.com/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="&#x2F;&#x2F;加载渲染过程父组件 beforeCreate父组件 created父组件 beforeMount子组件 beforeCreate子组件 created子组件 beforeMount子组件 mounted父组件 mounted&#x2F;&#x2F;更新过程父组件 beforeUpdate子组件 beforeUpdate子组件 updated父组件 updated&#x2F;">
+<meta property="og:description" content="12345678910111213141516171819&#x2F;&#x2F;vue 加载渲染过程父组件 beforeCreate父组件 created父组件 beforeMount子组件 beforeCreate子组件 created子组件 beforeMount子组件 mounted父组件 mounted&#x2F;&#x2F;更新过程父组件 beforeUpdate子组件 beforeUpdate子组件 updated父组件">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/@/assets/bigScreen/kuang-bg.png">
 <meta property="article:published_time" content="2023-12-26T03:57:00.519Z">
-<meta property="article:modified_time" content="2023-12-26T02:56:10.670Z">
+<meta property="article:modified_time" content="2023-12-26T08:52:54.801Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/@/assets/bigScreen/kuang-bg.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -83,247 +81,36 @@
   <div class="article-inner">
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      父子组件调用问题
+    </h1>
+  
+
+      </header>
+    
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>&#x2F;&#x2F;加载渲染过程<br>父组件 beforeCreate<br>父组件 created<br>父组件 beforeMount<br>子组件 beforeCreate<br>子组件 created<br>子组件 beforeMount<br>子组件 mounted<br>父组件 mounted<br>&#x2F;&#x2F;更新过程<br>父组件 beforeUpdate<br>子组件 beforeUpdate<br>子组件 updated<br>父组件 updated<br>&#x2F;&#x2F;销毁过程<br>父组件 beforeDestroy<br>子组件 beforeDestroy<br>子组件 destroyed<br>父组件 destroyed</p>
-<p>由于vue先执行mounted再执行父组件的执行顺序，所以在子组件在渲染时拿不到父组件的接口回调回来的数据，这时可以有以下三种解决方法：</p>
-<p>方案一：</p>
-<p>1、在父组件请求成功后再初始化渲染子组件，使用用子组件时添加v-if&#x3D;”flag”</p>
-<p>2、flag初始化为：false.</p>
-<p>3、在请求成功后修改flag为true。<br>&#x2F;&#x2F;父组件<br><template><br>    <div class="world-scroll-table"><br>      <ScrollTable :dealList="dealList" ref="table"  v-if="flag" /><br>    </div><br></template></p>
-<script>
-import ScrollTable from './components/ScrollTable'
-import { getAction } from '@api/manage'
-export default {
-  components: {
-    ScrollTable,
-  },
-  data() {
-    return {
-      flag:false,
-      dealList:[], 
-      url: {
-        dealList:'/bitcoin/bigScreen/pendingBtc'//最新交易通告
-      },
-    }
-  },
-  mounted() {
-    this.initDealList()
-    window.parentMounted = this._isMounted//方案3第一步
-  },
-  methods: {
-    /*
-     * 初始化最新交易通告数据
-     */
-    initDealList() {
-      getAction(this.url.dealList)
-        .then((res) => {
-          var arr = [];
-          for(let i=0;i<res.length;i++){
-            arr.push([res[i].txid, res[i].timeDate, res[i].fee])
-          }
-          this.dealList = arr
-          this.flag =true
-        })
-        .catch((err) => {
-          this.$message.error(err)
-        })
-    },
-  }
+        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">//vue 加载渲染过程</span><br><span class="line">父组件 beforeCreate</span><br><span class="line">父组件 created</span><br><span class="line">父组件 beforeMount</span><br><span class="line">子组件 beforeCreate</span><br><span class="line">子组件 created</span><br><span class="line">子组件 beforeMount</span><br><span class="line">子组件 mounted</span><br><span class="line">父组件 mounted</span><br><span class="line">//更新过程</span><br><span class="line">父组件 beforeUpdate</span><br><span class="line">子组件 beforeUpdate</span><br><span class="line">子组件 updated</span><br><span class="line">父组件 updated</span><br><span class="line">//销毁过程</span><br><span class="line">父组件 beforeDestroy</span><br><span class="line">子组件 beforeDestroy</span><br><span class="line">子组件 destroyed</span><br><span class="line">父组件 destroyed</span><br></pre></td></tr></table></figure>
 
-  //子组件
-<template>
-  <div class="scroll-table">
-    <img src="@/assets/bigScreen/kuang-bg.png" class="scroll-table-bg" />
-    <dv-scroll-board :config="config" class="scroll-table-table" />
-  </div>
-</template>
-<script>
-export default {
-  props: {
-    dealList: {
-      type: Array,
-      default: [],
-    },
-  },
-  data() {
-    return {
-      
-      config: {},
-      header: ['交易哈希', '交易时间', '交易费'],
-      data: [],
-    }
-  },
-  mounted() {
-          this.config = {
-          header: this.header,
-          data: this.dealList,
-          rowNum: 5, // 表行数
-          waitTime: 2000, // 轮播时间间隔(ms)
-          align: ['center'],
-          columnWidth: [50],
-          index: true,
-          indexHeader: '',
-          headerBGC: 'transparent', // 表头背景色
-          oddRowBGC: '', // 偶数行背景色
-          evenRowBGC: 'rgba(85, 156, 178, 0.1)', // 奇数行背景色
-        }
-  },
-}
-</script>
-<style lang="less" scoped>
-.scroll-table {
-  position: relative;
-
-  /deep/.dv-scroll-board .header {
-    height: 35px;
-  }
-
-  /deep/.scroll-table-table {
-    position: absolute;
-    top: 44px;
-    width: 585px;
-    height: 328px;
-    padding: 0 10px;
-    .header {
-      font-size: 16px;
-      font-family: Microsoft YaHei;
-      font-weight: bold;
-      color: #ffffff;
-    }
-
-    .row-item {
-      font-size: 14px;
-      font-family: Microsoft YaHei;
-      font-weight: 400;
-      color: #bfc3c4;
-    }
-  }
-}
-</style>
+<p>但是在我们实际开发的的业务中，经常存在先父组件中请求接口，拿到数据再传给子组件进行渲染的情况，由于 vue 先执行 mounted 再执行父组件的执行顺序，所以在子组件在渲染时拿不到父组件的接口回调回来的数据，这时可以有以下三种解决方法：</p>
+<p>方案一：<br>1、在父组件请求成功后再初始化渲染子组件，使用用子组件时添加 v-if&#x3D;”flag”<br>2、flag 初始化为：false.<br>3、在请求成功后修改 flag 为 true。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line">//父组件</span><br><span class="line">&lt;template&gt;</span><br><span class="line"></span><br><span class="line">&lt;div class=<span class="string">&quot;world-scroll-table&quot;</span>&gt;</span><br><span class="line">&lt;ScrollTable :dealList=<span class="string">&quot;dealList&quot;</span> ref=<span class="string">&quot;table&quot;</span>  v-if=<span class="string">&quot;flag&quot;</span> /&gt;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">import ScrollTable from <span class="string">&#x27;./components/ScrollTable&#x27;</span></span><br><span class="line">import &#123; getAction &#125; from <span class="string">&#x27;@api/manage&#x27;</span></span><br><span class="line"><span class="built_in">export</span> default &#123;</span><br><span class="line">  components: &#123;</span><br><span class="line">    ScrollTable,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      flag:<span class="literal">false</span>,</span><br><span class="line">      dealList:[],</span><br><span class="line">      url: &#123;</span><br><span class="line">        dealList:<span class="string">&#x27;/bitcoin/bigScreen/pendingBtc&#x27;</span>//最新交易通告</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="title">mounted</span></span>() &#123;</span><br><span class="line">    this.initDealList()</span><br><span class="line">    window.parentMounted = this._isMounted//方案3第一步</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    /*</span><br><span class="line">     * 初始化最新交易通告数据</span><br><span class="line">     */</span><br><span class="line">    <span class="function"><span class="title">initDealList</span></span>() &#123;</span><br><span class="line">      getAction(this.url.dealList)</span><br><span class="line">        .<span class="keyword">then</span>((res) =&gt; &#123;</span><br><span class="line">          var arr = [];</span><br><span class="line">          for(let i=<span class="number">0</span>;i&lt;res.length;i++)&#123;</span><br><span class="line">            arr.push([res[i].txid, res[i].timeDate, res[i].fee])</span><br><span class="line">          &#125;</span><br><span class="line">          this.dealList = arr</span><br><span class="line">          this.flag =true</span><br><span class="line">        &#125;)</span><br><span class="line">        .catch((err) =&gt; &#123;</span><br><span class="line">          this.<span class="variable">$message</span>.error(err)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//子组件</span><br><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div class=&quot;scroll-table&quot;&gt;</span><br><span class="line">    &lt;img src=&quot;@/assets/bigScreen/kuang-bg.png&quot; class=&quot;scroll-table-bg&quot; /&gt;</span><br><span class="line">    &lt;dv-scroll-board :config=&quot;config&quot; class=&quot;scroll-table-table&quot; /&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">export default &#123;</span><br><span class="line">  props: &#123;</span><br><span class="line">    dealList: &#123;</span><br><span class="line">      type: Array,</span><br><span class="line">      default: [],</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">  data() &#123;</span><br><span class="line">    return &#123;</span><br><span class="line"></span><br><span class="line">      config: &#123;&#125;,</span><br><span class="line">      header: [&#x27;交易哈希&#x27;, &#x27;交易时间&#x27;, &#x27;交易费&#x27;],</span><br><span class="line">      data: [],</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  mounted() &#123;</span><br><span class="line">          this.config = &#123;</span><br><span class="line">          header: this.header,</span><br><span class="line">          data: this.dealList,</span><br><span class="line">          rowNum: <span class="number">5</span>, // 表行数</span><br><span class="line">          waitTime: <span class="number">2000</span>, // 轮播时间间隔(ms)</span><br><span class="line">          align: [&#x27;center&#x27;],</span><br><span class="line">          columnWidth: [<span class="number">50</span>],</span><br><span class="line">          index: true,</span><br><span class="line">          indexHeader: &#x27;&#x27;,</span><br><span class="line">          headerBGC: &#x27;transparent&#x27;, // 表头背景色</span><br><span class="line">          oddRowBGC: &#x27;&#x27;, // 偶数行背景色</span><br><span class="line">          evenRowBGC: &#x27;rgba(<span class="number">85</span>, <span class="number">156</span>, <span class="number">178</span>, <span class="number">0.1</span>)&#x27;, // 奇数行背景色</span><br><span class="line">        &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;style lang=&quot;less&quot; scoped&gt;</span><br><span class="line">.scroll-table &#123;</span><br><span class="line">  position: relative;</span><br><span class="line"></span><br><span class="line">  :deep(.dv-scroll-board .header) &#123;</span><br><span class="line">    height: <span class="number">35</span>px;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  :deep(.scroll-table-table) &#123;</span><br><span class="line">    position: absolute;</span><br><span class="line">    top: <span class="number">44</span>px;</span><br><span class="line">    width: <span class="number">585</span>px;</span><br><span class="line">    height: <span class="number">328</span>px;</span><br><span class="line">    padding: <span class="number">0</span> <span class="number">10</span>px;</span><br><span class="line">    .header &#123;</span><br><span class="line">      font-size: <span class="number">16</span>px;</span><br><span class="line">      font-family: Microsoft YaHei;</span><br><span class="line">      font-weight: bold;</span><br><span class="line">      color: #ffffff;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    .row-item &#123;</span><br><span class="line">      font-size: <span class="number">14</span>px;</span><br><span class="line">      font-family: Microsoft YaHei;</span><br><span class="line">      font-weight: <span class="number">400</span>;</span><br><span class="line">      color: #bfc3c4;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure>
 
 <p>方案二：</p>
-<p>1、在子组件中使用watch监听，当dealList数据变化（获取到父组件传递过来的数据）时再渲染</p>
-<p>&#x2F;&#x2F;父组件<br><template><br>    <div class="world-scroll-table"><br>      <ScrollTable :dealList="dealList" ref="table" /><br>    </div><br></template></p>
-<script>
-import ScrollTable from './components/ScrollTable'
-import { getAction } from '@api/manage'
-export default {
-  components: {
-    ScrollTable,
-  },
-  data() {
-    return {
-      dealList:[], 
-      url: {
-        dealList:'/bitcoin/bigScreen/pendingBtc'//最新交易通告
-      },
-    }
-  },
-  mounted() {
-    this.initDealList()
-  },
-  methods: {
-    /*
-     * 初始化最新交易通告数据
-     */
-    initDealList() {
-      getAction(this.url.dealList)
-        .then((res) => {
-          var arr = [];
-          for(let i=0;i<res.length;i++){
-            arr.push([res[i].txid, res[i].timeDate, res[i].fee])
-          }
-          this.dealList = arr
-        })
-        .catch((err) => {
-          this.$message.error(err)
-        })
-    },
-  }
+<p>1、在子组件中使用 watch 监听，当 dealList 数据变化（获取到父组件传递过来的数据）时再渲染</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line">//父组件</span><br><span class="line">&lt;template&gt;</span><br><span class="line"></span><br><span class="line">&lt;div class=<span class="string">&quot;world-scroll-table&quot;</span>&gt;</span><br><span class="line">&lt;ScrollTable :dealList=<span class="string">&quot;dealList&quot;</span> ref=<span class="string">&quot;table&quot;</span> /&gt;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">import ScrollTable from <span class="string">&#x27;./components/ScrollTable&#x27;</span></span><br><span class="line">import &#123; getAction &#125; from <span class="string">&#x27;@api/manage&#x27;</span></span><br><span class="line"><span class="built_in">export</span> default &#123;</span><br><span class="line">  components: &#123;</span><br><span class="line">    ScrollTable,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      dealList:[],</span><br><span class="line">      url: &#123;</span><br><span class="line">        dealList:<span class="string">&#x27;/bitcoin/bigScreen/pendingBtc&#x27;</span>//最新交易通告</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="title">mounted</span></span>() &#123;</span><br><span class="line">    this.initDealList()</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    /*</span><br><span class="line">     * 初始化最新交易通告数据</span><br><span class="line">     */</span><br><span class="line">    <span class="function"><span class="title">initDealList</span></span>() &#123;</span><br><span class="line">      getAction(this.url.dealList)</span><br><span class="line">        .<span class="keyword">then</span>((res) =&gt; &#123;</span><br><span class="line">          var arr = [];</span><br><span class="line">          for(let i=<span class="number">0</span>;i&lt;res.length;i++)&#123;</span><br><span class="line">            arr.push([res[i].txid, res[i].timeDate, res[i].fee])</span><br><span class="line">          &#125;</span><br><span class="line">          this.dealList = arr</span><br><span class="line">        &#125;)</span><br><span class="line">        .catch((err) =&gt; &#123;</span><br><span class="line">          this.<span class="variable">$message</span>.error(err)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div class=&quot;scroll-table&quot;&gt;</span><br><span class="line">    &lt;img src=&quot;@/assets/bigScreen/kuang-bg.png&quot; class=&quot;scroll-table-bg&quot; /&gt;</span><br><span class="line">    &lt;dv-scroll-board :config=&quot;config&quot; ref=&quot;scrollBoard&quot; class=&quot;scroll-table-table&quot; /&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">export default &#123;</span><br><span class="line">  props: &#123;</span><br><span class="line">    dealList: &#123;</span><br><span class="line">      type: Array,</span><br><span class="line">      default: [],</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">  data() &#123;</span><br><span class="line">    return &#123;</span><br><span class="line">      config: &#123;&#125;,</span><br><span class="line">      header: [&#x27;交易哈希&#x27;, &#x27;交易时间&#x27;, &#x27;交易费&#x27;],</span><br><span class="line">      data: [],</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  mounted() &#123;&#125;,</span><br><span class="line">  methods:&#123;</span><br><span class="line">    initTable()&#123;</span><br><span class="line">      this.config = &#123;</span><br><span class="line">          header: this.header,</span><br><span class="line">          data: this.dealList,</span><br><span class="line">          rowNum: <span class="number">5</span>, // 表行数</span><br><span class="line">          waitTime: <span class="number">2000</span>, // 轮播时间间隔(ms)</span><br><span class="line">          align: [&#x27;center&#x27;],</span><br><span class="line">          columnWidth: [<span class="number">50</span>],</span><br><span class="line">          index: true,</span><br><span class="line">          indexHeader: &#x27;&#x27;,</span><br><span class="line">          headerBGC: &#x27;transparent&#x27;, // 表头背景色</span><br><span class="line">          oddRowBGC: &#x27;&#x27;, // 偶数行背景色</span><br><span class="line">          evenRowBGC: &#x27;rgba(<span class="number">85</span>, <span class="number">156</span>, <span class="number">178</span>, <span class="number">0.1</span>)&#x27;, // 奇数行背景色</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  watch:&#123;</span><br><span class="line">    dealList:&#123;</span><br><span class="line">      deep:true,</span><br><span class="line">      handler:function()&#123;</span><br><span class="line">        this.initTable()</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
 
-  //父组件
-<template>
-    <div class="world-scroll-table">
-      <ScrollTable :dealList="dealList" ref="table" />
-    </div>
-</template>
-<script>
-import ScrollTable from './components/ScrollTable'
-import { getAction } from '@api/manage'
-export default {
-  components: {
-    ScrollTable,
-  },
-  data() {
-    return {
-      dealList:[], 
-      url: {
-        dealList:'/bitcoin/bigScreen/pendingBtc'//最新交易通告
-      },
-    }
-  },
-  mounted() {
-    this.initDealList()
-  },
-  methods: {
-    /*
-     * 初始化最新交易通告数据
-     */
-    initDealList() {
-      getAction(this.url.dealList)
-        .then((res) => {
-          var arr = [];
-          for(let i=0;i<res.length;i++){
-            arr.push([res[i].txid, res[i].timeDate, res[i].fee])
-          }
-          this.dealList = arr
-        })
-        .catch((err) => {
-          this.$message.error(err)
-        })
-    },
-  }
+<p>方案三：</p>
+<p>【思路】 通过打印 this 发现，有一个 _isMounted 属性，表示当前是否挂载完毕（true：挂载完毕，false：没有挂载完成），在父组件挂载前将 _isMounted 存在 window 中，挂载后更新 _isMounted。在子组件 mounted 中添加定时器，根据 _isMounted 判断是否执行初始化方法。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">// 父组件</span><br><span class="line"><span class="function"><span class="title">beforeMount</span></span>() &#123;</span><br><span class="line">window.parentMounted = this.\_isMounted // \_isMounted 是当前实例 mouned()是否执行 此时为 <span class="literal">false</span>，实际使用时这步可以不要</span><br><span class="line">&#125;,</span><br><span class="line"><span class="function"><span class="title">mounted</span></span>() &#123;</span><br><span class="line">this.initDealList() //该方法是去请求接口拿到回调数据</span><br><span class="line">window.parentMounted = this.\_isMounted // \_isMounted 是当前实例 mouned()是否执行 此时为 <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 子组件</span><br><span class="line"><span class="function"><span class="title">mounted</span></span>() &#123;</span><br><span class="line"><span class="built_in">let</span> pMountedTimer = window.setInterval(() =&gt; &#123;</span><br><span class="line">if (window.parentMounted ) &#123;</span><br><span class="line">window.clearInterval(pMountedTimer)</span><br><span class="line">// 下面就可以写子组件想在 mounted 时执行代码（此时父组件的 mounted 已经执行完毕）</span><br><span class="line">this.config = &#123;</span><br><span class="line">header: this.header,</span><br><span class="line">data: this.dealList,</span><br><span class="line">rowNum: <span class="number">5</span>, // 表行数</span><br><span class="line">waitTime: <span class="number">2000</span>, // 轮播时间间隔(ms)</span><br><span class="line">align: [&#x27;center&#x27;],</span><br><span class="line">columnWidth: [<span class="number">50</span>],</span><br><span class="line">index: true,</span><br><span class="line">indexHeader: &#x27;&#x27;,</span><br><span class="line">headerBGC: &#x27;transparent&#x27;, // 表头背景色</span><br><span class="line">oddRowBGC: &#x27;&#x27;, // 偶数行背景色</span><br><span class="line">evenRowBGC: &#x27;rgba(<span class="number">85</span>, <span class="number">156</span>, <span class="number">178</span>, <span class="number">0.1</span>)&#x27;, // 奇数行背景色</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;, <span class="number">2000</span>)// 经过测试这里子组件的定时器不生效，如果渲染的时候还是子组件还是没有拿到父组件传过来的数据，那么延长这个时间即可，所以推荐方案一、二</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-  方案三：
-
-【思路】 通过打印 this 发现，有一个 _isMounted 属性，表示当前是否挂载完毕（true：挂载完毕，false：没有挂载完成），在父组件挂载前将 _isMounted 存在 window 中，挂载后更新 _isMounted。在子组件 mounted 中添加定时器，根据 _isMounted 判断是否执行初始化方法。
-
-// 父组件
-beforeMount() {
-    window.parentMounted = this._isMounted    // _isMounted是当前实例mouned()是否执行 此时为false，实际使用时这步可以不要
-},
-mounted() {
-    this.initDealList() //该方法是去请求接口拿到回调数据
-    window.parentMounted = this._isMounted    // _isMounted是当前实例mouned()是否执行 此时为true
-}
-
-// 子组件
-mounted() {
-    let pMountedTimer = window.setInterval(() => {
-        if (window.parentMounted ) {
-            window.clearInterval(pMountedTimer)
-            // 下面就可以写子组件想在mounted时执行代码（此时父组件的mounted已经执行完毕）
-            this.config = {
-                  header: this.header,
-                  data: this.dealList,
-                  rowNum: 5, // 表行数
-                  waitTime: 2000, // 轮播时间间隔(ms)
-                  align: ['center'],
-                  columnWidth: [50],
-                  index: true,
-                  indexHeader: '',
-                  headerBGC: 'transparent', // 表头背景色
-                  oddRowBGC: '', // 偶数行背景色
-                  evenRowBGC: 'rgba(85, 156, 178, 0.1)', // 奇数行背景色
-            }
-        }
-    }, 2000)// 经过测试这里子组件的定时器不生效，如果渲染的时候还是子组件还是没有拿到父组件传过来的数据，那么延长这个时间即可，所以推荐方案一、二
-}
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/" data-id="clqm3l9p5000204v925ux5sx6" data-title="" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/" data-id="clqm3l9p5000204v925ux5sx6" data-title="父子组件调用问题" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -337,7 +124,7 @@ mounted() {
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          (no title)
+          合并单元格操作
         
       </div>
     </a>
@@ -383,11 +170,11 @@ mounted() {
       <ul>
         
           <li>
-            <a href="/2023/12/26/%E5%90%88%E5%B9%B6%E5%8D%95%E5%85%83%E6%A0%BC/">(no title)</a>
+            <a href="/2023/12/26/%E5%90%88%E5%B9%B6%E5%8D%95%E5%85%83%E6%A0%BC/">合并单元格操作</a>
           </li>
         
           <li>
-            <a href="/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/">(no title)</a>
+            <a href="/2023/12/26/%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/">父子组件调用问题</a>
           </li>
         
           <li>
