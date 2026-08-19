@@ -1,6 +1,6 @@
 ---
 title: "工作台日报 · 2026-08-19"
-date: 2026-08-19 15:04:30
+date: 2026-08-19 15:07:20
 categories: [日报]
 tags: [日报]
 author: Litongjin
@@ -8,7 +8,7 @@ author: Litongjin
 
 # 工作台日报 · 2026-08-19
 
-> 自动生成于 2026-08-19 15:04 · 个人工作台 Agent
+> 自动生成于 2026-08-19 15:07 · 个人工作台 Agent
 
 ## 🔥 行业热点
 
@@ -17,53 +17,53 @@ author: Litongjin
 - [Universal health coverage could save $1T and 114k lives a year: study](https://ysph.yale.edu/news-article/universal-health-coverage-could-save-one-trillion-dollars-and-114000-lives-every-year/) — *Hacker News*
 - [Memory prices climb 500% in 12 months](https://www.tomshardware.com/pc-components/ram/memory-prices-climb-500-percent-in-12-months-up-to-10x-the-lowest-ever-tracked-prices-128gb-of-ddr5-now-usd3-399) — *Hacker News*
 - [Cursor launches Origin, GitHub alternative](https://cursor.com/changelog/origin-code-hosting) — *Hacker News*
+- [Beware Management Consultants](https://about.iceland.co.uk/our-story/the-dark-ages/beware-management-consultants/) — *Hacker News*
 - [Being ambitious and being a dad](https://nicholascharriere.com/blog/being-ambitious-and-being-a-dad/) — *Hacker News*
 - [OpenLogi](https://openlogi.org/en) — *Hacker News*
 - [Sticky wage norms and the real wage cost of unexpected inflation](https://bfi.uchicago.edu/wp-content/uploads/2026/08/BFI_WP_2026-108-1.pdf) — *Hacker News*
 - [How does IKEA come up with names for its products?](https://www.ikea.com/se/en/customer-service/knowledge/articles/6f564c4d-2ccc-46de-b643-545a3948dc79.html) — *Hacker News*
-- [And then the men with guns tell you to do it anyway](https://shkspr.mobi/blog/2026/08/and-then-the-men-with-guns-tell-you-to-do-it-anyway/) — *Hacker News*
 
 ## 🚀 技能提升点（工作总结汇总）
 
-### 1. Quill 内容同步 getHTML
-- **技能点**：掌握 vue-quill 中 Delta 与 HTML 的区分，正确选择 API 同步 v-model。
-- **坑点**：watch 中用 getContents() 得到 Delta，trim 后把 Delta JSON 当 HTML 用 DOMParser 解析，污染 modelValue。
-- **解决方案**：用 quill.getHTML() 或 quill.root.innerHTML 获取真实 HTML 字符串再同步。
-- **拓展**：其他富文本编辑器同样要区分数据模型与展示 HTML。
+### 1. 富文本错别字高亮回写
+- **技能点**：掌握将 HTML 拍平为纯文本、维护偏移映射并回写高亮/替换的算法设计能力。
+- **坑点**：直接对 HTML 字面匹配，标签、空格、HTML 实体、公式等边界会造成失配，高亮不完整或替换失败。
+- **解决方案**：先拍平为纯文本（标签/公式原子映射到原偏移），在纯文本上匹配，再按偏移回写；替换时合并跨段片段。
+- **拓展**：可扩展到拼写检查、搜索定位、翻译对齐等富文本场景。
 - *来源：admin-workspace 2026-08-12*
 
-### 2. Vue watch 双向同步防循环
-- **技能点**：理解 Vue 响应式循环触发机制，掌握写回前值比较的防护方法。
-- **坑点**：双向 watch 中数组引用变化 + deep watch 互相唤醒，即使值未变也无限递归。
-- **解决方案**：每一步写回前比较新旧值，无变化直接 return；避免深层 watch 无意义触发。
-- **拓展**：任何 A→B→A 的状态同步都要加守卫，可抽公共工具。
+### 2. 属性内原始尖括号解析
+- **技能点**：掌握编写健壮 HTML 扫描/解析逻辑，识别引号内特殊字符。
+- **坑点**：latex 内裸 `<`/`>` 未实体化直接塞进 data-formula 属性，标签结束定位被内部 `>` 截断，公式内容丢失。
+- **解决方案**：标签扫描改为引号感知（引号内跳过），并强制特殊字符实体化存储。
+- **拓展**：可延伸到富文本序列化、HTML 安全过滤等场景。
+- *来源：admin-workspace 2026-08-12*
+
+### 3. Vue watch 双向同步防递归
+- **技能点**：掌握 Vue 响应式 watch 循环触发的防护方法。
+- **坑点**：状态 A→数组→状态 B→状态 A 的同步链，因数组引用变化 + deep watch 互相唤醒，报 Maximum recursive updates。
+- **解决方案**：每次回写前比较新旧值，无变化直接 return，打断循环。
+- **拓展**：可延伸到多状态联动、拖拽面板尺寸同步等场景。
 - *来源：admin-workspace 2026-08-11*
 
-### 3. element-plus 按需组件 CSS 缺失
-- **技能点**：识别按需注册组件不等于加载样式，能快速定位并显式 import 所需 CSS。
-- **坑点**：unplugin-vue-components + ElementPlusResolver 不会自动补齐所有组件样式，新组件如 el-splitter 退化为块级布局。
-- **解决方案**：显式 `import "element-plus/theme-chalk/el-splitter.css"` 等；不要依赖全量 index.css。
-- **拓展**：其他组件库按需引入同样要检查样式加载，写组件前先确认 CSS 是否引入。
-- *来源：admin-workspace MEMORY.md*
-
-### 4. 公式 latex 的 < > 实体化
-- **技能点**：掌握 HTML 解析器对裸 `<` 的处理，养成在属性/内文中安全存储 latex 的规范。
-- **坑点**：裸 `<`/`>` 塞进 data-formula 属性会被标签解析截断，或 innerHTML 渲染时吞并后续节点；字面匹配也失配。
-- **解决方案**：存储/传输时转义 `&lt;`/`&gt;`；解析 HTML 标签时做引号感知扫描，渲染前对公式内容先转义。
-- **拓展**：可沉淀为 latex 安全处理工具函数，统一在渲染/解析两侧兜底。
+### 4. Quill 内容同步 getHTML
+- **技能点**：掌握 vue-quill/Quill 内容 API 差异。
+- **坑点**：getContents() 返回 Delta，被误当 HTML 写入 v-model，DOMParser 解析出转义 JSON 字符串，导致匹配/替换全部失配。
+- **解决方案**：同步 v-model 使用 getHTML() 或 quill.root.innerHTML。
+- **拓展**：可延伸到其他富文本编辑器的内容序列化。
 - *来源：admin-workspace 2026-08-12*
 
-### 5. 跨版本克隆文件防覆盖
-- **技能点**：建立“先看目标文件已有结构”的代码合并意识，避免用旧内容整体覆盖新语义文件。
-- **坑点**：直接用旧版 type.ts 覆盖新版完整类型声明，导致所有引用类型找不到。
-- **解决方案**：保留目标文件原内容，仅追加所需旧代码；用 git show 对照原始版本；lint 校验。
-- **拓展**：任何“克隆”操作都应视为合并而非替换，可先 diff 再动手。
-- *来源：admin-workspace 2026-08-12*
+### 5. 跨目录克隆防覆盖
+- **技能点**：培养跨版本/跨目录合并时先审查目标文件已有导出的意识。
+- **坑点**：直接用旧版文件覆盖新版同名文件，覆盖了承载完整类型声明的文件，导致所有引用类型丢失。
+- **解决方案**：目标文件已存在且承载语义时，保留原结构，仅追加/合并新增代码。
+- **拓展**：可延伸到模块升级、分支合并等场景。
+- *来源：admin-workspace*
 
-### 6. 文本匹配容空白
-- **技能点**：掌握字面匹配失败时用空白容错正则重试的策略，提升匹配鲁棒性。
-- **坑点**：AI 生成的 typo original 与正文 latex 空格不一致，严格字面匹配永远失配。
-- **解决方案**：构建 `\s*` 容空白正则，严格匹配优先，失败再容错重试；纯空白字符串返回 null 防死循环。
-- **拓展**：可推广到搜索/高亮/替换场景，做成通用工具函数。
-- *来源：admin-workspace 2026-08-12*
+### 6. Quill Clipboard matcher 注册
+- **技能点**：理解 Quill 插件接管后的职责边界，掌握自定义 embed 的 clipboard 接入。
+- **坑点**：自定义 TableClipboard 覆盖默认 clipboard 后，不继承默认 image/divider matcher，图片和分割线丢失。
+- **解决方案**：在 registerClipboardMatchers 显式 addMatcher，属性提取与对应 Blot.value 结构对齐。
+- **拓展**：新增自定义 embed blot 时沿用同样模式。
+- *来源：admin-workspace-new*
 
