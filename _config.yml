@@ -1,34 +1,33 @@
 # ============================================================
-# Jekyll / GitHub Pages 配置
-# 推送到 GitHub 后，在仓库 Settings -> Pages 选择 main 分支根目录，
-# GitHub 会自动构建并发布（无需本地安装 Ruby）。
+# Hexo 配置
+# 由 Cloudflare Pages 构建：Build command `hexo generate`，Output `public`
+# （无需本地安装 Ruby / 无需 GitHub Pages）
 # ============================================================
-title: "我的工作台"
-description: "每日待办 · 行业热点 · 技能提升"
-author: "Litongjin"
-
-# 站点地址：本项目是「用户主页仓库」(用户名.github.io)，
-# 因此发布地址就是 https://litongjin.github.io/ ，无需 baseurl。
-url: "https://litongjin.github.io"
-
-# 主题：minima 是 GitHub Pages 官方支持、零配置即用的极简主题
-theme: minima
-markdown: kramdown
-highlighter: rouge
-lang: zh-CN
+title: 我的工作台
+subtitle: ''
+description: 行业热点 · 技能提升（工作总结汇总）
+author: Litongjin
+language: zh-CN
 timezone: Asia/Shanghai
 
-# GitHub Pages 白名单插件（直接写这里即可，无需 Gemfile 也能在 Pages 上构建）
-plugins:
-  - jekyll-feed        # 生成 RSS，方便订阅
-  - jekyll-seo-tag     # SEO / 社交分享卡片，对简历曝光友好
+# 部署交给 Cloudflare Pages，这里不配置 deployer
+deploy: {}
 
-show_excerpts: true
+# 站点地址（改成你的 Cloudflare Pages 域名或自定义域名，用于绝对链接/SEO）
+url: https://litongjin.github.io
+root: /
 
-# 顶部导航
-header_pages:
-  - about.md
+# 主题
+theme: butterfly
 
-# 社交链接（填了会在页脚显示）
-social_links:
-  - { platform: github, user: Litongjin }
+# 永久链接（ASCII 友好：文件名含日期+slug -> /2026/08/19/daily-workbench/）
+permalink: :year/:month/:day/:title/
+
+# 文章资源目录（关闭，避免每篇文章多生成一个资源文件夹）
+post_asset_folder: false
+
+# RSS 订阅
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
