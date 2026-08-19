@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>我的工作台</title>
+  
+  
+  <link href="https://litongjin.github.io/atom.xml" rel="self"/>
+  
+  <link href="https://litongjin.github.io/"/>
+  <updated>2026-08-19T06:47:13.268Z</updated>
+  <id>https://litongjin.github.io/</id>
+  
+  <author>
+    <name>Litongjin</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>工作台日报 · 2026-08-19</title>
+    <link href="https://litongjin.github.io/2026/08/19/2026-08-19-daily-workbench/"/>
+    <id>https://litongjin.github.io/2026/08/19/2026-08-19-daily-workbench/</id>
+    <published>2026-08-19T06:45:53.000Z</published>
+    <updated>2026-08-19T06:47:13.268Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="工作台日报-·-2026-08-19"><a href="#工作台日报-·-2026-08-19" class="headerlink" title="工作台日报 · 2026-08-19"></a>工作台日报 · 2026-08-19</h1><blockquote><p>自动生成于 2026-08-19 14:45 · 个人工作台 Agent</p></blockquote><h2 id="🔥-行业热点"><a href="#🔥-行业热点" class="headerlink" title="🔥 行业热点"></a>🔥 行业热点</h2><ul><li><a href="https://linear.app/data">AI usage patterns in software teams</a> — <em>Hacker News</em></li><li><a href="https://seths.blog/2026/08/the-amazon-tax/">The Amazon tax</a> — <em>Hacker News</em></li><li><a href="https://ysph.yale.edu/news-article/universal-health-coverage-could-save-one-trillion-dollars-and-114000-lives-every-year/">Universal health coverage could save $1T and 114k lives a year: study</a> — <em>Hacker News</em></li><li><a href="https://www.tomshardware.com/pc-components/ram/memory-prices-climb-500-percent-in-12-months-up-to-10x-the-lowest-ever-tracked-prices-128gb-of-ddr5-now-usd3-399">Memory prices climb 500% in 12 months</a> — <em>Hacker News</em></li><li><a href="https://cursor.com/changelog/origin-code-hosting">Cursor launches Origin, GitHub alternative</a> — <em>Hacker News</em></li><li><a href="https://about.iceland.co.uk/our-story/the-dark-ages/beware-management-consultants/">Beware Management Consultants</a> — <em>Hacker News</em></li><li><a href="https://nicholascharriere.com/blog/being-ambitious-and-being-a-dad/">Being ambitious and being a dad</a> — <em>Hacker News</em></li><li><a href="https://bfi.uchicago.edu/wp-content/uploads/2026/08/BFI_WP_2026-108-1.pdf">Sticky wage norms and the real wage cost of unexpected inflation</a> — <em>Hacker News</em></li><li><a href="https://www.ikea.com/se/en/customer-service/knowledge/articles/6f564c4d-2ccc-46de-b643-545a3948dc79.html">How does IKEA come up with names for its products?</a> — <em>Hacker News</em></li><li><a href="https://openlogi.org/en">OpenLogi</a> — <em>Hacker News</em></li></ul><h2 id="🚀-技能提升点（工作总结汇总）"><a href="#🚀-技能提升点（工作总结汇总）" class="headerlink" title="🚀 技能提升点（工作总结汇总）"></a>🚀 技能提升点（工作总结汇总）</h2><h3 id="1-跨版本克隆文件前审查目标结构"><a href="#1-跨版本克隆文件前审查目标结构" class="headerlink" title="1. 跨版本克隆文件前审查目标结构"></a>1. 跨版本克隆文件前审查目标结构</h3><ul><li><strong>技能点</strong>：在复制&#x2F;覆盖文件前，先审查目标文件现有导出与语义，避免破坏既有类型或接口。</li><li><strong>坑点</strong>：直接用旧版文件覆盖新版同名文件，导致新版独有类型定义（如 QuillEditorProps）丢失，编译报 Unresolvable type reference。</li><li><strong>解决方案</strong>：目标文件已存在且承载语义时，仅追加新代码段，保留原有导出与结构；用 git show 对比后再修改。</li><li><strong>拓展</strong>：可扩展到任何代码迁移&#x2F;合并场景，先 diff 再落盘，形成“克隆前审查目标”的习惯。</li><li><em>来源：admin-workspace 2026-08-12</em></li></ul><h3 id="2-HTML-与纯文本映射回写"><a href="#2-HTML-与纯文本映射回写" class="headerlink" title="2. HTML 与纯文本映射回写"></a>2. HTML 与纯文本映射回写</h3><ul><li><strong>技能点</strong>：设计 HTML→纯文本 拍平与偏移映射（plain + mapIndex + entityRanges），将纯文本上的匹配结果精确回写到 HTML 片段，支持跨段、公式、实体。</li><li><strong>坑点</strong>：将标签替换为空格导致边界不一致；HTML 实体跨多字符被拦腰截断；data-formula 属性内裸 &lt; &gt; 被误判为标签结束。</li><li><strong>解决方案</strong>：标签→空串并记录 mapIndex；实体整体解码并映射到起始偏移；标签结束定位用引号感知扫描；公式作为原子节点处理。</li><li><strong>拓展</strong>：可沉淀为通用富文本文本匹配&#x2F;高亮&#x2F;替换工具库（类似 rangy 的 TextRange）。</li><li><em>来源：admin-workspace 2026-08-12</em></li></ul><h3 id="3-Quill-内容同步用-getHTML"><a href="#3-Quill-内容同步用-getHTML" class="headerlink" title="3. Quill 内容同步用 getHTML"></a>3. Quill 内容同步用 getHTML</h3><ul><li><strong>技能点</strong>：使用富文本编辑器时，明确区分 Delta、HTML、纯文本等 API 返回类型，并按需取用。</li><li><strong>坑点</strong>：watch Quill 内容时误用 vue-quill 的 getContents()（返回 Delta JSON 对象），后续把它当 HTML 用 DOMParser 解析，导致 modelValue 被 Delta JSON 字符串污染。</li><li><strong>解决方案</strong>：取真实 HTML 用 quill.root.innerHTML 或 getHTML?.()；另注意 watch 初始化时序，用 pendingModelValue 缓存 quill 未就绪时的值。</li><li><strong>拓展</strong>：可延伸到其他富文本（如 TipTap 的 getJSON&#x2F;getHTML）以及所有异步初始化组件的 v-model 时序处理。</li><li><em>来源：admin-workspace 2026-08-12</em></li></ul><h3 id="4-Vue-watch-双向同步防循环"><a href="#4-Vue-watch-双向同步防循环" class="headerlink" title="4. Vue watch 双向同步防循环"></a>4. Vue watch 双向同步防循环</h3><ul><li><strong>技能点</strong>：设计跨状态双向同步时，在每一步写入前做值比较守卫，避免无变化写回引发递归。</li><li><strong>坑点</strong>：状态 A 变化 → 写数组（新引用） → deep watch 数组 → 写状态 B → 又触发 A，即使值相同也无限循环，报 Maximum recursive updates exceeded。</li><li><strong>解决方案</strong>：计算 next 后逐项比较，相等直接 return；回写标志前先判断当前值 !&#x3D;&#x3D; 推导值。</li><li><strong>拓展</strong>：适用于任何响应式状态同步、拖拽面板尺寸与折叠标志联动等场景。</li><li><em>来源：admin-workspace 2026-08-11</em></li></ul><h3 id="5-按需注册组件的-CSS-补齐"><a href="#5-按需注册组件的-CSS-补齐" class="headerlink" title="5. 按需注册组件的 CSS 补齐"></a>5. 按需注册组件的 CSS 补齐</h3><ul><li><strong>技能点</strong>：使用 unplugin-vue-components 等按需注册时，要识别框架组件依赖的独立样式，缺失时显式 import。</li><li><strong>坑点</strong>：按需注册了 el-splitter 组件，但没引入 el-splitter.css，组件退化为普通 block，三栏布局变成上下堆叠，且拖拽&#x2F;折叠图标不可见。</li><li><strong>解决方案</strong>：显式 import “element-plus&#x2F;theme-chalk&#x2F;el-splitter.css” 和 panel CSS；排查布局先确认样式是否真正加载，而非反复加 flex:1。</li><li><strong>拓展</strong>：可扩展为组件库按需加载时的样式审计清单（每个新组件都要查是否有配套 CSS）。</li><li><em>来源：admin-workspace MEMORY.md</em></li></ul><h3 id="6-框架配置数组需展平"><a href="#6-框架配置数组需展平" class="headerlink" title="6. 框架配置数组需展平"></a>6. 框架配置数组需展平</h3><ul><li><strong>技能点</strong>：向框架传入配置项时，理解其内部遍历&#x2F;解析逻辑（如 Quill toolbar 的 controls 结构），数组项需要展平为独立对象。</li><li><strong>坑点</strong>：getDefaultButtonConfig 返回数组（如 list 的多个子按钮），调用方直接 map 后混入 controls，Quill 将数组当对象处理，生成 ql-0 空按钮。</li><li><strong>解决方案</strong>：用 flatMap 展平一维 controls，让每个 {list:’ordered’} 独立成为 control。</li><li><strong>拓展</strong>：可延伸到其他“配置数组→控件”的框架（如富文本工具栏、表单渲染配置），写封装时注意返回类型的一致性。</li><li><em>来源：admin-workspace-new 2026-08-12</em></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;工作台日报-·-2026-08-19&quot;&gt;&lt;a href=&quot;#工作台日报-·-2026-08-19&quot; class=&quot;headerlink&quot; title=&quot;工作台日报 · 2026-08-19&quot;&gt;&lt;/a&gt;工作台日报 · 2026-08-19&lt;/h1&gt;&lt;blockquo</summary>
+      
+    
+    
+    
+    <category term="日报" scheme="https://litongjin.github.io/categories/%E6%97%A5%E6%8A%A5/"/>
+    
+    
+    <category term="日报" scheme="https://litongjin.github.io/tags/%E6%97%A5%E6%8A%A5/"/>
+    
+  </entry>
+  
+</feed>
