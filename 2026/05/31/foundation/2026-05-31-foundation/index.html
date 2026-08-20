@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次📚 今日主题 消息队列的投递语义：至少一次与至多一次（后端基础）  1. 核心概念速览消息队列的投递语义（Delivery Semantics）定义了生产者发送的消息被消费者接收并处理的确切次数保证。至少一次（At-Least-Once）指每条消息至少被投递一次，可能重复；至多一次（At-Most-Once）指">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次">
+<meta property="og:url" content="https://litongjin.github.io/2026/05/31/foundation/2026-05-31-foundation/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次📚 今日主题 消息队列的投递语义：至少一次与至多一次（后端基础）  1. 核心概念速览消息队列的投递语义（Delivery Semantics）定义了生产者发送的消息被消费者接收并处理的确切次数保证。至少一次（At-Least-Once）指每条消息至少被投递一次，可能重复；至多一次（At-Most-Once）指">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-05-31T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T07:47:13.817Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/05/31/foundation/2026-05-31-foundation/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 15:47:13'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-31T00:00:00.000Z" title="发表于 2026-05-31 08:00:00">2026-05-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T07:47:13.817Z" title="更新于 2026-08-20 15:47:13">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-05-31-·-消息队列的投递语义：至少一次与至多一次"><a href="#每日基础技术总结-·-2026-05-31-·-消息队列的投递语义：至少一次与至多一次" class="headerlink" title="每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次"></a>每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>消息队列的投递语义：至少一次与至多一次</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>消息队列的投递语义（Delivery Semantics）定义了生产者发送的消息被消费者接收并处理的确切次数保证。至少一次（At-Least-Once）指每条消息至少被投递一次，可能重复；至多一次（At-Most-Once）指每条消息至多被投递一次，可能丢失。其本质是分布式系统中网络不可靠、进程可能崩溃的必然产物，用于刻画消息从生产者到消费者之间传递的可靠性边界。它解决的核心问题是：在故障场景下，系统应该容忍重复还是容忍丢失，以及如何为上层应用提供可预测的行为。该语义位于消息中间件（如 Kafka、RabbitMQ、Pulsar）的传输层与消费确认机制之间，是构建分布式数据管道、事件驱动架构、流处理系统的基石。专业工程师必须掌握它，因为投递语义直接决定数据一致性和系统可用性的取舍，也是实现端到端精确一次（Exactly-Once）的基础前提，任何涉及异步解耦、事件回溯、日志采集的系统都绕不开这一底层契约。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层机制围绕两个核心操作展开：消息写入（生产端确认）与消息消费确认（消费者偏移量提交）。至少一次语义的实现逻辑为：生产者发送消息后，在未收到 Broker 确认前会重试，Broker 可能已持久化但确认丢失，导致重复写入；消费者处理完消息后，若在提交偏移量前崩溃，Broker 会重新投递该消息，导致重复消费。至多一次语义则相反：生产者不重试，消费者在处理前先提交偏移量，若处理中崩溃则消息不再投递，导致丢失。本质上是“确认与处理”的相对顺序问题。伪代码描述如下：</p>
+<h1 id="至少一次（At-Least-Once）"><a href="#至少一次（At-Least-Once）" class="headerlink" title="至少一次（At-Least-Once）"></a>至少一次（At-Least-Once）</h1><h1 id="消费者侧：先处理，后提交偏移量"><a href="#消费者侧：先处理，后提交偏移量" class="headerlink" title="消费者侧：先处理，后提交偏移量"></a>消费者侧：先处理，后提交偏移量</h1><p>while (msg &#x3D; poll()):<br>    process(msg)        # 处理消息（可能成功，可能部分成功）<br>    commit_offset(msg)  # 提交偏移量；若崩溃在 commit 之前，则重新投递 msg</p>
+<h1 id="至多一次（At-Most-Once）"><a href="#至多一次（At-Most-Once）" class="headerlink" title="至多一次（At-Most-Once）"></a>至多一次（At-Most-Once）</h1><h1 id="消费者侧：先提交偏移量，后处理"><a href="#消费者侧：先提交偏移量，后处理" class="headerlink" title="消费者侧：先提交偏移量，后处理"></a>消费者侧：先提交偏移量，后处理</h1><p>while (msg &#x3D; poll()):<br>    commit_offset(msg)  # 提交偏移量；若崩溃在 process 之前，则 msg 不再投递<br>    process(msg)        # 处理消息（可能失败，但无法重试）</p>
+<p>从底层看，Broker 维护每个消费者分区的偏移量，消费者通过 poll 接口拉取消息，并通过 commit 接口告知 Broker 已完成消费。投递语义正是由 commit 的时机与生产者重试策略共同决定。它与前端概念的对比：Java 的接口是一套编译期契约，类必须实现所有抽象方法，否则无法编译；TS 的接口是结构类型（鸭子类型），对象只要形状匹配即满足约束，是运行时类型系统的编译期检查。两者的差异在于“约束的强制性与静态性”。而消息队列的投递语义是运行时分布式协议层面的契约，它不依赖编译器，而是通过消息的持久化、确认超时、重试和偏移量提交等机制在节点间动态达成。前端接口是静态结构约束，投递语义是动态时序约束；前者关乎类型安全，后者关乎数据可靠性。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">以下用纯 Python 标准库模拟一个极简消息队列的消费端，展示至少一次与至多一次的区别。不依赖任何框架，核心是控制偏移量提交时机。</span><br><span class="line"></span><br><span class="line">import time</span><br><span class="line">import random</span><br><span class="line"></span><br><span class="line"># 模拟 Broker 中存储的消息队列，每条消息有唯一偏移量</span><br><span class="line">broker_messages = [</span><br><span class="line">    &#123;&#x27;offset&#x27;: 0, &#x27;payload&#x27;: &#x27;user:1001&#x27;&#125;,</span><br><span class="line">    &#123;&#x27;offset&#x27;: 1, &#x27;payload&#x27;: &#x27;user:1002&#x27;&#125;,</span><br><span class="line">    &#123;&#x27;offset&#x27;: 2, &#x27;payload&#x27;: &#x27;user:1003&#x27;&#125;,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">class Consumer:</span><br><span class="line">    def __init__(self, semantics):</span><br><span class="line">        self.semantics = semantics  # &#x27;at_least_once&#x27; 或 &#x27;at_most_once&#x27;</span><br><span class="line">        self.current_offset = 0     # 已提交的偏移量（即下次要拉的起始位置）</span><br><span class="line">        self.processed_offsets = set()  # 记录已处理过的偏移量，用于演示重复</span><br><span class="line"></span><br><span class="line">    def poll(self):</span><br><span class="line">        # 模拟从 Broker 拉取一批消息：从当前提交的偏移量开始</span><br><span class="line">        if self.current_offset &gt;= len(broker_messages):</span><br><span class="line">            return []</span><br><span class="line">        return [broker_messages[self.current_offset]]  # 每次拉取一条</span><br><span class="line"></span><br><span class="line">    def process(self, msg):</span><br><span class="line">        # 模拟业务处理，可能中途崩溃（这里用随机概率模拟）</span><br><span class="line">        if random.random() &lt; 0.3:</span><br><span class="line">            raise Exception(&quot;process crash&quot;)</span><br><span class="line">        self.processed_offsets.add(msg[&#x27;offset&#x27;])</span><br><span class="line">        return True</span><br><span class="line"></span><br><span class="line">    def commit(self, offset):</span><br><span class="line">        # 提交偏移量：Broker 将该偏移量持久化为消费进度</span><br><span class="line">        self.current_offset = offset + 1</span><br><span class="line"></span><br><span class="line">    def run(self):</span><br><span class="line">        while True:</span><br><span class="line">            try:</span><br><span class="line">                msgs = self.poll()</span><br><span class="line">                if not msgs:</span><br><span class="line">                    break</span><br><span class="line">                msg = msgs[0]</span><br><span class="line"></span><br><span class="line">                if self.semantics == &#x27;at_least_once&#x27;:</span><br><span class="line">                    # 至少一次：先处理，后提交</span><br><span class="line">                    self.process(msg)</span><br><span class="line">                    self.commit(msg[&#x27;offset&#x27;])</span><br><span class="line">                elif self.semantics == &#x27;at_most_once&#x27;:</span><br><span class="line">                    # 至多一次：先提交，后处理</span><br><span class="line">                    self.commit(msg[&#x27;offset&#x27;])</span><br><span class="line">                    self.process(msg)</span><br><span class="line">            except Exception as e:</span><br><span class="line">                # 模拟崩溃后恢复，从已提交的偏移量重新开始</span><br><span class="line">                print(f&quot;crash at offset &#123;self.current_offset&#125;, exception: &#123;e&#125;&quot;)</span><br><span class="line">                # 在至少一次语义下，未提交的消息会重新拉取；至多一次则不会</span><br><span class="line">                continue</span><br><span class="line"></span><br><span class="line"># 运行至少一次消费者</span><br><span class="line">c1 = Consumer(&#x27;at_least_once&#x27;)</span><br><span class="line">random.seed(1)</span><br><span class="line">c1.run()</span><br><span class="line">print(&#x27;At-Least-Once processed offsets:&#x27;, sorted(c1.processed_offsets))</span><br><span class="line"></span><br><span class="line"># 运行至多一次消费者</span><br><span class="line">c2 = Consumer(&#x27;at_most_once&#x27;)</span><br><span class="line">random.seed(1)</span><br><span class="line">c2.run()</span><br><span class="line">print(&#x27;At-Most-Once processed offsets:&#x27;, sorted(c2.processed_offsets))</span><br><span class="line"></span><br><span class="line"># 关键行注释：</span><br><span class="line"># 第 30 行：process 后 commit，若 process 成功但 commit 前崩溃，消息未提交，重启后会重新拉取并处理 → 重复</span><br><span class="line"># 第 34 行：commit 后 process，若 process 中崩溃，消息已提交，重启后不再拉取该消息 → 丢失</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为“至少一次”会自动导致数据重复，因此必须用幂等性解决。实际上，重复投递是语义本身允许的，幂等是消费端应对重复的手段，但并非所有操作都天然幂等。真正要理解的是重复发生的精确窗口：在至少一次语义中，重复可能发生在“处理成功但提交失败”或“提交成功但确认响应丢失”两种情况下，而非任意时刻。设计系统时应明确重复窗口的边界，而不是笼统地说“可能重复”。</p>
+<p>误区二：混淆“投递语义”与“处理语义”。至少一次&#x2F;至多一次描述的是消息从 Broker 到消费者的传递次数，而消费者是否成功处理（如写入数据库）是另一回事。如果消费者处理消息时本地事务成功但提交偏移量失败，从消息队列角度是重复投递，但从业务角度是重复处理。真正需要的是将消费处理与偏移量提交绑定在同一原子事务中（如 Kafka 的 exactly-once 事务），才能实现端到端精确一次。</p>
+<p>思考题：在 Kafka 中，若消费者关闭了自动提交，并在处理消息后调用 commitSync()，但在 commitSync() 返回前进程崩溃，那么该消息属于哪种投递语义？如果改为先调用 commitSync() 再处理消息，又属于哪种？请从 Broker 偏移量更新的时间点与消息重试窗口的关系，解释为什么前者会导致重复而后者会导致丢失，并说明这是否真正实现了“至多一次”的全部条件？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/05/31/foundation/2026-05-31-foundation/">https://litongjin.github.io/2026/05/31/foundation/2026-05-31-foundation/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/01/foundation/2026-06-01-foundation/" title="每日基础技术总结 · 2026-06-01 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-01 · 一致性哈希与虚拟节点</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/30/foundation/2026-05-30-foundation-grpc-keepalive/" title="每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/28/foundation/2026-05-28-foundation-redis-rdb-aof/" title="每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-tcp-time-wait/" title="每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用</div></div></a></div><div><a href="/2026/05/29/foundation/2026-05-29-foundation-etcd-raft/" title="每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="title">每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-mysql-innodb-mvcc-undo-log/" title="每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-grpc-keepalive/" title="每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive</div></div></a></div><div><a href="/2026/06/01/foundation/2026-06-01-foundation-saga/" title="每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-01</div><div class="title">每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-05-31-%C2%B7-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E6%8A%95%E9%80%92%E8%AF%AD%E4%B9%89%EF%BC%9A%E8%87%B3%E5%B0%91%E4%B8%80%E6%AC%A1%E4%B8%8E%E8%87%B3%E5%A4%9A%E4%B8%80%E6%AC%A1"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-05-31 · 消息队列的投递语义：至少一次与至多一次</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%B3%E5%B0%91%E4%B8%80%E6%AC%A1%EF%BC%88At-Least-Once%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">至少一次（At-Least-Once）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E4%BE%A7%EF%BC%9A%E5%85%88%E5%A4%84%E7%90%86%EF%BC%8C%E5%90%8E%E6%8F%90%E4%BA%A4%E5%81%8F%E7%A7%BB%E9%87%8F"><span class="toc-number">3.</span> <span class="toc-text">消费者侧：先处理，后提交偏移量</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%B3%E5%A4%9A%E4%B8%80%E6%AC%A1%EF%BC%88At-Most-Once%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">至多一次（At-Most-Once）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E4%BE%A7%EF%BC%9A%E5%85%88%E6%8F%90%E4%BA%A4%E5%81%8F%E7%A7%BB%E9%87%8F%EF%BC%8C%E5%90%8E%E5%A4%84%E7%90%86"><span class="toc-number">5.</span> <span class="toc-text">消费者侧：先提交偏移量，后处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">5.0.1.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">5.0.2.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理">每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理</a><time datetime="2026-08-19T10:41:56.000Z" title="发表于 2026-08-19 18:41:56">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/daily/2026-08-19-workbench-daily/" title="工作台日报 · 2026-08-19">工作台日报 · 2026-08-19</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/05/foundation/2026-06-05-foundation-tcp/" title="每日基础技术总结 · 2026-06-05 · TCP 慢启动与拥塞避免">每日基础技术总结 · 2026-06-05 · TCP 慢启动与拥塞避免</a><time datetime="2026-06-05T00:00:00.000Z" title="发表于 2026-06-05 08:00:00">2026-06-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/05/foundation/2026-06-05-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-06-05 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-06-05 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-06-05T00:00:00.000Z" title="发表于 2026-06-05 08:00:00">2026-06-05</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

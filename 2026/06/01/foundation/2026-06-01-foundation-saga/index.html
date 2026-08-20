@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制📚 今日主题 Saga 分布式事务的补偿机制（后端基础）  1. 核心概念速览Saga 是分布式事务领域的一种一致性模式，属于分布式系统理论中事务协议族（2PC、TCC、Saga、本地消息表&#x2F;Outbox）之一，解决的是跨服务、跨数据库的多个本地事务如何收敛为『要么全部生效、要么全部被抵消』的问题。其本质定义">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制">
+<meta property="og:url" content="https://litongjin.github.io/2026/06/01/foundation/2026-06-01-foundation-saga/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制📚 今日主题 Saga 分布式事务的补偿机制（后端基础）  1. 核心概念速览Saga 是分布式事务领域的一种一致性模式，属于分布式系统理论中事务协议族（2PC、TCC、Saga、本地消息表&#x2F;Outbox）之一，解决的是跨服务、跨数据库的多个本地事务如何收敛为『要么全部生效、要么全部被抵消』的问题。其本质定义">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-06-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T07:47:13.818Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/06/01/foundation/2026-06-01-foundation-saga/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 15:47:13'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-01T00:00:00.000Z" title="发表于 2026-06-01 08:00:00">2026-06-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T07:47:13.818Z" title="更新于 2026-08-20 15:47:13">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-06-01-·-Saga-分布式事务的补偿机制"><a href="#每日基础技术总结-·-2026-06-01-·-Saga-分布式事务的补偿机制" class="headerlink" title="每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制"></a>每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Saga 分布式事务的补偿机制</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Saga 是分布式事务领域的一种一致性模式，属于分布式系统理论中事务协议族（2PC、TCC、Saga、本地消息表&#x2F;Outbox）之一，解决的是跨服务、跨数据库的多个本地事务如何收敛为『要么全部生效、要么全部被抵消』的问题。其本质定义是：将一个全局业务事务分解为有序的本地事务序列 T1, T2, …, Tn，每个 Ti 在自己的数据库内以 ACID 语义独立提交；同时为每个 Ti 预先定义补偿事务 Ci，Ci 的职责是在业务语义层面撤销 Ti 已对外产生的副作用。执行规则只有两条：正向顺序执行 Ti，全部提交即全局成功；若 Tk 失败，则逆序执行 C(k-1), …, C1，使系统收敛到等价于全局未执行的状态。</p>
+<p>Saga 解决的问题是 2PC 在分布式环境下的可用性缺陷：2PC 通过准备阶段加锁、提交阶段协调来保证强原子性，但任一参与者不可用会导致全局阻塞；Saga 放弃全局锁与强隔离，换取高可用与最终一致性，属于 BASE 模型的具体实现。其机制的核心区分是『补偿』而非『回滚』：回滚是存储引擎基于 undo 日志在物理层执行的逆操作，发生在事务提交前，且不可能失败；补偿是应用层执行的语义逆操作，发生在事务提交后，可能失败、必须重试、必须幂等。因此 Saga 提供的原子性是『假设补偿最终必然成功』的收敛性保证，而非数据库式的确定性保证。</p>
+<p>在计算机体系中的位置：位于分布式系统理论、CAP&#x2F;BASE、事件驱动架构的交汇处，是微服务架构中订单、支付、库存等跨服务写路径的必备基础设施能力。专业工程师必须掌握它，因为跨服务写入在现代系统中无法回避；只有理解补偿与回滚的本质差异、隔离性缺失的后果、幂等与持久化的必要性，才能正确设计故障恢复路径，并判断何时选用 Saga、何时选用 2PC 或本地消息表。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>一、形式化模型<br>Saga 是二元组序列 S &#x3D; {(T1,C1), (T2,C2), …, (Tn,Cn)}。Ti 是第 i 个本地事务，在参与者各自的数据库内以 ACID 语义独立提交；Ci 是 Ti 的补偿事务，只在 Ti 提交后才可能被调用。补偿的对象是『已提交的副作用』，而非『未提交的数据』——这是与数据库回滚的根本分界：回滚发生在提交前、由 undo 日志驱动、不执行业务逻辑；补偿发生在提交后、由业务代码驱动、会创建新的数据状态。</p>
+<p>二、执行与收敛规则<br>正向路径：T1 → T2 → … → Tn 顺序执行，全部成功即全局完成，无全局提交动作。反向路径：若 Tk 抛错，则执行 C(k-1) → … → C1，完成后 Saga 终止。执行顺序必须严格逆序，因为 Ci 只保证撤销 Ti 的副作用，乱序执行会破坏前置补偿的语义前提。若 Ci 自身失败，必须持久化失败标记并重试（指数退避）直至成功；重试要求 Ci 幂等。另需注意：并非所有失败都必须补偿，对瞬时故障（如网络超时），正向重试 Tk 往往优于逆序补偿，因为补偿本身也有成本与二次失败风险；选择正向恢复还是反向补偿，取决于失败类型与业务约束。</p>
+<p>三、协调模型<br>编排模式（Orchestration）：中央协调器维护 Saga 状态机，显式向各参与者下发 execute&#x2F;compensate 指令。状态机最小集合为 INIT、EXECUTING(Ti)、SUCCEEDED、FAILED、COMPENSATING(Ci)、COMPENSATED；每次状态迁移必须先持久化再执行动作，否则进程崩溃后无法恢复执行点。协同模式（Choreography）：无中央协调器，参与者完成 Ti 后发布领域事件，后续参与者订阅并执行 T(i+1)；某步失败则发布失败事件，前序参与者订阅后执行补偿。协同模式耦合度更低，但全局执行序列隐式分布在事件拓扑中，难以观测与治理，且事件乱序可能导致补偿错乱。</p>
+<p>四、持久化根基<br>执行 Tk 之前，协调器必须将『Saga 进入 Tk』的日志记录与 Tk 的本地业务写入放在同一个本地数据库事务中（事务性发件箱模式）。补偿同理：执行 Ck 前持久化『Ck 开始』，完成后持久化『Ck 完成』。没有持久化的执行栈，进程一旦崩溃就丢失补偿依据，系统永久停留在中间态。这是 Saga 工程实现与理论模型的临界点。</p>
+<p>五、隔离性缺失与对策<br>Saga 明确放弃隔离性（I）：T1..Tn 执行期间，中间状态对外可见，并发读会观察到不一致视图。对策包括：语义锁（状态字段预留，如订单置为 PENDING，拒绝冲突操作）、可交换操作（操作结果与顺序无关，天然免疫中间态）、重读校验（执行前重新读取并验证前置条件）、枢轴事务（最后改变业务状态、之后不再需要补偿的步骤）。</p>
+<p>六、与前端已有概念的本质对照</p>
+<ol>
+<li>Saga 补偿对应前端命令模式&#x2F;Redux 中的 undo：撤销一个 action 不是改写历史记录（物理回滚），而是派发一个语义相反的 action 去抵消其副作用；区别在于前端 undo 在同一内存作用域内同步完成，Saga 补偿跨进程、跨网络，因此必须显式声明、幂等、可重试。</li>
+<li>2PC 与 Saga 的契约强度差异，等价于 Java 接口与 TS 接口的差异：Java 接口是名义型契约，类型绑定到显式声明的名字，编译期强制、运行期由具体类实现兜底，类似 2PC 用全局锁与准备阶段在物理层强制各参与方『同生共死』；TS 接口是结构型契约，编译期按形状校验、运行期完全擦除，类似 Saga 不在物理层加锁，而是约定『只要 Ci 在业务语义上抵消 Ti，整个序列就等价于原子』。前者靠机制强制，后者靠语义约定收敛——这正是 Saga 的 Ci 设计必须与业务规则深度绑定、而非简单做数据逆操作的原因。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">// ============ 极简 Saga 编排器（编排模式，内存版） ============</span><br><span class="line">// 核心抽象：一个 Saga 步骤 = 一个本地事务 execute + 一个语义补偿 compensate</span><br><span class="line">interface SagaStep &#123;</span><br><span class="line">  name: string;</span><br><span class="line">  execute: () =&gt; Promise&lt;void&gt;;    // 本地 ACID 事务，独立提交，提交后副作用对外可见</span><br><span class="line">  compensate: () =&gt; Promise&lt;void&gt;; // 语义补偿：在业务层面抵消 execute 已产生的副作用</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">async function runSaga(steps: SagaStep[]): Promise&lt;void&gt; &#123;</span><br><span class="line">  const executed: SagaStep[] = []; // 已成功提交的步骤栈 —— 只有栈内步骤需要补偿</span><br><span class="line"></span><br><span class="line">  for (const step of steps) &#123;</span><br><span class="line">    await step.execute();          // 正向路径：提交第 i 个本地事务</span><br><span class="line">    executed.push(step);           // 仅提交成功才入栈；若抛错则不入栈，因为它从未生效</span><br><span class="line">  &#125;</span><br><span class="line">  // 走到此处表示全部成功：各本地事务已各自提交，Saga 全局成功，无显式提交动作</span><br><span class="line"></span><br><span class="line">  // 若某步抛错，进入补偿路径：从栈顶逆序执行补偿，LIFO 与依赖顺序严格一致</span><br><span class="line">  for (let i = executed.length - 1; i &gt;= 0; i--) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">      await executed[i].compensate();</span><br><span class="line">    &#125; catch (e) &#123;</span><br><span class="line">      // 补偿失败不能吞掉：上层必须持久化失败状态并重试（依赖幂等）直至成功，</span><br><span class="line">      // 否则系统停留在中间态 —— 这就是 Saga 原子性只是『最终收敛』而非『物理保证』的原因</span><br><span class="line">      throw new Error(&#x27;Saga compensation failed at step: &#x27; + executed[i].name, e as Error);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  throw new Error(&#x27;Saga failed, all executed steps compensated&#x27;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// ============ 验证：下单三步骤 ============</span><br><span class="line">await runSaga([</span><br><span class="line">  &#123;</span><br><span class="line">    name: &#x27;createOrder&#x27;,</span><br><span class="line">    // 生产实现中，此处与『写入 Saga 日志』必须在同一个本地事务内完成（事务性发件箱）</span><br><span class="line">    execute: async () =&gt; &#123; await db.insert(&#x27;orders&#x27;, &#123; id: &#x27;o1&#x27;, status: &#x27;CREATED&#x27; &#125;); &#125;,</span><br><span class="line">    // 补偿不是物理删除，而是状态迁移到 CANCELLED —— 保留审计痕迹，且可安全重试</span><br><span class="line">    compensate: async () =&gt; &#123; await db.update(&#x27;orders&#x27;, &#123; id: &#x27;o1&#x27;, status: &#x27;CANCELLED&#x27; &#125;); &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    name: &#x27;deductStock&#x27;,</span><br><span class="line">    execute: async () =&gt; &#123; await db.decrement(&#x27;inventory&#x27;, &#123; sku: &#x27;A&#x27;, qty: 1 &#125;); &#125;,</span><br><span class="line">    compensate: async () =&gt; &#123; await db.increment(&#x27;inventory&#x27;, &#123; sku: &#x27;A&#x27;, qty: 1 &#125;); &#125;, // 语义逆操作</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    name: &#x27;chargePayment&#x27;,</span><br><span class="line">    execute: async () =&gt; &#123; await paymentApi.charge(&#x27;o1&#x27;, 100); &#125;,</span><br><span class="line">    compensate: async () =&gt; &#123; await paymentApi.refund(&#x27;o1&#x27;, 100); &#125;, // 退款 ≠ 删除支付记录</span><br><span class="line">  &#125;,</span><br><span class="line">]);</span><br><span class="line">// 若 chargePayment 失败，逆序执行：refund（若已扣款）→ increment 库存 → 订单置为 CANCELLED</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：『补偿就是回滚』<br>补偿与回滚是两种不同层级的机制。回滚由存储引擎基于 undo 日志执行，发生在事务提交前，是物理层的确定性逆操作，不会失败，不需要业务代码参与。补偿由应用层业务代码执行，发生在事务提交后，是对已生效副作用的语义抵消；它本身会创建新的数据状态（如退款记录、取消状态），会失败，必须幂等、必须可重试。把补偿当回滚的典型错误是：补偿逻辑写成『删除刚才插入的行』。这会丢失审计痕迹，且一旦该行已被后续流程引用，删除会造成更严重的一致性破坏。补偿的正确形态是『把状态迁移到语义上等价于未发生的状态』。</p>
+<p>误区二：『Saga 提供分布式原子性，所以是强一致』<br>Saga 只提供最终一致性，且明确牺牲隔离性（I）：T1..Tn 执行期间中间状态对外可见。更关键的是，Saga 的原子性不是确定性的——它依赖于『补偿最终必然成功』的假设。若补偿永久失败（如依赖服务永久不可用、业务规则阻止补偿执行），系统会永久停留在中间态，只能人工介入。这与数据库事务由存储引擎保证的原子性有本质区别：前者是应用层的收敛性保证，后者是物理层的确定性保证。</p>
+<p>思考题：<br>一个三步 Saga：T1（创建订单）成功、T2（扣库存）成功、T3（扣款）失败，进入补偿路径。执行 C2（加回库存）时库存服务宕机，C2 失败。请回答：1) 此刻系统处于什么状态？2) Saga 框架依靠哪些机制最终收敛到一致？3) 若 C2 永久失败，Saga 是否还成立？为什么？——该题检验你是否真正理解：补偿的持久化与幂等重试、状态机在崩溃恢复中的作用，以及应用层语义补偿与存储引擎回滚在保证强度上的根本差异。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/06/01/foundation/2026-06-01-foundation-saga/">https://litongjin.github.io/2026/06/01/foundation/2026-06-01-foundation-saga/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/02/foundation/2026-06-02-foundation/" title="每日基础技术总结 · 2026-06-02 · 熔断器模式与滑动窗口统计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-02 · 熔断器模式与滑动窗口统计</div></div></a></div><div class="next-post pull-right"><a href="/2026/06/01/foundation/2026-06-01-foundation/" title="每日基础技术总结 · 2026-06-01 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-06-01 · 一致性哈希与虚拟节点</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/28/foundation/2026-05-28-foundation-redis-rdb-aof/" title="每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-tcp-time-wait/" title="每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用</div></div></a></div><div><a href="/2026/05/29/foundation/2026-05-29-foundation-etcd-raft/" title="每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="title">每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-mysql-innodb-mvcc-undo-log/" title="每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-grpc-keepalive/" title="每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-http2/" title="每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-06-01-%C2%B7-Saga-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%9A%84%E8%A1%A5%E5%81%BF%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-06-01 · Saga 分布式事务的补偿机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理">每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理</a><time datetime="2026-08-19T10:41:56.000Z" title="发表于 2026-08-19 18:41:56">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/daily/2026-08-19-workbench-daily/" title="工作台日报 · 2026-08-19">工作台日报 · 2026-08-19</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/05/foundation/2026-06-05-foundation-tcp/" title="每日基础技术总结 · 2026-06-05 · TCP 慢启动与拥塞避免">每日基础技术总结 · 2026-06-05 · TCP 慢启动与拥塞避免</a><time datetime="2026-06-05T00:00:00.000Z" title="发表于 2026-06-05 08:00:00">2026-06-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/05/foundation/2026-06-05-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-06-05 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-06-05 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-06-05T00:00:00.000Z" title="发表于 2026-06-05 08:00:00">2026-06-05</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

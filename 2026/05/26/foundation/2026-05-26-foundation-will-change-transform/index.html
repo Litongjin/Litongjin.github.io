@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件📚 今日主题 will-change 与 transform 合成层的触发条件（前端底层与计算机基础）  1. 核心概念速览will-change 是 CSS 属性，用于提前告知浏览器某个元素未来会发生何种变化（如 transform、opacity、top 等），其本质是触发合成层（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件">
+<meta property="og:url" content="https://litongjin.github.io/2026/05/26/foundation/2026-05-26-foundation-will-change-transform/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件📚 今日主题 will-change 与 transform 合成层的触发条件（前端底层与计算机基础）  1. 核心概念速览will-change 是 CSS 属性，用于提前告知浏览器某个元素未来会发生何种变化（如 transform、opacity、top 等），其本质是触发合成层（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-05-26T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T07:47:13.802Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/05/26/foundation/2026-05-26-foundation-will-change-transform/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 15:47:13'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-26T00:00:00.000Z" title="发表于 2026-05-26 08:00:00">2026-05-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T07:47:13.802Z" title="更新于 2026-08-20 15:47:13">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-05-26-·-will-change-与-transform-合成层的触发条件"><a href="#每日基础技术总结-·-2026-05-26-·-will-change-与-transform-合成层的触发条件" class="headerlink" title="每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件"></a>每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>will-change 与 transform 合成层的触发条件</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>will-change 是 CSS 属性，用于提前告知浏览器某个元素未来会发生何种变化（如 transform、opacity、top 等），其本质是触发合成层（compositing layer）的创建与提升，将元素从常规文档流所在的普通层（paint layer）提升至独立的 GPU 合成层。合成层机制解决的核心问题是：避免因属性变化引起的重新布局（layout）与重绘（paint）在每一帧都作用于整个页面，而是通过将高频变化的属性（transform&#x2F;opacity）独立到合成层，使浏览器仅对合成层进行 transform&#x2F;opacity 的复合（composite），从而跳过 layout 与 paint，大幅降低帧开销。在浏览器渲染管线中，合成（composite）是最后一步，发生在 GPU 端，独立于主线程。专业工程师必须掌握它，因为它直接决定了动画性能的上限，也是理解现代浏览器渲染架构（layer tree、compositor thread、rasterization）的关键入口，是前端性能优化的底层基础，与后端系统的缓存、并发模型类似，本质是『将频繁变化的部分隔离，减少全局同步成本』。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>浏览器渲染流程：DOM → CSSOM → Render Tree → Layout → Paint → Composite。在 Paint 阶段，浏览器会将渲染对象划分为多个 paint layer（普通层），每个层包含若干绘制指令。之后，根据合成触发条件（如 3D transform、will-change、fixed 定位、video 等），某些 paint layer 会被提升为合成层（composited layer），上传为 GPU 纹理。合成层的核心特性：该层内容被 GPU 独立存储，后续对该层的 transform&#x2F;opacity 修改只需要在合成阶段（compositor thread）对纹理做仿射变换或透明度混合，完全不需要重新 layout&#x2F;paint，也不占用主线程。触发条件严格来说有两类：显式声明（will-change: transform）和隐式条件（例如 transform: translateZ(0)、opacity 动画、filter、backface-visibility、contain: layout paint 等）。will-change 的作用是提前创建合成层，避免动画开始时才创建造成的首帧卡顿；同时它会作为对后续样式的提示，浏览器可将该元素的合成层保留一段时间。注意：will-change 并不是把属性本身变成合成属性，而是『该属性后续发生变化时，希望浏览器提前优化』。底层实现中，当 will-change 指定为 transform 时，浏览器会将元素提升到合成层，并为其创建新的 layer tree 节点。该节点在 compositor thread 上由独立的 compositor job 处理。对比前端已有概念：Java 的接口与 TypeScript 的接口在运行时都不存在，属于编译期契约；而 will-change 是运行时的浏览器提示，它不改变语义，只影响优化策略。类似地，后端中数据库索引与查询计划器：索引是优化器可选的加速结构，will-change 也是渲染引擎可选的优化提示，两者都不保证一定生效，依赖优化器的判断。但关键区别：will-change 创建合成层本身有内存与合成成本（每多一个合成层就多一份纹理内存和一次合成拼接），所以必须精确使用，否则反而劣化性能。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">纯文字化伪代码/步骤验证原理：</span><br><span class="line"></span><br><span class="line">1. 创建普通元素，设置 transform: scale(1)，不做 will-change。打开 DevTools → Rendering → Layer Borders，观察该元素没有单独的 layer 边框。</span><br><span class="line">2. 给元素添加 will-change: transform，刷新，立即观察：元素被绿色边框包裹（表示合成层），即使尚未发生任何动画。此时在 compositor 中已注册独立纹理。</span><br><span class="line">3. 对元素执行 JS 动画（requestAnimationFrame 内修改 transform: translateX(...)）。在 Performance 面板录制：会看到每一帧只有 Composite 任务，没有 Layout 和 Paint。若去掉 will-change，再次录制，会看到每帧出现 Paint（甚至 Layout）。</span><br><span class="line">4. 验证内存成本：在 Layer 面板中查看合成层的尺寸，内存占用约等于 width*height*4 字节（RGBA）。大量元素加 will-change 会显著提升 GPU 内存，可能导致层数过多（超过 30 层）时合成开销反超重绘开销。</span><br><span class="line"></span><br><span class="line">精确代码示例（浏览器内运行）：</span><br><span class="line"></span><br><span class="line">// 1. 打开控制台，在已存在的目标元素上测试</span><br><span class="line">const el = document.getElementById(&#x27;card&#x27;);</span><br><span class="line">// 2. 先不设置 will-change，记录动画帧的 performance 条目</span><br><span class="line">el.style.transition = &#x27;transform 1s linear&#x27;;</span><br><span class="line">el.style.transform = &#x27;translateX(200px)&#x27;;</span><br><span class="line">// 观察 performance 中 paint 条目数量</span><br><span class="line"></span><br><span class="line">// 3. 重置后，设置 will-change: transform</span><br><span class="line">el.style.transition = &#x27;none&#x27;;</span><br><span class="line">el.style.transform = &#x27;none&#x27;;</span><br><span class="line">el.style.willChange = &#x27;transform&#x27;;  // 浏览器立即将该元素提升为合成层</span><br><span class="line">el.offsetWidth; // 强制同步重排，确保样式计算已生效</span><br><span class="line"></span><br><span class="line">// 4. 再次执行相同动画</span><br><span class="line">el.style.transition = &#x27;transform 1s linear&#x27;;</span><br><span class="line">el.style.transform = &#x27;translateX(200px)&#x27;;</span><br><span class="line">// 观察 performance 中不再出现 paint 条目，只有 composite 条目。</span><br><span class="line"></span><br><span class="line">// 注意：will-change 不是魔法，它只是将元素从普通层提升为合成层。</span><br><span class="line">// 合成的前提是属性可合成：transform 和 opacity 是典型的合成属性，而 width/left/top 修改会强制 layout，即使有 will-change 也无法跳过重排。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为 will-change 越多越好，或把 will-change 永远留在元素上。实际合成层是 GPU 纹理，每增加一个层就增加内存和合成阶段的混合开销；过度使用会导致层数爆炸，合成器的绘制指令变得复杂，甚至让每帧都因为层间混合而变慢。正确用法：在动画开始前动态添加，动画结束后移除（或使用 will-change 的 auto 值让浏览器自行管理）。<br>误区二：混淆『合成属性』与『合成层』。will-change: transform 只确保元素被提升为合成层，但它不改变属性的合成性。如果同时修改 left 或 margin，这些属性不是合成属性，浏览器仍会执行 layout，合成层优化失效（甚至因多余纹理上传而更慢）。真正能走合成管线的属性只包括 transform、opacity、filter（部分）等。<br>深度思考题：假设一个页面有 1000 个元素，每个都设置 will-change: transform，同时用 requestAnimationFrame 修改这 1000 个元素的 transform 属性。请分析此时浏览器的合成器（compositor thread）是如何处理这 1000 个独立纹理的？最终帧率的瓶颈会出现在哪里？如果改成只对一个大容器设置 will-change，容器内部的所有子元素做 transform 动画，底层合成策略和性能特征会有什么不同？这两种方案分别对应 GPU 纹理数量、层间混合开销、主线程与合成线程的负载差异，请用渲染管线各阶段的时间成本推导出最优方案。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/05/26/foundation/2026-05-26-foundation-will-change-transform/">https://litongjin.github.io/2026/05/26/foundation/2026-05-26-foundation-will-change-transform/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/27/foundation/2026-05-27-foundation-layout-thrashing/" title="每日基础技术总结 · 2026-05-27 · 强制同步布局与 Layout Thrashing"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-05-27 · 强制同步布局与 Layout Thrashing</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/26/foundation/2026-05-26-foundation/" title="每日基础技术总结 · 2026-05-26 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-05-26 · 重排触发条件与增量布局脏标记</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-scavenger-mark-compact/" title="每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8/" title="每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-v8-jit-ignition-turbofan/" title="每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-context/" title="每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-05-26-%C2%B7-will-change-%E4%B8%8E-transform-%E5%90%88%E6%88%90%E5%B1%82%E7%9A%84%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-05-26 · will-change 与 transform 合成层的触发条件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理">每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理</a><time datetime="2026-08-19T10:41:56.000Z" title="发表于 2026-08-19 18:41:56">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/daily/2026-08-19-workbench-daily/" title="工作台日报 · 2026-08-19">工作台日报 · 2026-08-19</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</a><time datetime="2026-08-19T10:34:21.000Z" title="发表于 2026-08-19 18:34:21">2026-08-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/05/foundation/2026-06-05-foundation-tcp/" title="每日基础技术总结 · 2026-06-05 · TCP 慢启动与拥塞避免">每日基础技术总结 · 2026-06-05 · TCP 慢启动与拥塞避免</a><time datetime="2026-06-05T00:00:00.000Z" title="发表于 2026-06-05 08:00:00">2026-06-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/05/foundation/2026-06-05-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-06-05 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-06-05 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-06-05T00:00:00.000Z" title="发表于 2026-06-05 08:00:00">2026-06-05</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
