@@ -8,8 +8,6 @@ author: Litongjin
 
 # 工作台日报 · 2026-08-19
 
-> 自动生成于 2026-08-19 18:34 · 个人工作台 Agent
-
 ## 🔥 行业热点
 
 - [AI usage patterns in software teams](https://linear.app/data) — *Hacker News*

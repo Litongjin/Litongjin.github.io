@@ -8,8 +8,6 @@ author: Litongjin
 
 # 每日基础技术总结 · 2026-08-19 · Java 面向对象与接口
 
-> 自动生成于 2026-08-19 18:34 · 个人工作台 Agent
-
 ## 📚 今日主题
 
 > **Java 面向对象与接口**（后端基础（Node.js / Java / Python））

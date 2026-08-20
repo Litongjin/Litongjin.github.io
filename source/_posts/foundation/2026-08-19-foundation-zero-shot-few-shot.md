@@ -8,8 +8,6 @@ author: Litongjin
 
 # 每日基础技术总结 · 2026-08-19 · Zero-shot / Few-shot 原理
 
-> 自动生成于 2026-08-19 18:41 · 个人工作台 Agent
-
 ## 📚 今日主题
 
 > **Zero-shot / Few-shot 原理**（AI 开发基础（LLM & Agent））
