@@ -111,4 +111,3 @@ order.flatMap(name => { const cfg = getDefaultButtonConfig(name); return Array.i
 ```
 - **拓展**：任何'配置生成器返回数组而消费者预期对象'的情况都需显式展平，可写类型守卫。
 - *来源：admin-workspace-new 2026-08-12*
-
