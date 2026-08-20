@@ -66,3 +66,7 @@ category_ui:
   index: true
   item: true
   tag: true
+
+# 网站背景图（覆盖主题默认；图片放在 source/img/ 下，构建后访问路径为 /img/background.jpg）
+# 主题会用此值作为 #web_bg 的 CSS background，并自动 background-size: cover
+background: url(/img/background.jpg)
