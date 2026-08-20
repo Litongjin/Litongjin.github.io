@@ -1,0 +1,68 @@
+# ============================================================
+# butterfly 主题配置（覆盖 node_modules/hexo-theme-butterfly/_config.yml）
+# 顶部导航：首页 / 工作日记 / 技术分享 / 标签 / 归档 / 关于
+# ============================================================
+
+# 顶部导航菜单（Home / 工作日记 / 技术分享 等 tab）
+menu:
+  首页: / || fas fa-home
+  工作日记: /categories/工作日记/ || fas fa-calendar-alt
+  技术分享: /categories/技术分享/ || fas fa-book-open
+  标签: /tags/ || fas fa-tags
+  归档: /archives/ || fas fa-archive
+  关于: /about/ || fas fa-user
+
+# 侧边栏
+aside:
+  enable: true
+  hide: false
+  button: true
+  mobile: true
+  position: right
+  display:
+    archive: true
+    tag: true
+    category: true
+  card_author:
+    enable: true
+    description: 个人工作台 · 行业热点 / 工作总结 / 基础技术
+    button:
+      enable: true
+      icon: fab fa-github
+      text: GitHub
+      link: https://github.com/Litongjin
+  card_recent_post:
+    enable: true
+    limit: 6
+    sort: date
+  card_categories:
+    enable: true
+    limit: 20
+    expand: none
+  card_tags:
+    enable: true
+    limit: 40
+    color: false
+  card_archives:
+    enable: true
+    type: monthly
+    format: MMMM YYYY
+    order: -1
+    limit: 12
+
+# 代码块（浅色主题 + 显示语言标签）
+highlight_theme: light
+highlight_copy: true
+highlight_lang: true
+highlight_shrink: false
+
+# 首页文章显示摘要（防止把整篇长文都堆在首页）
+index_post_content:
+  method: 3
+  length: 300
+
+# 分类页 / 标签页显示文章数
+category_ui:
+  index: true
+  item: true
+  tag: true
