@@ -76,3 +76,8 @@ background: url(/img/background.jpg)
 index_img: url(/img/background.jpg)
 default_top_img: url(/img/background.jpg)
 footer_bg: url(/img/background.jpg)
+
+# 注入自定义 CSS，强制背景图不重复、居中、完整铺满（避免宽屏下被切分/平铺）
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/custom.css">
