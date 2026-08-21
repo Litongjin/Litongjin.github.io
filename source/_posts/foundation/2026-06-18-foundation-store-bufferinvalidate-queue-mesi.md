@@ -4,6 +4,7 @@ date: 2026-06-18 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "操作系统基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-18 · 内存屏障：Store Buffer、Invalidate Queue 与 MESI

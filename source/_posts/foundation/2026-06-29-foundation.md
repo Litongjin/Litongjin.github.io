@@ -4,6 +4,7 @@ date: 2026-06-29 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解

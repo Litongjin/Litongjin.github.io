@@ -4,6 +4,7 @@ date: 2026-06-29 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-29 · Adam 优化器的一阶/二阶矩估计与偏差校正

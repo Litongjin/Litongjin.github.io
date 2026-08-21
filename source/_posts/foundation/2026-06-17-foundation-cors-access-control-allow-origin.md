@@ -4,6 +4,7 @@ date: 2026-06-17 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-17 · CORS 预检请求与 Access-Control-Allow-Origin 反射

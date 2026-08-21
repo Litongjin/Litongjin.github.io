@@ -4,6 +4,7 @@ date: 2026-07-01 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-07-01 · 分组查询注意力 GQA 与多查询注意力 MQA

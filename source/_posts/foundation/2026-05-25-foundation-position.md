@@ -4,6 +4,7 @@ date: 2026-05-25 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "前端底层与计算机基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-05-25 · 包含块：position 与百分比尺寸的基准

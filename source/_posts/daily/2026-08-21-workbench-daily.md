@@ -4,6 +4,7 @@ date: 2026-08-21 06:55:27
 categories: [工作日记]
 tags: ["日报", "AI", "AI工具", "AI编程", "Git"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 工作台日报 · 2026-08-21

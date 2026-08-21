@@ -4,6 +4,7 @@ date: 2026-06-21 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-21 · 会话固定攻击与登录后的 Session ID 轮换

@@ -4,6 +4,7 @@ date: 2026-06-17 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-17 · HSTS 与超域预加载及证书错误覆盖

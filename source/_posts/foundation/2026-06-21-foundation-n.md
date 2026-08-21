@@ -4,6 +4,7 @@ date: 2026-06-21 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-21 · 格式化字符串漏洞：%n 与栈上参数泄露

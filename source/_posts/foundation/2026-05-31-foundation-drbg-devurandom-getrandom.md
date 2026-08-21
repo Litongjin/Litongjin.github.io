@@ -4,6 +4,7 @@ date: 2026-05-31 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-05-31 · 密码学随机数与 DRBG 的熵池：/dev/urandom 与 getrandom

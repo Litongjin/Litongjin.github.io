@@ -4,6 +4,7 @@ date: 2026-06-09 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "网络基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag/Last-Modified 与 Cache-Control

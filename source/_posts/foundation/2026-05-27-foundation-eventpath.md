@@ -4,6 +4,7 @@ date: 2026-05-27 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "前端底层与计算机基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-05-27 · 事件传播：捕获、冒泡、委托与 event.path

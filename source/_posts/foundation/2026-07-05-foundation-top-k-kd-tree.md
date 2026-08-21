@@ -4,6 +4,7 @@ date: 2026-07-05 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-07-05 · 向量检索：暴力 Top-K 与 KD-Tree 的维度灾难

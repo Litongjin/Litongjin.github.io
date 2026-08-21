@@ -4,6 +4,7 @@ date: 2026-07-02 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-07-02 · 连续批处理 Continuous Batching 与动态批处理

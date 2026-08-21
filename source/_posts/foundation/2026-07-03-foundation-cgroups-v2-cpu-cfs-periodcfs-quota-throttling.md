@@ -4,6 +4,7 @@ date: 2026-07-03 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "DevOps 与云原生"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-07-03 · Cgroups v2 的 CPU 带宽控制：cfs_period/cfs_quota 与 throttling

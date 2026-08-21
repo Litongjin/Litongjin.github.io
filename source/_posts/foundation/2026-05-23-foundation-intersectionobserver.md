@@ -4,6 +4,7 @@ date: 2026-05-23 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "前端底层与计算机基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-05-23 · IntersectionObserver 的异步回调与帧边界

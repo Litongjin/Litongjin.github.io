@@ -4,6 +4,7 @@ date: 2026-06-13 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "操作系统基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-13 · 线程切换的上下文开销：寄存器、TLS 与缓存失效

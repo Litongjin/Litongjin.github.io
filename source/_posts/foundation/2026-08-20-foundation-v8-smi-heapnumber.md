@@ -4,6 +4,7 @@ date: 2026-08-20 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "前端底层与计算机基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-08-20 · V8 中 Smi 与 HeapNumber 的指针标记

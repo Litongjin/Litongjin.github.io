@@ -4,6 +4,7 @@ date: 2026-06-30 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-30 · 多头注意力中 head 维度与模型维度的关系及切分方式

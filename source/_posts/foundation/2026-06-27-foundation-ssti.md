@@ -4,6 +4,7 @@ date: 2026-06-27 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-27 · 服务端模板注入 SSTI 的沙箱逃逸与构造

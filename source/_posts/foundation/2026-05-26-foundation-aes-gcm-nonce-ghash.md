@@ -4,6 +4,7 @@ date: 2026-05-26 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "安全基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-05-26 · AES-GCM 的 nonce 复用与 GHASH 碰撞

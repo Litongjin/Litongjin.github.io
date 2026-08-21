@@ -4,6 +4,7 @@ date: 2026-06-30 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "AI 开发基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-30 · Transformer 位置编码：正弦编码与旋转位置编码 RoPE

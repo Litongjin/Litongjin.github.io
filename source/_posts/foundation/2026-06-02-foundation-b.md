@@ -4,6 +4,7 @@ date: 2026-06-02 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "后端基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-02 · 数据库 B+树索引与最左前缀匹配

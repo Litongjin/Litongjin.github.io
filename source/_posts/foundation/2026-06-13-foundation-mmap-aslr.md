@@ -4,6 +4,7 @@ date: 2026-06-13 08:00:00
 categories: [技术分享]
 tags: ["技术分享", "操作系统基础"]
 author: Litongjin
+disableNunjucks: true
 ---
 
 # 每日基础技术总结 · 2026-06-13 · 进程地址空间布局：栈、堆、mmap 与 ASLR
