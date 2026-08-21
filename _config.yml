@@ -31,3 +31,10 @@ feed:
   type: atom
   path: atom.xml
   limit: 20
+
+# 站内搜索（hexo-generator-search，配合 butterfly local_search 前端检索）
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: html

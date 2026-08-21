@@ -67,15 +67,22 @@ category_ui:
   item: true
   tag: true
 
-# 网站背景图（覆盖主题默认；图片放在 source/img/ 下，构建后访问路径为 /img/background.jpg）
+# 网站背景图（覆盖主题默认；图片放在 source/img/ 下，构建后访问路径为 /img/background.webp）
+# WebP 版本体积约为 JPG 的 1/4，加载更快（P4-15）
 # 主题会用此值作为 #web_bg 的 CSS background，并自动 background-size: cover
-background: url(/img/background.jpg)
+background: url(/img/background.webp)
 
 # 首页顶部 Banner / 默认顶部图 / 底部背景
 # 统一使用同一张背景图，配合 mask.header/footer 的黑色半透明遮罩保证文字可读
-index_img: url(/img/background.jpg)
-default_top_img: url(/img/background.jpg)
-footer_bg: url(/img/background.jpg)
+index_img: url(/img/background.webp)
+default_top_img: url(/img/background.webp)
+footer_bg: url(/img/background.webp)
+
+# 站内搜索（hexo-generator-search 生成 search.xml，butterfly 前端检索，P4-15）
+local_search:
+  enable: true
+  preload: true
+  CDN:
 
 # 注入自定义 CSS，强制背景图不重复、居中、完整铺满（避免宽屏下被切分/平铺）
 inject:
