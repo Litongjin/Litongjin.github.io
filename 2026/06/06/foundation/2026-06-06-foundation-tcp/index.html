@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新📚 今日主题 TCP 零窗口探测与接收窗口更新（网络基础）  1. 核心概念速览TCP零窗口探测（Zero Window Probe）是TCP流控机制中处理接收窗口归零后恢复通信的可靠性保障。当接收方通告窗口为0时，发送方被禁止发送数据，但为了防止接收方后续发布的窗口更新（Window Update）报文丢失导致死锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新">
+<meta property="og:url" content="https://litongjin.github.io/2026/06/06/foundation/2026-06-06-foundation-tcp/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新📚 今日主题 TCP 零窗口探测与接收窗口更新（网络基础）  1. 核心概念速览TCP零窗口探测（Zero Window Probe）是TCP流控机制中处理接收窗口归零后恢复通信的可靠性保障。当接收方通告窗口为0时，发送方被禁止发送数据，但为了防止接收方后续发布的窗口更新（Window Update）报文丢失导致死锁">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-06-06T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.673Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="网络基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/06/06/foundation/2026-06-06-foundation-tcp/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-06T00:00:00.000Z" title="发表于 2026-06-06 08:00:00">2026-06-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.673Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-06-06-·-TCP-零窗口探测与接收窗口更新"><a href="#每日基础技术总结-·-2026-06-06-·-TCP-零窗口探测与接收窗口更新" class="headerlink" title="每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新"></a>每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>TCP 零窗口探测与接收窗口更新</strong>（网络基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>TCP零窗口探测（Zero Window Probe）是TCP流控机制中处理接收窗口归零后恢复通信的可靠性保障。当接收方通告窗口为0时，发送方被禁止发送数据，但为了防止接收方后续发布的窗口更新（Window Update）报文丢失导致死锁，发送方启动持久计时器（Persist Timer），周期性发送包含1字节的探测报文，强制接收方回复当前窗口大小。本质是通过主动探询打破依赖单方向通知的失效链路，确保窗口状态信息最终一致。它解决的核心问题是：接收端缓存已满时，若其窗口更新通知在网络中丢失，发送端将永远等待，连接进入死锁状态。该机制属于TCP可靠传输与流量控制的交叉领域，是滑动窗口协议与ARQ思想的延伸。专业工程师必须掌握它，因为它是理解TCP拥塞控制、可靠传输、以及分布式系统背压机制的基础，也是排查网络故障和设计高性能传输协议（如QUIC）的底层参照。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层原理：TCP接收方通过ACK携带窗口字段通告剩余缓冲区容量。当应用层不消费数据，缓冲区填满，接收方通告零窗口。发送方在收到零窗口后停止发送，并设置持久计时器（通常初始1.5秒，指数退避至60秒）。计时器超时后，发送方发送一个特殊的零窗口探测包（ZWP），其序列号取当前发送队列中下一个未确认的序列号，但数据长度仅1字节（即使会暂时越过窗口，也允许）。接收方收到探测后，必须立即回复ACK，通告当前窗口值（可能仍为0，也可能已非零）。若窗口仍为0，发送方继续等待并再次探测；若窗口非零，发送方恢复正常发送。同时，接收方应用层腾出空间后，会主动发送窗口更新ACK（纯ACK，不含数据）。但纯ACK没有序号，可能被延迟或丢失，所以探测机制是最终兜底。伪代码状态机：<br>发送端：<br>  if (window &#x3D;&#x3D; 0):<br>    启动持久计时器<br>    禁止发送数据<br>    超时后:<br>      发送1字节探测包(snd_nxt)<br>      重置计时器<br>      等待ACK<br>  收到ACK:<br>    更新window<br>    if (window &gt; 0): 停止探测，恢复正常发送<br>接收端：<br>  收到数据包:<br>    若窗口为0但收到探测包:<br>      立即返回ACK(当前窗口)<br>    否则正常处理<br>  应用层读取数据后:<br>    若窗口从0变为非0:<br>      发送纯ACK通告新窗口</p>
+<p>与前端ReadableStream背压的对比：</p>
+<ul>
+<li>相似：都基于接收方反馈容量（desiredSize），发送方（生产者）据此暂停或恢复写入。</li>
+<li>不同：TCP零窗口探测是网络协议层面对不可靠信道的补偿，主动探测解决通知丢失；前端流是内存模型，无丢包，靠Promise的pull信号精确同步，无需探测。这类似于Java接口与TypeScript接口的对比：两者都定义契约，但Java接口是编译期类型检查加运行时多态，TS接口是结构类型、擦除后无运行时存在——同样，TCP和前端流虽都实现背压，但底层机制和可靠性假设截然不同。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">理论性知识点，用文字化伪代码验证：</span><br><span class="line"></span><br><span class="line"># 发送端主循环（简化）</span><br><span class="line">snd_una = 0      # 最早未确认序号</span><br><span class="line">snd_nxt = 0      # 下一个待发送序号</span><br><span class="line">window = peer_window  # 对端通告窗口</span><br><span class="line"></span><br><span class="line">def send_data(data):</span><br><span class="line">    while data and window &gt; 0:</span><br><span class="line">        # 发送数据，减少窗口</span><br><span class="line">        window -= len(chunk)</span><br><span class="line">        snd_nxt += len(chunk)</span><br><span class="line"></span><br><span class="line">def on_ack(ack_no, new_window):</span><br><span class="line">    global snd_una, window</span><br><span class="line">    snd_una = max(snd_una, ack_no)</span><br><span class="line">    window = new_window</span><br><span class="line">    if window &gt; 0:</span><br><span class="line">        stop_persist_timer()</span><br><span class="line">    else:</span><br><span class="line">        # 窗口为零，启动持久计时器（若未启动）</span><br><span class="line">        start_persist_timer()</span><br><span class="line"></span><br><span class="line">def persist_timeout():</span><br><span class="line">    # 超时，发送1字节探测包，序号为snd_nxt</span><br><span class="line">    send_probe(snd_nxt, data=b&#x27;\x00&#x27;)</span><br><span class="line">    # 重置计时器（指数退避）</span><br><span class="line">    restart_timer(backoff)</span><br><span class="line"></span><br><span class="line"># 接收端</span><br><span class="line">def on_recv(segment):</span><br><span class="line">    if segment.is_probe:  # 仅1字节数据且seq==snd_nxt</span><br><span class="line">        # 即使窗口为0，也返回当前窗口</span><br><span class="line">        send_ack(rcv_nxt, window=current_available_space())</span><br><span class="line">    else:</span><br><span class="line">        # 正常处理，更新窗口</span><br><span class="line">        if segment.len &gt; 0:</span><br><span class="line">            rcv_nxt += segment.len</span><br><span class="line">        send_ack(rcv_nxt, window=current_available_space())</span><br><span class="line"></span><br><span class="line"># 接收应用层读取数据时</span><br><span class="line">def on_read(n):</span><br><span class="line">    window = current_available_space()</span><br><span class="line">    if window &gt; 0 and previous_window == 0:</span><br><span class="line">        send_ack(rcv_nxt, window)  # 主动发送窗口更新</span><br><span class="line">    previous_window = window</span><br><span class="line"></span><br><span class="line">验证思路：在本地用socket编程，将接收缓冲区调至极小，暂停读取，观察发送端探测包（可用tcpdump捕获）。若手动丢弃接收端发送的窗口更新ACK，发送端会在持久计时器超时后发出探测，验证机制。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为零窗口探测包携带的数据会突破流控，导致接收方缓冲区溢出。实际上探测包仅1字节，且接收方即使窗口为0也必须接收（序号匹配），但不会将其交付应用层，而是丢弃或缓存，并回复ACK通告窗口。这是协议允许的例外，目的是换取窗口状态的确定性。<br>误区二：认为只要接收方窗口更新（Window Update）发送成功，连接就能恢复，无需探测。但纯ACK可能因路由延迟或网络拥塞而丢失，且发送方无法区分是窗口未更新还是更新丢失。因此持久计时器是必须的兜底，不能依赖单向通知。<br>思考题：如果接收方在窗口为0期间收到探测包，但应用层同时刚好读取了数据、窗口变为非零，那么接收方回复的ACK中，ACK序号和窗口字段应该是什么？这个ACK能否同时作为对探测包的响应和窗口更新？请从TCP累积确认和窗口更新的角度解释，并说明这如何避免一次额外的窗口更新传输。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/06/06/foundation/2026-06-06-foundation-tcp/">https://litongjin.github.io/2026/06/06/foundation/2026-06-06-foundation-tcp/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">网络基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-sack/" title="每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK</div></div></a></div><div class="next-post pull-right"><a href="/2026/06/05/foundation/2026-06-05-foundation-openid-connect-id-token-nonce/" title="每日基础技术总结 · 2026-06-05 · OpenID Connect 的 ID Token 与 nonce 校验"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-06-05 · OpenID Connect 的 ID Token 与 nonce 校验</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/07/foundation/2026-06-07-foundation-ip-mtu/" title="每日基础技术总结 · 2026-06-07 · IP 分片与路径 MTU 发现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="title">每日基础技术总结 · 2026-06-07 · IP 分片与路径 MTU 发现</div></div></a></div><div><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-nagle-ack/" title="每日基础技术总结 · 2026-06-06 · TCP Nagle 算法与延迟 ACK 交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="title">每日基础技术总结 · 2026-06-06 · TCP Nagle 算法与延迟 ACK 交互</div></div></a></div><div><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-sack/" title="每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="title">每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK</div></div></a></div><div><a href="/2026/06/07/foundation/2026-06-07-foundation-udp/" title="每日基础技术总结 · 2026-06-07 · UDP 校验和计算与伪头部"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="title">每日基础技术总结 · 2026-06-07 · UDP 校验和计算与伪头部</div></div></a></div><div><a href="/2026/06/08/foundation/2026-06-08-foundation-dns-ttl/" title="每日基础技术总结 · 2026-06-08 · DNS 缓存 TTL 与缓存污染"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="title">每日基础技术总结 · 2026-06-08 · DNS 缓存 TTL 与缓存污染</div></div></a></div><div><a href="/2026/06/08/foundation/2026-06-08-foundation-dns/" title="每日基础技术总结 · 2026-06-08 · DNS 递归与迭代解析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="title">每日基础技术总结 · 2026-06-08 · DNS 递归与迭代解析</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-06-06-%C2%B7-TCP-%E9%9B%B6%E7%AA%97%E5%8F%A3%E6%8E%A2%E6%B5%8B%E4%B8%8E%E6%8E%A5%E6%94%B6%E7%AA%97%E5%8F%A3%E6%9B%B4%E6%96%B0"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-06-06 · TCP 零窗口探测与接收窗口更新</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

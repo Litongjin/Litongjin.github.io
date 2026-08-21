@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR/LALR 区别 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR&#x2F;LALR 区别📚 今日主题 LR(1) 项集族的构造与 SLR&#x2F;LALR 区别（算法与数据结构）  1. 核心概念速览LR(1) 项集族是规范 LR(1) 语法分析器的核心构造，其本质是在 LR(0) 项集基础上为每个项附加一个前瞻符号（lookahead），形成形如 [A → α·β, a]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR&#x2F;LALR 区别">
+<meta property="og:url" content="https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-lr1-slrlalr/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR&#x2F;LALR 区别📚 今日主题 LR(1) 项集族的构造与 SLR&#x2F;LALR 区别（算法与数据结构）  1. 核心概念速览LR(1) 项集族是规范 LR(1) 语法分析器的核心构造，其本质是在 LR(0) 项集基础上为每个项附加一个前瞻符号（lookahead），形成形如 [A → α·β, a]">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-06-28T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.715Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="算法与数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-lr1-slrlalr/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR/LALR 区别',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR/LALR 区别</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-28T00:00:00.000Z" title="发表于 2026-06-28 08:00:00">2026-06-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.715Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR/LALR 区别"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-06-28-·-LR-1-项集族的构造与-SLR-LALR-区别"><a href="#每日基础技术总结-·-2026-06-28-·-LR-1-项集族的构造与-SLR-LALR-区别" class="headerlink" title="每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR&#x2F;LALR 区别"></a>每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR&#x2F;LALR 区别</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>LR(1) 项集族的构造与 SLR&#x2F;LALR 区别</strong>（算法与数据结构）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>LR(1) 项集族是规范 LR(1) 语法分析器的核心构造，其本质是在 LR(0) 项集基础上为每个项附加一个前瞻符号（lookahead），形成形如 [A → α·β, a] 的 LR(1) 项。它解决的核心问题是：在自底向上分析中，当规约句柄 α 时，如何精确判定哪些输入符号允许触发该规约，从而消除移进&#x2F;规约冲突。机制是：闭包运算中，对形如 [A → α·Bβ, a] 的项，为 B 的每个产生式 B → γ 生成 [B → ·γ, b]，其中 b ∈ FIRST(βa)。这个前瞻符号的传播使得每个状态携带了完整的上下文信息。它在编译原理中占据语法分析阶段的关键位置，是 LR 文法族（SLR、LALR、LR(1)）之间区分度的根本依据。专业工程师必须掌握，因为它是理解现代编译器、静态分析工具以及形式化语言处理的基础，也是设计无歧义语法和调试解析冲突的必备认知。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>构造 LR(1) 项集族的核心算法如下：</p>
+<ol>
+<li>增广文法：添加产生式 S’ → S，S’ 为新的开始符号。</li>
+<li>初始项集 I0 &#x3D; closure({[S’ → ·S, $]})。</li>
+<li>对每个项集 I 和每个文法符号 X（终结符或非终结符），计算 goto(I, X) &#x3D; closure({[A → αX·β, a] | [A → α·Xβ, a] ∈ I})。</li>
+<li>重复步骤 3 直到没有新的项集产生。</li>
+</ol>
+<p>闭包运算的精确描述：</p>
+<ul>
+<li>对 I 中每个项 [A → α·Bβ, a]，其中 B 是非终结符，对 B 的每个产生式 B → γ，以及每个 b ∈ FIRST(βa)，将 [B → ·γ, b] 加入 closure(I)，重复直到不动点。</li>
+<li>FIRST(βa) 的计算：若 β 能推出空串，则包含 a；否则为 FIRST(β)（注意 β 中第一个终结符或可推导出终结符的非终结符）。</li>
+</ul>
+<p>SLR 与 LALR 的区别本质上是规约时使用的“向前看”信息精度的差异：</p>
+<ul>
+<li>SLR：对任何状态 i 中的规约项 A → α·，其规约动作仅依赖于 FOLLOW(A)。这是全局信息，未考虑当前状态的上文约束，因此会引入错误的规约，导致冲突。</li>
+<li>LR(1)：规约动作依赖于该项携带的前瞻符号集合（lookahead set），该集合是通过闭包计算精确传播得到的局部信息，只包含在给定上下文中真正可能出现的符号，因此最精确，冲突最少。</li>
+<li>LALR：合并 LR(1) 中具有相同核心（core，即忽略前瞻符号后的 LR(0) 项）的状态。合并后前瞻符号取并集，因此比 LR(1) 宽松，但比 SLR 精确。LALR 的动作表比 LR(1) 小得多，且对同一输入，移进动作完全一致，只在规约动作上可能比 LR(1) 多包含一些前瞻符号，但不会产生新的移进&#x2F;规约冲突，可能产生规约&#x2F;规约冲突。</li>
+</ul>
+<p>与前端知识体系的对比：SLR 类似于在全局类型定义上做重载决议（如 Java 接口的静态类型），而 LR(1) 类似于使用泛型约束（如 TS 的条件类型）在局部上下文精确推断；LALR 则类似于通过类型擦除合并不同接口但共享行为的方法，损失部分精度换取性能。本质是“上下文信息粒度”与“状态空间大小”的权衡。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下为 LR(1) 项集族构造的伪代码（可直接映射为实际实现）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">function FIRST(β):</span><br><span class="line">    // 返回可推导出的终结符集合，若 β 可推出 ε，则包含 ε</span><br><span class="line">    if β 为空: return &#123;ε&#125;</span><br><span class="line">    if β[0] 是终结符: return &#123;β[0]&#125;</span><br><span class="line">    result = FIRST(β[0])</span><br><span class="line">    if ε in result:</span><br><span class="line">        result -= &#123;ε&#125;</span><br><span class="line">        result ∪= FIRST(β[1:])</span><br><span class="line">    return result</span><br><span class="line"></span><br><span class="line">function closure(I):</span><br><span class="line">    repeat</span><br><span class="line">        changed = false</span><br><span class="line">        for each item [A → α·Bβ, a] in I:</span><br><span class="line">            for each production B → γ in P:</span><br><span class="line">                for each b in FIRST(βa):</span><br><span class="line">                    if [B → ·γ, b] not in I:</span><br><span class="line">                        add [B → ·γ, b] to I</span><br><span class="line">                        changed = true</span><br><span class="line">    until not changed</span><br><span class="line">    return I</span><br><span class="line"></span><br><span class="line">function goto(I, X):</span><br><span class="line">    J = &#123;&#125;</span><br><span class="line">    for each item [A → α·Xβ, a] in I:</span><br><span class="line">        add [A → αX·β, a] to J</span><br><span class="line">    return closure(J)</span><br><span class="line"></span><br><span class="line">function build_LR1_items():</span><br><span class="line">    I0 = closure(&#123;[S&#x27; → ·S, $]&#125;)</span><br><span class="line">    C = &#123;I0&#125;</span><br><span class="line">    repeat</span><br><span class="line">        for each I in C:</span><br><span class="line">            for each symbol X:</span><br><span class="line">                J = goto(I, X)</span><br><span class="line">                if J not empty and J not in C:</span><br><span class="line">                    add J to C</span><br><span class="line">    until no new itemset added</span><br><span class="line">    return C</span><br></pre></td></tr></table></figure>
+
+<p>关键点注释：</p>
+<ul>
+<li><code>FIRST(βa)</code> 中的 <code>a</code> 是当前项的前瞻符号，它决定了当 β 可空时，新产生式的规约前瞻传播自 <code>a</code>。</li>
+<li>闭包中的 <code>changed</code> 循环保证传递闭包，即嵌套的非终结符产生式都会被正确展开，并且前瞻符号按 FIRST 链传播。</li>
+<li><code>goto</code> 只是将圆点右移一位，再对新位置做闭包，反映“读入一个符号后进入新状态”的机制。</li>
+<li>构建完成后，分析表的 ACTION 和 GOTO 从每个项集的移进项和规约项提取，规约动作的表项仅对规约项的前瞻符号集合中的终结符置 <code>reduce</code>，这是与 SLR 的根本区别（SLR 使用 FOLLOW 全集）。</li>
+</ul>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为 LALR 合并状态后一定会产生新的冲突。实际上，LALR 合并的是具有相同核心的 LR(1) 状态，合并后只可能产生规约&#x2F;规约冲突，绝不会产生移进&#x2F;规约冲突。因为移进冲突的存在取决于核心中的移进项与规约项的共存，而合并前这两个状态核心相同，若一个状态有移进项而另一个有规约项，则合并后核心中同时存在移进和规约，但移进符号与规约项前瞻符号的冲突在合并前其实已由核心中的规约项的前瞻符号决定——若冲突存在，则合并前某个状态必然已经冲突。因此，若一个文法不是 LR(1)，它可能是 LALR(1)；但若它是 LR(1)，合并后不会新增移进&#x2F;规约冲突。</p>
+<p>误区2：把 SLR 的 FOLLOW 集合视为“上下文无关的近似”。实际上 FOLLOW(A) 是文法全局上所有可能出现 A 之后符号的集合，它不考虑当前规约项所在状态隐含的“左边上下文”。例如在状态中，项 [A → α·] 的 FOLLOW(A) 可能包含符号 b，但该状态能到达这里的前提是 A 之前必须出现某些特定符号，b 在那种上下文中永远不会出现。SLR 仍允许规约，导致错误输入被接受；LR(1) 的前瞻符号由闭包运算从该项的产生式右侧继承，严格反映了从开始符号推导到该状态时可能的后继符号。</p>
+<p>思考题：给定一个 LR(1) 文法，构造其 LALR(1) 自动机。假设两个 LR(1) 状态有相同核心但前瞻集合不同，合并后前瞻集合取并集。试证明：若合并后的状态对某个终结符 a 同时有移进和规约动作，则合并前必然已存在一个状态对 a 有移进和规约动作；反之，若合并前无任何冲突，则合并后只可能出现规约&#x2F;规约冲突。这题检验是否真正理解核心相同与前瞻符号传播的关系。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-lr1-slrlalr/">https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-lr1-slrlalr/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">算法与数据结构</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/28/foundation/2026-06-28-foundation-ssa-phi/" title="每日基础技术总结 · 2026-06-28 · SSA 的 phi 函数与支配边界"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-28 · SSA 的 phi 函数与支配边界</div></div></a></div><div class="next-post pull-right"><a href="/2026/06/28/foundation/2026-06-28-foundation-ll1-firstfollow/" title="每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST/FOLLOW 集"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST/FOLLOW 集</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/22/foundation/2026-06-22-foundation-bellman-ford/" title="每日基础技术总结 · 2026-06-22 · Bellman-Ford 算法的松弛轮数与负环检测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · Bellman-Ford 算法的松弛轮数与负环检测</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation-dijkstra/" title="每日基础技术总结 · 2026-06-22 · Dijkstra 算法的优先队列优化与负权陷阱"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · Dijkstra 算法的优先队列优化与负权陷阱</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation/" title="每日基础技术总结 · 2026-06-22 · 并查集的按秩合并与路径压缩复杂度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · 并查集的按秩合并与路径压缩复杂度</div></div></a></div><div><a href="/2026/06/24/foundation/2026-06-24-foundation-kmp-next/" title="每日基础技术总结 · 2026-06-24 · KMP 的 next 数组与失配优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-24</div><div class="title">每日基础技术总结 · 2026-06-24 · KMP 的 next 数组与失配优化</div></div></a></div><div><a href="/2026/06/23/foundation/2026-06-23-foundation-kahn-dfs/" title="每日基础技术总结 · 2026-06-23 · 拓扑排序的 Kahn 算法与 DFS 后序逆序"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-23</div><div class="title">每日基础技术总结 · 2026-06-23 · 拓扑排序的 Kahn 算法与 DFS 后序逆序</div></div></a></div><div><a href="/2026/06/23/foundation/2026-06-23-foundation-tarjan-lowlink/" title="每日基础技术总结 · 2026-06-23 · 强连通分量 Tarjan 算法的 lowlink 更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-23</div><div class="title">每日基础技术总结 · 2026-06-23 · 强连通分量 Tarjan 算法的 lowlink 更新</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-06-28-%C2%B7-LR-1-%E9%A1%B9%E9%9B%86%E6%97%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E-SLR-LALR-%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR&#x2F;LALR 区别</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

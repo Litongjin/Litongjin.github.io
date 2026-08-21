@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-07-02 · 模型量化：对称/非对称量化与零点 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-07-02 · 模型量化：对称&#x2F;非对称量化与零点📚 今日主题 模型量化：对称&#x2F;非对称量化与零点（AI 开发基础）  1. 核心概念速览模型量化是将浮点权重和激活从 FP32 映射到低比特整数（如 INT8）的线性仿射变换。其本质是用离散整数网格近似连续实数，通过缩放因子（scale）和零点（zero_point）唯一确定映射关系。它解决模型体积">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-07-02 · 模型量化：对称&#x2F;非对称量化与零点">
+<meta property="og:url" content="https://litongjin.github.io/2026/07/02/foundation/2026-07-02-foundation/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-07-02 · 模型量化：对称&#x2F;非对称量化与零点📚 今日主题 模型量化：对称&#x2F;非对称量化与零点（AI 开发基础）  1. 核心概念速览模型量化是将浮点权重和激活从 FP32 映射到低比特整数（如 INT8）的线性仿射变换。其本质是用离散整数网格近似连续实数，通过缩放因子（scale）和零点（zero_point）唯一确定映射关系。它解决模型体积">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-07-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.722Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/07/02/foundation/2026-07-02-foundation/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-07-02 · 模型量化：对称/非对称量化与零点',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-07-02 · 模型量化：对称/非对称量化与零点</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-02T00:00:00.000Z" title="发表于 2026-07-02 08:00:00">2026-07-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.722Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-07-02 · 模型量化：对称/非对称量化与零点"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-07-02-·-模型量化：对称-非对称量化与零点"><a href="#每日基础技术总结-·-2026-07-02-·-模型量化：对称-非对称量化与零点" class="headerlink" title="每日基础技术总结 · 2026-07-02 · 模型量化：对称&#x2F;非对称量化与零点"></a>每日基础技术总结 · 2026-07-02 · 模型量化：对称&#x2F;非对称量化与零点</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>模型量化：对称&#x2F;非对称量化与零点</strong>（AI 开发基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>模型量化是将浮点权重和激活从 FP32 映射到低比特整数（如 INT8）的线性仿射变换。其本质是用离散整数网格近似连续实数，通过缩放因子（scale）和零点（zero_point）唯一确定映射关系。它解决模型体积过大、内存带宽不足、浮点运算慢的问题，使推理可运行在仅支持整数指令集的硬件上。在 AI 体系中，量化属于模型压缩与推理优化层，与剪枝、蒸馏并列。专业工程师必须掌握，因为量化精度损失与超参选择直接相关，且 TensorRT、XNNPACK 等加速库的底层均依赖这一映射机制。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>量化映射是仿射变换：r &#x3D; s(q - z)，其中 r 为浮点值，q 为量化整数，s 为缩放因子（浮点），z 为零点（整数）。反量化即由 q 求解 r。给定浮点范围 [min, max] 和量化范围 [q_min, q_max]，有：</p>
+<p>s &#x3D; (max - min) &#x2F; (q_max - q_min)<br>z &#x3D; q_min - round(min &#x2F; s)</p>
+<p>量化时：<br>q &#x3D; clip(round(r &#x2F; s) + z, q_min, q_max)</p>
+<p>对称量化强制 z &#x3D; 0，且量化范围关于 0 对称（如 [-127, 127]），因此 s &#x3D; max(|min|, |max|) &#x2F; 127。非对称量化不强制 z &#x3D; 0，可适应任意浮点分布，典型为 [0, 255] 无符号。误差来源有裁剪（超出范围被截断）和舍入（取整导致离散化）。</p>
+<p>与前端知识体系的对比：Canvas 的 ImageData 用 Uint8ClampedArray 存储 0-255 的像素值，底层即是一种非对称量化（浮点颜色 0-1 映射到整数 0-255，零点为 0 但范围不对称）；而 TypeScript 的类型约束是编译期行为，不改变运行时数值表示，量化则是在运行时真实改变数值存储与计算。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">import numpy as np</span><br><span class="line"></span><br><span class="line">def quant_asym(x, bits=8):</span><br><span class="line">    # 非对称量化：浮点范围 [min, max] 映射到无符号整数 [0, 2^bits - 1]</span><br><span class="line">    q_min, q_max = 0, (1 &lt;&lt; bits) - 1</span><br><span class="line">    x_min, x_max = x.min(), x.max()</span><br><span class="line">    if x_min == x_max:</span><br><span class="line">        scale = 1.0</span><br><span class="line">        zero_point = q_min - int(round(x_min / scale))</span><br><span class="line">    else:</span><br><span class="line">        # 计算缩放因子：浮点范围宽度 / 量化范围宽度</span><br><span class="line">        scale = (x_max - x_min) / (q_max - q_min)</span><br><span class="line">        # 零点：量化整数 0 对应的浮点值对应的整数，用 round 消除偏移</span><br><span class="line">        zero_point = q_min - int(np.round(x_min / scale))</span><br><span class="line">    # 量化：先除以 scale，加零点，再裁剪到有效范围</span><br><span class="line">    q = np.clip(np.round(x / scale) + zero_point, q_min, q_max)</span><br><span class="line">    # 反量化：还原浮点值（存在误差）</span><br><span class="line">    deq = scale * (q - zero_point)</span><br><span class="line">    return q.astype(np.uint8), scale, zero_point, deq</span><br><span class="line"></span><br><span class="line">def quant_sym(x, bits=8):</span><br><span class="line">    # 对称量化：零点固定为 0，量化范围 [-2^(bits-1), 2^(bits-1)-1]</span><br><span class="line">    q_min, q_max = -(1 &lt;&lt; (bits - 1)), (1 &lt;&lt; (bits - 1)) - 1</span><br><span class="line">    max_abs = np.max(np.abs(x))</span><br><span class="line">    if max_abs == 0:</span><br><span class="line">        scale = 1.0</span><br><span class="line">    else:</span><br><span class="line">        # 用 127 作为分母，保证正负对称且避免溢出（-128 留作余量）</span><br><span class="line">        scale = max_abs / ((1 &lt;&lt; (bits - 1)) - 1)</span><br><span class="line">    # 量化：直接除以 scale，零点为 0，无需加偏移</span><br><span class="line">    q = np.clip(np.round(x / scale), q_min, q_max)</span><br><span class="line">    deq = scale * q</span><br><span class="line">    return q.astype(np.int8), scale, 0, deq</span><br><span class="line"></span><br><span class="line"># 验证：对一个非对称分布的张量分别做两种量化</span><br><span class="line">x = np.array([0.1, 0.5, 1.0, -0.2], dtype=np.float32)</span><br><span class="line">q_a, s_a, z_a, deq_a = quant_asym(x)</span><br><span class="line">q_s, s_s, z_s, deq_s = quant_sym(x)</span><br><span class="line">print(&#x27;原始:&#x27;, x)</span><br><span class="line">print(&#x27;非对称量化:&#x27;, q_a, &#x27;scale:&#x27;, s_a, &#x27;zero_point:&#x27;, z_a, &#x27;反量化:&#x27;, deq_a)</span><br><span class="line">print(&#x27;对称量化:&#x27;, q_s, &#x27;scale:&#x27;, s_s, &#x27;zero_point:&#x27;, z_s, &#x27;反量化:&#x27;, deq_s)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区 1：认为量化只是简单的四舍五入，忽略 scale 和 zero_point 的仿射映射。这会导致反量化公式错误，甚至把零点偏移当成噪声，无法正确恢复浮点值。</p>
+<p>误区 2：认为对称量化一定比非对称量化精度差。实际上，对称量化对接近 0 对称的分布（如卷积权重）效率高，非对称量化对偏置分布（如 ReLU 激活值全为正）更优，但引入 zero_point 会带来额外计算开销。</p>
+<p>思考题：若张量所有值均为正（如 [0.1, 0.5, 1.0]），使用 8 位对称量化（INT8）与非对称量化（UINT8）相比，量化误差有何本质区别？试计算两者的 scale 和有效精度，并解释为什么对称量化会浪费一半量化范围。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/07/02/foundation/2026-07-02-foundation/">https://litongjin.github.io/2026/07/02/foundation/2026-07-02-foundation/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/">AI 开发基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/07/02/foundation/2026-07-02-foundation-pagedattention/" title="每日基础技术总结 · 2026-07-02 · PagedAttention 的页表管理与显存碎片化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-07-02 · PagedAttention 的页表管理与显存碎片化</div></div></a></div><div class="next-post pull-right"><a href="/2026/07/01/foundation/2026-07-01-foundation-flashattention-io/" title="每日基础技术总结 · 2026-07-01 · FlashAttention 的 IO 感知分块算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-07-01 · FlashAttention 的 IO 感知分块算法</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/29/foundation/2026-06-29-foundation-batch-normalization/" title="每日基础技术总结 · 2026-06-29 · Batch Normalization 在训练与推理时的行为差异"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-29</div><div class="title">每日基础技术总结 · 2026-06-29 · Batch Normalization 在训练与推理时的行为差异</div></div></a></div><div><a href="/2026/06/29/foundation/2026-06-29-foundation-adam/" title="每日基础技术总结 · 2026-06-29 · Adam 优化器的一阶&#x2F;二阶矩估计与偏差校正"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-29</div><div class="title">每日基础技术总结 · 2026-06-29 · Adam 优化器的一阶&#x2F;二阶矩估计与偏差校正</div></div></a></div><div><a href="/2026/06/30/foundation/2026-06-30-foundation-transformer-scale/" title="每日基础技术总结 · 2026-06-30 · Transformer 的缩放点积注意力中的 scale 因子作用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-30</div><div class="title">每日基础技术总结 · 2026-06-30 · Transformer 的缩放点积注意力中的 scale 因子作用</div></div></a></div><div><a href="/2026/06/30/foundation/2026-06-30-foundation-head/" title="每日基础技术总结 · 2026-06-30 · 多头注意力中 head 维度与模型维度的关系及切分方式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-30</div><div class="title">每日基础技术总结 · 2026-06-30 · 多头注意力中 head 维度与模型维度的关系及切分方式</div></div></a></div><div><a href="/2026/06/30/foundation/2026-06-30-foundation-transformer-rope/" title="每日基础技术总结 · 2026-06-30 · Transformer 位置编码：正弦编码与旋转位置编码 RoPE"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-30</div><div class="title">每日基础技术总结 · 2026-06-30 · Transformer 位置编码：正弦编码与旋转位置编码 RoPE</div></div></a></div><div><a href="/2026/06/29/foundation/2026-06-29-foundation/" title="每日基础技术总结 · 2026-06-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-29</div><div class="title">每日基础技术总结 · 2026-06-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-07-02-%C2%B7-%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%EF%BC%9A%E5%AF%B9%E7%A7%B0-%E9%9D%9E%E5%AF%B9%E7%A7%B0%E9%87%8F%E5%8C%96%E4%B8%8E%E9%9B%B6%E7%82%B9"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-07-02 · 模型量化：对称&#x2F;非对称量化与零点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

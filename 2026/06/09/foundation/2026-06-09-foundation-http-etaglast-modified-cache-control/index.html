@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag/Last-Modified 与 Cache-Control | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control📚 今日主题 HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control（网络基础）  1. 核心概念速览HTTP缓存协商是客户端与服务器之间通过元数据判定资源是否可复用的机制，核心解决网络传输冗余与延迟问题。其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control">
+<meta property="og:url" content="https://litongjin.github.io/2026/06/09/foundation/2026-06-09-foundation-http-etaglast-modified-cache-control/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control📚 今日主题 HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control（网络基础）  1. 核心概念速览HTTP缓存协商是客户端与服务器之间通过元数据判定资源是否可复用的机制，核心解决网络传输冗余与延迟问题。其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-06-09T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.680Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="网络基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/06/09/foundation/2026-06-09-foundation-http-etaglast-modified-cache-control/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag/Last-Modified 与 Cache-Control',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag/Last-Modified 与 Cache-Control</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-09T00:00:00.000Z" title="发表于 2026-06-09 08:00:00">2026-06-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.680Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag/Last-Modified 与 Cache-Control"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-06-09-·-HTTP-缓存协商：ETag-Last-Modified-与-Cache-Control"><a href="#每日基础技术总结-·-2026-06-09-·-HTTP-缓存协商：ETag-Last-Modified-与-Cache-Control" class="headerlink" title="每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control"></a>每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control</strong>（网络基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>HTTP缓存协商是客户端与服务器之间通过元数据判定资源是否可复用的机制，核心解决网络传输冗余与延迟问题。其本质是将资源版本的『指纹』与『新鲜度』信息随响应下发，由客户端（或中间缓存）在后续请求中携带条件头，服务器据此返回304 Not Modified或200+新资源。ETag是实体标签，强校验器，基于内容哈希或版本号生成，精确到字节级变化；Last-Modified是时间戳，弱校验器，精度到秒且无法感知内容变化（如相同内容不同时间）。Cache-Control是指令集，定义缓存策略（max-age、no-cache、no-store、must-revalidate等），直接决定缓存生命周期与校验行为。三者协作：Cache-Control决定何时需要重新验证，ETag&#x2F;Last-Modified决定如何验证。该机制处于HTTP应用层，是Web性能优化的基石，与TLS、HTTP&#x2F;2同属网络基础核心。专业工程师必须掌握，因为它直接影响资源加载速度、服务器负载、用户体验，且是理解CDN、Service Worker、浏览器缓存行为的前提；任何前端性能优化脱离HTTP缓存协商机制，都是空中楼阁。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层机制可抽象为两阶段：缓存写入与缓存验证。写入阶段：服务器响应头携带Cache-Control（如max-age&#x3D;3600）、ETag、Last-Modified，客户端或中间缓存将资源连同这些元数据存入本地。验证阶段：当缓存过期（如max-age到期）或显式要求重新验证（no-cache）时，客户端构造条件请求——若存在Last-Modified则发送If-Modified-Since，若存在ETag则发送If-None-Match。服务器收到条件请求后执行校验：优先比较ETag（强校验，若资源内容未变则匹配），若匹配则返回304空体；若不匹配则返回200完整资源。若仅有Last-Modified，服务器比较时间戳：若资源最后修改时间早于或等于请求中的值则304，否则200。注意：ETag与Last-Modified可同时存在，服务器应优先处理If-None-Match，因为它更精确；若两者都不满足条件则返回200。流程图：请求→本地缓存是否存在？→不存在→200+缓存头→写入缓存；存在→是否新鲜（根据Cache-Control max-age）？→新鲜→200（from cache）→使用；不新鲜→携带If-None-Match&#x2F;If-Modified-Since发起协商→服务器判断→304→更新缓存元数据（保留实体）→使用；200→替换缓存。对比前端已有概念：ETag之于资源，如同JS中对象的引用标识或React的key，用于识别『同一实体是否变化』，但区别是HTTP缓存协商是网络层的分布式一致性校验，而JS接口是编译期契约。与TS接口的异同：TS接口是静态类型约束，描述形状，不参与运行时；ETag是运行时动态生成的校验值，描述资源状态。但两者共同点在于：都提供了一种『契约』——TS接口约束代码结构，ETag约束资源版本。更贴切的对比是Java的equals&#x2F;hashCode：ETag类似hashCode，用于快速判断相等；Last-Modified类似equals，但精度低可能误判。Cache-Control则类似于Java中的对象生命周期管理（如WeakReference的回收策略），决定对象何时被GC。核心本质：HTTP缓存协商是『条件请求』的实例化，将『全量拉取』降级为『元数据校验』，利用服务器端资源版本的确定性，换取网络传输的最小化。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">以Node.js原生http模块实现一个最小化缓存协商服务器，验证ETag与Last-Modified行为。</span><br><span class="line"></span><br><span class="line">const http = require(&#x27;http&#x27;);</span><br><span class="line">const crypto = require(&#x27;crypto&#x27;);</span><br><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">const resource = &#123; content: &#x27;Hello HTTP Cache&#x27;, updatedAt: Date.now() &#125;;</span><br><span class="line">// 预计算ETag：基于内容哈希，强校验器。任何字节变化导致ETag变化。</span><br><span class="line">const etag = crypto.createHash(&#x27;sha256&#x27;).update(resource.content).digest(&#x27;hex&#x27;);</span><br><span class="line"></span><br><span class="line">http.createServer((req, res) =&gt; &#123;</span><br><span class="line">  if (req.url === &#x27;/resource&#x27;) &#123;</span><br><span class="line">    // 1. 响应头设置缓存策略：max-age=0表示立即过期，必须重新验证；no-cache表示存储但使用前必须验证。</span><br><span class="line">    // 这里用max-age=0 + must-revalidate模拟协商场景。</span><br><span class="line">    res.setHeader(&#x27;Cache-Control&#x27;, &#x27;no-cache&#x27;);</span><br><span class="line">    res.setHeader(&#x27;ETag&#x27;, `&quot;$&#123;etag&#125;&quot;`);</span><br><span class="line">    res.setHeader(&#x27;Last-Modified&#x27;, new Date(resource.updatedAt).toUTCString());</span><br><span class="line"></span><br><span class="line">    // 2. 读取客户端条件头。服务器优先处理If-None-Match（ETag强校验）。</span><br><span class="line">    const ifNoneMatch = req.headers[&#x27;if-none-match&#x27;];</span><br><span class="line">    const ifModifiedSince = req.headers[&#x27;if-modified-since&#x27;];</span><br><span class="line"></span><br><span class="line">    // 3. 校验逻辑：若If-None-Match与当前ETag完全匹配，返回304空体。</span><br><span class="line">    // 这里演示了ETag优先于Last-Modified的规则。</span><br><span class="line">    if (ifNoneMatch === `&quot;$&#123;etag&#125;&quot;`) &#123;</span><br><span class="line">      res.statusCode = 304;</span><br><span class="line">      res.end();</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 4. 若没有ETag匹配，再检查Last-Modified。注意：时间精度秒，且不感知内容变化。</span><br><span class="line">    if (ifModifiedSince &amp;&amp; new Date(ifModifiedSince).getTime() &gt;= resource.updatedAt) &#123;</span><br><span class="line">      res.statusCode = 304;</span><br><span class="line">      res.end();</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 5. 未命中任何条件，返回200和完整资源。</span><br><span class="line">    res.statusCode = 200;</span><br><span class="line">    res.setHeader(&#x27;Content-Type&#x27;, &#x27;text/plain&#x27;);</span><br><span class="line">    res.end(resource.content);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    res.statusCode = 404;</span><br><span class="line">    res.end();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;).listen(3000, () =&gt; console.log(&#x27;Server on :3000&#x27;));</span><br><span class="line"></span><br><span class="line">// 客户端验证：</span><br><span class="line">// 首次请求：GET /resource → 200 + ETag + Last-Modified + Cache-Control: no-cache。</span><br><span class="line">// 第二次请求：带上If-None-Match: &quot;&lt;etag&gt;&quot; → 服务器返回304，响应体为空。</span><br><span class="line">// 实际网络面板可见状态码304，传输体积大幅减少。</span><br><span class="line">// 若修改resource.content（比如改为&#x27;Hello HTTP Cache!&#x27;），ETag变化，服务器返回200与新内容。</span><br><span class="line">// 注意：max-age=0与no-cache的区别：max-age=0强制立即过期，必须重新验证；no-cache语义为存储但不直接使用，同样必须验证。</span><br><span class="line">// 而no-store才是完全不缓存。</span><br><span class="line">// 伪代码：</span><br><span class="line">// request = &#123; headers: &#123; &#x27;If-None-Match&#x27;: etag &#125; &#125;</span><br><span class="line">// response = server.handle(request)</span><br><span class="line">// if response.status == 304: use local cache</span><br><span class="line">// else: update local cache with new response</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为 ETag 一定优于 Last-Modified，因此忽略 Last-Modified。实际上二者是互补关系：ETag 精确但需要服务器计算，Last-Modified 成本极低且足够覆盖大多数时间敏感场景。HTTP 规范允许同时发送，服务器应优先处理 If-None-Match，但客户端可能只支持其一。真实服务器（如 Nginx）默认开启 Last-Modified，ETag 可选，若前端工程师只依赖 ETag 而源站未开启，则缓存协商完全失效，导致每次回源。</p>
+<p>误区2：混淆 Cache-Control 的 no-cache 与 no-store。no-cache 并非『不缓存』，而是『缓存但每次使用前必须重新验证』，即强制走协商流程；no-store 才是彻底不缓存。专业工程师常误用 no-cache 以为禁用了缓存，导致性能不升反降。同理，max-age&#x3D;0 与 no-cache 效果类似，但语义不同：max-age&#x3D;0 表示资源立即过期，客户端必须重新验证；no-cache 则允许存储但禁止未经验证直接使用。</p>
+<p>思考题：假设服务器对某资源返回 Cache-Control: max-age&#x3D;60, ETag: “v1”，客户端在第 30 秒请求时是否发请求？不发请求，直接使用本地缓存。第 61 秒请求时，客户端会携带 If-None-Match: “v1” 发送条件请求。此时服务器若发现资源未变，返回 304；若资源已变为 “v2”，返回 200 新资源。请进一步思考：如果第 30 秒时用户强制刷新（Ctrl+F5），浏览器通常发送 Cache-Control: no-cache 并携带 If-None-Match，此时服务器应如何处理？若服务器忽略 If-None-Match 直接返回 200，是否违反 HTTP 语义？为什么？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/06/09/foundation/2026-06-09-foundation-http-etaglast-modified-cache-control/">https://litongjin.github.io/2026/06/09/foundation/2026-06-09-foundation-http-etaglast-modified-cache-control/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">网络基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/10/foundation/2026-06-10-foundation-tls/" title="每日基础技术总结 · 2026-06-10 · TLS 证书链验证与中间人攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-10 · TLS 证书链验证与中间人攻击</div></div></a></div><div class="next-post pull-right"><a href="/2026/06/09/foundation/2026-06-09-foundation-dns-cname-alias/" title="每日基础技术总结 · 2026-06-09 · DNS CNAME 与 ALIAS 记录区别"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-06-09 · DNS CNAME 与 ALIAS 记录区别</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/07/foundation/2026-06-07-foundation-ip-mtu/" title="每日基础技术总结 · 2026-06-07 · IP 分片与路径 MTU 发现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="title">每日基础技术总结 · 2026-06-07 · IP 分片与路径 MTU 发现</div></div></a></div><div><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-nagle-ack/" title="每日基础技术总结 · 2026-06-06 · TCP Nagle 算法与延迟 ACK 交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="title">每日基础技术总结 · 2026-06-06 · TCP Nagle 算法与延迟 ACK 交互</div></div></a></div><div><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-sack/" title="每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="title">每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK</div></div></a></div><div><a href="/2026/06/07/foundation/2026-06-07-foundation-udp/" title="每日基础技术总结 · 2026-06-07 · UDP 校验和计算与伪头部"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="title">每日基础技术总结 · 2026-06-07 · UDP 校验和计算与伪头部</div></div></a></div><div><a href="/2026/06/08/foundation/2026-06-08-foundation-dns-ttl/" title="每日基础技术总结 · 2026-06-08 · DNS 缓存 TTL 与缓存污染"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="title">每日基础技术总结 · 2026-06-08 · DNS 缓存 TTL 与缓存污染</div></div></a></div><div><a href="/2026/06/08/foundation/2026-06-08-foundation-dns/" title="每日基础技术总结 · 2026-06-08 · DNS 递归与迭代解析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="title">每日基础技术总结 · 2026-06-08 · DNS 递归与迭代解析</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-06-09-%C2%B7-HTTP-%E7%BC%93%E5%AD%98%E5%8D%8F%E5%95%86%EF%BC%9AETag-Last-Modified-%E4%B8%8E-Cache-Control"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-06-09 · HTTP 缓存协商：ETag&#x2F;Last-Modified 与 Cache-Control</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

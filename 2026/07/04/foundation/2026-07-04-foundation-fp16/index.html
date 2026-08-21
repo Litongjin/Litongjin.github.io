@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放📚 今日主题 混合精度训练：FP16 的梯度下溢与损失缩放（AI 开发基础）  1. 核心概念速览混合精度训练是指在训练过程中同时使用 FP32 与 FP16 两种精度存储与计算，核心动机是利用现代 GPU（如 Tensor Core）对 FP16 矩阵乘法的加速能力，同时通过损失缩放（Loss Scal">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放">
+<meta property="og:url" content="https://litongjin.github.io/2026/07/04/foundation/2026-07-04-foundation-fp16/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放📚 今日主题 混合精度训练：FP16 的梯度下溢与损失缩放（AI 开发基础）  1. 核心概念速览混合精度训练是指在训练过程中同时使用 FP32 与 FP16 两种精度存储与计算，核心动机是利用现代 GPU（如 Tensor Core）对 FP16 矩阵乘法的加速能力，同时通过损失缩放（Loss Scal">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-07-04T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.724Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/07/04/foundation/2026-07-04-foundation-fp16/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-04T00:00:00.000Z" title="发表于 2026-07-04 08:00:00">2026-07-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.724Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-07-04-·-混合精度训练：FP16-的梯度下溢与损失缩放"><a href="#每日基础技术总结-·-2026-07-04-·-混合精度训练：FP16-的梯度下溢与损失缩放" class="headerlink" title="每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放"></a>每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>混合精度训练：FP16 的梯度下溢与损失缩放</strong>（AI 开发基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>混合精度训练是指在训练过程中同时使用 FP32 与 FP16 两种精度存储与计算，核心动机是利用现代 GPU（如 Tensor Core）对 FP16 矩阵乘法的加速能力，同时通过损失缩放（Loss Scaling）对抗 FP16 有限动态范围导致的梯度下溢。本质问题是：FP16 的指数位仅 5 位，最小正规格化数为 2^-14 ≈ 6.1e-5，非规格化数可下探至 2^-24 ≈ 5.96e-8，而反向传播中梯度常远小于此量级，直接以 FP16 存储会截断为 0，导致权重无法更新。损失缩放通过在反向传播前将损失乘以一个大因子（如 1024），使梯度整体上移进入 FP16 可表示范围，更新权重前再除以该因子，从而在保持 FP16 计算加速的同时逼近 FP32 的数值稳定性。它位于 AI 基础设施层的数值计算与硬件指令集交汇处，是训练大模型（如 GPT、BERT）的默认策略之一。专业工程师必须掌握它，因为模型规模越大，梯度分布越稀疏，下溢概率越高；且混合精度已内置于 PyTorch AMP、NVIDIA Apex 等库，不理解其底层机制将无法诊断训练发散、精度异常或性能回退问题。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层机制分四步：</p>
+<ol>
+<li>前向传播：权重保持 FP32 主副本，每层计算时将其转为 FP16 参与矩阵乘；中间激活值以 FP16 存储，必要时保存 FP32 副本用于梯度计算（取决于实现策略）。</li>
+<li>损失缩放：前向损失 L 乘以缩放因子 S（通常 1024），得到 L’ &#x3D; L * S。该因子需足够大，使反向传播中最大梯度不超过 FP16 最大值 65504，同时最小梯度不小于 2^-24。</li>
+<li>反向传播：从 L’ 开始求梯度，所有梯度以 FP16 计算与存储。由于链式法则，每一层梯度都乘以 S，相当于梯度值整体放大，避免下溢。</li>
+<li>权重更新：将 FP16 梯度转为 FP32，除以 S 得到真实梯度，再更新 FP32 权重主副本。若发现梯度溢出（inf&#x2F;NaN），则跳过该步，将 S 减半并重新前向&#x2F;反向。<br>与前端概念的对比：这类似于 TypeScript 的 <code>number</code> 与 <code>bigint</code> 的精度取舍——TS 中 <code>number</code> 是 IEEE 754 双精度，<code>bigint</code> 是任意精度，但 <code>bigint</code> 运算慢；混合精度不是简单“用低精度代替高精度”，而是“高精度存储，低精度计算，通过缩放桥接动态范围差异”。更贴切的类比是 HTTP&#x2F;2 与 HTTP&#x2F;1.1 的多路复用：前者将多个请求交错在一个连接上，必须解决队头阻塞问题（对应梯度下溢）；损失缩放就像为每个请求分配独立流 ID，让小请求（小梯度）不被大请求（大梯度）淹没。本质上都是“在受限的共享资源中保证小信号的生存”。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下用纯 PyTorch 实现最小混合精度训练循环，不依赖 <code>torch.cuda.amp</code>，展示损失缩放原理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型：单线性层，权重初始化为小值，便于产生小梯度</span></span><br><span class="line">model = torch.nn.Linear(<span class="number">8</span>, <span class="number">1</span>).double()  <span class="comment"># 内部保持 FP32/FP64 主副本</span></span><br><span class="line">model.half()  <span class="comment"># 转换为 FP16 权重（真实场景会保留 FP32 主副本，这里简化）</span></span><br><span class="line"></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(), lr=<span class="number">0.01</span>)</span><br><span class="line">loss_fn = torch.nn.MSELoss()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输入与目标，使用 FP16</span></span><br><span class="line">x = torch.randn(<span class="number">4</span>, <span class="number">8</span>, dtype=torch.float16)</span><br><span class="line">y = torch.randn(<span class="number">4</span>, <span class="number">1</span>, dtype=torch.float16)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 损失缩放因子，初始化为 1024</span></span><br><span class="line">scaler = <span class="number">1024.0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> step <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前向：FP16 计算，计算 FP32 损失（防止损失自身下溢）</span></span><br><span class="line">    pred = model(x)          <span class="comment"># FP16 预测</span></span><br><span class="line">    loss = loss_fn(pred.<span class="built_in">float</span>(), y.<span class="built_in">float</span>())  <span class="comment"># 转为 FP32 计算损失</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 损失缩放：将损失乘以 scaler，梯度将按相同比例放大</span></span><br><span class="line">    scaled_loss = loss * scaler</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 反向传播：梯度以 FP16 存储（实际 autograd 会用 FP16），此时梯度被放大</span></span><br><span class="line">    scaled_loss.backward()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 检查梯度是否溢出（inf/NaN），若溢出则跳过更新并降低 scaler</span></span><br><span class="line">    grad_ok = <span class="built_in">all</span>(torch.isfinite(p.grad).<span class="built_in">all</span>() <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters())</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> grad_ok:</span><br><span class="line">        scaler /= <span class="number">2.0</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Step <span class="subst">&#123;step&#125;</span>: overflow, scaler halved to <span class="subst">&#123;scaler&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 更新权重前，将梯度除以 scaler 还原，并转为 FP32 更新</span></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters():</span><br><span class="line">        p.grad.data = p.grad.<span class="built_in">float</span>() / scaler</span><br><span class="line">    optimizer.step()</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Step <span class="subst">&#123;step&#125;</span>: loss=<span class="subst">&#123;loss.item():<span class="number">.6</span>f&#125;</span>, grad_scale=<span class="subst">&#123;scaler&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>关键行注释：</p>
+<ul>
+<li><code>scaled_loss = loss * scaler</code>：将损失放大，后续梯度自动乘以 scaler，使小梯度进入 FP16 可表示范围。</li>
+<li><code>torch.isfinite(p.grad)</code>：检测 FP16 梯度是否溢出，若溢出说明 scaler 过大，需减半重试（真实实现会跳过本轮更新）。</li>
+<li><code>p.grad.float() / scaler</code>：还原真实梯度，再执行 FP32 权重更新，保证权重精度不被破坏。<br>该代码可直接运行，观察 loss 是否正常下降；若去掉缩放，梯度极小（线性层输出接近 0）时梯度会下溢为 0，loss 不下降。</li>
+</ul>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为混合精度只是“把模型改成 FP16”。实际上必须保留 FP32 权重主副本，否则权重更新时的微小修正量（通常 &lt; 2^-14）会被 FP16 舍入吞掉，训练无法收敛。这与前端开发中用 <code>Number</code> 存储时间戳却丢失毫秒精度类似，根因都是“计算精度”与“存储精度”分离。<br>误区二：认为损失缩放因子越大越好。若 scaler 过大，梯度会溢出为 inf；过小则下溢。正确做法是动态调整：初始较大，检测到 inf 后减半，并在连续若干步无溢出时适当增大（如 NVIDIA 的 <code>Dynamic Loss Scaling</code>）。<br>进阶思考题：当使用 Tensor Core 时，FP16 矩阵乘法的输入必须满足维度为 8 的倍数。假设你的模型隐藏层维度为 10，混合精度训练时为何实际计算会被填充到 16？填充部分如何影响梯度计算？请从内存布局与 Tensor Core 指令集的角度解释，并说明损失缩放是否仍适用于填充区域。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/07/04/foundation/2026-07-04-foundation-fp16/">https://litongjin.github.io/2026/07/04/foundation/2026-07-04-foundation-fp16/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/">AI 开发基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/07/04/foundation/2026-07-04-foundation/" title="每日基础技术总结 · 2026-07-04 · 学习率预热与余弦退火的原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-07-04 · 学习率预热与余弦退火的原理</div></div></a></div><div class="next-post pull-right"><a href="/2026/07/04/foundation/2026-07-04-foundation-xavier-he/" title="每日基础技术总结 · 2026-07-04 · 权重初始化：Xavier 与 He 的方差分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-07-04 · 权重初始化：Xavier 与 He 的方差分析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/29/foundation/2026-06-29-foundation-batch-normalization/" title="每日基础技术总结 · 2026-06-29 · Batch Normalization 在训练与推理时的行为差异"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-29</div><div class="title">每日基础技术总结 · 2026-06-29 · Batch Normalization 在训练与推理时的行为差异</div></div></a></div><div><a href="/2026/06/29/foundation/2026-06-29-foundation-adam/" title="每日基础技术总结 · 2026-06-29 · Adam 优化器的一阶&#x2F;二阶矩估计与偏差校正"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-29</div><div class="title">每日基础技术总结 · 2026-06-29 · Adam 优化器的一阶&#x2F;二阶矩估计与偏差校正</div></div></a></div><div><a href="/2026/06/30/foundation/2026-06-30-foundation-transformer-scale/" title="每日基础技术总结 · 2026-06-30 · Transformer 的缩放点积注意力中的 scale 因子作用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-30</div><div class="title">每日基础技术总结 · 2026-06-30 · Transformer 的缩放点积注意力中的 scale 因子作用</div></div></a></div><div><a href="/2026/06/30/foundation/2026-06-30-foundation-head/" title="每日基础技术总结 · 2026-06-30 · 多头注意力中 head 维度与模型维度的关系及切分方式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-30</div><div class="title">每日基础技术总结 · 2026-06-30 · 多头注意力中 head 维度与模型维度的关系及切分方式</div></div></a></div><div><a href="/2026/06/30/foundation/2026-06-30-foundation-transformer-rope/" title="每日基础技术总结 · 2026-06-30 · Transformer 位置编码：正弦编码与旋转位置编码 RoPE"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-30</div><div class="title">每日基础技术总结 · 2026-06-30 · Transformer 位置编码：正弦编码与旋转位置编码 RoPE</div></div></a></div><div><a href="/2026/06/29/foundation/2026-06-29-foundation/" title="每日基础技术总结 · 2026-06-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-29</div><div class="title">每日基础技术总结 · 2026-06-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-07-04-%C2%B7-%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E8%AE%AD%E7%BB%83%EF%BC%9AFP16-%E7%9A%84%E6%A2%AF%E5%BA%A6%E4%B8%8B%E6%BA%A2%E4%B8%8E%E6%8D%9F%E5%A4%B1%E7%BC%A9%E6%94%BE"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-07-04 · 混合精度训练：FP16 的梯度下溢与损失缩放</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

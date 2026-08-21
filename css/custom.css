@@ -1,0 +1,8 @@
+/* 让首页顶部 Banner、子页面顶部 Banner、底部背景都按完整一张图居中铺满，不重复 */
+#page-header.full_page,
+#page-header.not-home-page,
+#footer {
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}

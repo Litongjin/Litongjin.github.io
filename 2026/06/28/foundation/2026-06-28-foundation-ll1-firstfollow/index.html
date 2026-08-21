@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST/FOLLOW 集 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集📚 今日主题 LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集（算法与数据结构）  1. 核心概念速览LL(1) 预测分析表是自顶向下语法分析器的核心驱动结构，它根据当前输入符号（lookahead）与栈顶非终结符，唯一确定应采用的产生式。其本质是文法在‘单符号前瞻、最">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集">
+<meta property="og:url" content="https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-ll1-firstfollow/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集📚 今日主题 LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集（算法与数据结构）  1. 核心概念速览LL(1) 预测分析表是自顶向下语法分析器的核心驱动结构，它根据当前输入符号（lookahead）与栈顶非终结符，唯一确定应采用的产生式。其本质是文法在‘单符号前瞻、最">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-06-28T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.714Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="算法与数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-ll1-firstfollow/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST/FOLLOW 集',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST/FOLLOW 集</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-28T00:00:00.000Z" title="发表于 2026-06-28 08:00:00">2026-06-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.714Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST/FOLLOW 集"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-06-28-·-LL-1-预测分析表与-FIRST-FOLLOW-集"><a href="#每日基础技术总结-·-2026-06-28-·-LL-1-预测分析表与-FIRST-FOLLOW-集" class="headerlink" title="每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集"></a>每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集</strong>（算法与数据结构）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>LL(1) 预测分析表是自顶向下语法分析器的核心驱动结构，它根据当前输入符号（lookahead）与栈顶非终结符，唯一确定应采用的产生式。其本质是文法在‘单符号前瞻、最左推导’约束下的确定化函数：M[N, T] → 产生式 ∪ error。FIRST&#x2F;FOLLOW 集是构造该表的静态信息基础：FIRST(α) 是从 α 能推导出的所有终结符首符集合（含 ε 当且仅当 α ⇒* ε）；FOLLOW(A) 是在所有句型中可能紧跟在非终结符 A 之后的终结符集合（含 $ 作为输入结束符）。LL(1) 的本质条件是对同一非终结符的任意两条产生式 A → α | β，要求 FIRST(α) 与 FIRST(β) 不相交，且若 α ⇒* ε，则 FIRST(β) ∩ FOLLOW(A) 为空。该条件保证查表时每个表项至多一个产生式，从而消除回溯，实现线性时间解析。在整个计算机体系中，预测分析是编译原理前端的核心环节，也是递归下降解析器自动化的基础；同时，FIRST&#x2F;FOLLOW 的计算思想广泛用于自然语言处理中的语法分析、代码生成中的文法验证，以及各类‘基于前瞻做决策’的算法设计。专业工程师必须掌握它，因为它是理解语法分析器生成器（如 ANTLR、Yacc）内部机制、设计无歧义语法、排查解析冲突的底层理论基础，也是从‘会调解析库’进阶到‘能实现解析器’的分水岭。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层运行机制分为三个层次：</p>
+<ol>
+<li><p>计算 FIRST 集（不动点迭代）：</p>
+<ul>
+<li>对每个文法符号 X，初始化 FIRST(X) &#x3D; ∅。</li>
+<li>应用规则直到集合不再增长：<br>a. 若 X 是终结符，FIRST(X) &#x3D; {X}。<br>b. 若 X → ε，则 ε ∈ FIRST(X)。<br>c. 若 X → Y1 Y2 … Yk，则从左向右扫描：将 FIRST(Yi) 中除 ε 外所有符号加入 FIRST(X)；若 FIRST(Yi) 含 ε，继续处理 Yi+1；若所有 Y1..Yk 均含 ε，则将 ε 加入 FIRST(X)。</li>
+<li>对于符号串 α &#x3D; X1 X2 … Xm，FIRST(α) 同样规则：依次取 FIRST(Xi) 的非 ε 元素，直到遇到不含 ε 的 Xi 为止；若所有 Xi 均可为 ε，则 ε ∈ FIRST(α)。</li>
+</ul>
+</li>
+<li><p>计算 FOLLOW 集（不动点迭代）：</p>
+<ul>
+<li>初始化：FOLLOW(S) &#x3D; {$}（S 为开始符号），其余 FOLLOW(A) &#x3D; ∅。</li>
+<li>应用规则直到不再变化：<br>a. 对产生式 A → α B β，将 FIRST(β) 中除 ε 外所有符号加入 FOLLOW(B)。<br>b. 若 A → α B 或 A → α B β 且 β ⇒* ε，则将 FOLLOW(A) 中所有符号加入 FOLLOW(B)。</li>
+<li>注意 FOLLOW 集中永不含 ε。</li>
+</ul>
+</li>
+<li><p>构造预测分析表 M[N, T]：</p>
+<ul>
+<li>对每个产生式 A → α，执行：<br>a. 对每个终结符 a ∈ FIRST(α)，将 A → α 填入 M[A, a]。<br>b. 若 ε ∈ FIRST(α)，则对每个 b ∈ FOLLOW(A)，将 A → α 填入 M[A, b]；若 $ ∈ FOLLOW(A)，也填入 M[A, $]。</li>
+<li>若某表项已有产生式，则发生冲突，文法不是 LL(1)。</li>
+</ul>
+</li>
+<li><p>预测分析执行机制：</p>
+<ul>
+<li>栈初始为 [$, S]，输入串后追加 $。</li>
+<li>每次看栈顶符号 X 与当前输入符号 a：<ul>
+<li>若 X 是终结符，则 X 必须等于 a，弹出 X，输入指针前移；否则报错。</li>
+<li>若 X 是非终结符，查 M[X, a]；若无定义则报错；若有产生式 X → Y1…Yk，弹出 X，将 Yk…Y1 逆序压栈（若 α&#x3D;ε 则什么都不压）。</li>
+<li>若 X&#x3D;$ 且 a&#x3D;$，则接受。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>与前端已有概念的对比：预测分析表本质是一个二维的‘决策路由表’，类似前端中事件委托的映射表（selector → handler），但这里的确定性由文法的 LL(1) 条件保证；FIRST&#x2F;FOLLOW 集类似于 TypeScript 的类型收窄所需的‘可能输入集合’，但它们是语法层面静态计算的闭包；LL(1) 的‘无回溯’机制类似于 React 的 reconcile 过程中通过 key 做确定性匹配，一旦 key 冲突就会渲染异常，对应文法冲突。此外，递归下降解析器中的每个函数对应一个非终结符，函数体内的分支判断就是在手工模拟查询 FIRST&#x2F;FOLLOW 集，而预测分析表则是将这种逻辑显式数据化，二者本质等价。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下为极简的 LL(1) 表构造与预测分析过程的文字化伪代码（不依赖具体语言）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">// 文法：</span><br><span class="line">// E  → T E&#x27;</span><br><span class="line">// E&#x27; → + T E&#x27; | ε</span><br><span class="line">// T  → F T&#x27;</span><br><span class="line">// T&#x27; → * F T&#x27; | ε</span><br><span class="line">// F  → ( E ) | id</span><br><span class="line"></span><br><span class="line">// 步骤1：计算 FIRST 集（不动点）</span><br><span class="line">FIRST(F)  = &#123; ( , id &#125;</span><br><span class="line">FIRST(T&#x27;) = &#123; * , ε &#125;</span><br><span class="line">FIRST(T)  = &#123; ( , id &#125;</span><br><span class="line">FIRST(E&#x27;) = &#123; + , ε &#125;</span><br><span class="line">FIRST(E)  = &#123; ( , id &#125;</span><br><span class="line"></span><br><span class="line">// 步骤2：计算 FOLLOW 集（不动点）</span><br><span class="line">FOLLOW(E) = &#123; $ , ) &#125;</span><br><span class="line">FOLLOW(E&#x27;) = &#123; $ , ) &#125;</span><br><span class="line">FOLLOW(T) = &#123; + , $ , ) &#125;</span><br><span class="line">FOLLOW(T&#x27;) = &#123; + , $ , ) &#125;</span><br><span class="line">FOLLOW(F) = &#123; * , + , $ , ) &#125;</span><br><span class="line"></span><br><span class="line">// 步骤3：构造预测分析表 M</span><br><span class="line">// 对 E → T E&#x27;：FIRST(T E&#x27;) = &#123; ( , id &#125;，故 M[E, (] = E→T E&#x27;，M[E, id] = E→T E&#x27;</span><br><span class="line">// 对 E&#x27; → + T E&#x27;：FIRST(+ T E&#x27;) = &#123; + &#125;，故 M[E&#x27;, +] = E&#x27;→+ T E&#x27;</span><br><span class="line">// 对 E&#x27; → ε：ε ∈ FIRST(ε)，故对 b ∈ FOLLOW(E&#x27;)=&#123;$,)&#125;，填 M[E&#x27;, $] = E&#x27;→ε，M[E&#x27;, )] = E&#x27;→ε</span><br><span class="line">// 对 T → F T&#x27;：FIRST(F T&#x27;) = &#123; ( , id &#125;，故 M[T, (] = T→F T&#x27;，M[T, id] = T→F T&#x27;</span><br><span class="line">// 对 T&#x27; → * F T&#x27;：M[T&#x27;, *] = T&#x27;→* F T&#x27;</span><br><span class="line">// 对 T&#x27; → ε：对 b ∈ FOLLOW(T&#x27;)=&#123;+,$,)&#125;，填 M[T&#x27;, +] = T&#x27;→ε，M[T&#x27;, $] = T&#x27;→ε，M[T&#x27;, )] = T&#x27;→ε</span><br><span class="line">// 对 F → ( E )：M[F, (] = F→( E )</span><br><span class="line">// 对 F → id：M[F, id] = F→id</span><br><span class="line">// 其余表项为 error</span><br><span class="line"></span><br><span class="line">// 步骤4：预测分析过程（输入串 id + id * id）</span><br><span class="line">// 栈初始: [$, E]  输入: id + id * id $</span><br><span class="line">// 1. 栈顶 E，输入 id：查 M[E, id] = E→T E&#x27;，弹出 E，压入 E&#x27; T（逆序），栈变为 [$, E&#x27;, T]</span><br><span class="line">// 2. 栈顶 T，输入 id：查 M[T, id] = T→F T&#x27;，弹出 T，压入 T&#x27; F，栈变为 [$, E&#x27;, T&#x27;, F]</span><br><span class="line">// 3. 栈顶 F，输入 id：查 M[F, id] = F→id，弹出 F，压入 id，栈变为 [$, E&#x27;, T&#x27;, id]</span><br><span class="line">// 4. 栈顶 id，输入 id：匹配，弹出 id，输入指针移到 +，栈变为 [$, E&#x27;, T&#x27;]</span><br><span class="line">// 5. 栈顶 T&#x27;，输入 +：查 M[T&#x27;, +] = T&#x27;→ε，弹出 T&#x27;，不压入，栈变为 [$, E&#x27;]</span><br><span class="line">// 6. 栈顶 E&#x27;，输入 +：查 M[E&#x27;, +] = E&#x27;→+ T E&#x27;，弹出 E&#x27;，压入 E&#x27; T +，栈变为 [$, E&#x27;, T, +]</span><br><span class="line">// 7. 栈顶 +，输入 +：匹配，弹出 +，输入指针移到 id，栈变为 [$, E&#x27;, T]</span><br><span class="line">// 8. 后续同理，最终栈和输入均为 $，接受。</span><br></pre></td></tr></table></figure>
+
+<p>关键注释：预测分析表中每个表项就是‘当非终结符遇到某个终结符时，唯一应采用的产生式’。栈中压入产生式右部逆序是为了让栈顶保持最左待推导符号，符合最左推导顺序。ε 产生式的处理不是‘压入空’，而是‘什么都不压’，这等价于当前非终结符推导为空串，并依赖 FOLLOW 集决定该产生式适用的输入符号。</p>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区：</p>
+<ol>
+<li><p>误以为 FIRST 集和 FOLLOW 集只用于构造 LL(1) 表，而忽略它们是自顶向下分析‘预测信息’的完整抽象。实际工程中，即使不显式建表，递归下降解析器中的每个分支判断都在隐式计算并利用 FIRST&#x2F;FOLLOW 信息；不理解这一点，就无法在手工编写解析器时处理左递归和公共前缀，也无法理解为何 LL(1) 文法不能有左递归。</p>
+</li>
+<li><p>将 FOLLOW 集与‘某个符号之后可能出现的所有符号’混淆。FOLLOW 只针对非终结符，且不包含 ε；而 FIRST 可以针对任意符号串。另一个常见错误是计算 FOLLOW 时忽略‘产生式右部末尾非终结符’的情况：A → α B 时，FOLLOW(B) 必须包含 FOLLOW(A)，这本质是‘B 后面的东西就是 A 后面的东西’，因为 B 可以推导到整个 A 的末尾。</p>
+</li>
+</ol>
+<p>深度思考题：给定文法 S → A a | b，A → c | ε。该文法是 LL(1) 吗？请通过构造 FIRST&#x2F;FOLLOW 集并检查 LL(1) 条件给出判断；如果不满足，请指出具体冲突的表项，并思考能否通过提取公共因子将其改写为等价的 LL(1) 文法（注意提取后仍需验证）。这题的关键在于理解 ε 产生式与 FOLLOW 集如何导致预测表冲突，以及改写后文法的等价性边界。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-ll1-firstfollow/">https://litongjin.github.io/2026/06/28/foundation/2026-06-28-foundation-ll1-firstfollow/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">算法与数据结构</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/28/foundation/2026-06-28-foundation-lr1-slrlalr/" title="每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR/LALR 区别"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-28 · LR(1) 项集族的构造与 SLR/LALR 区别</div></div></a></div><div class="next-post pull-right"><a href="/2026/06/27/foundation/2026-06-27-foundation-http-clte-tete/" title="每日基础技术总结 · 2026-06-27 · HTTP 请求走私：CL.TE 与 TE.TE 语义差异"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-06-27 · HTTP 请求走私：CL.TE 与 TE.TE 语义差异</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/22/foundation/2026-06-22-foundation-bellman-ford/" title="每日基础技术总结 · 2026-06-22 · Bellman-Ford 算法的松弛轮数与负环检测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · Bellman-Ford 算法的松弛轮数与负环检测</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation-dijkstra/" title="每日基础技术总结 · 2026-06-22 · Dijkstra 算法的优先队列优化与负权陷阱"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · Dijkstra 算法的优先队列优化与负权陷阱</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation/" title="每日基础技术总结 · 2026-06-22 · 并查集的按秩合并与路径压缩复杂度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · 并查集的按秩合并与路径压缩复杂度</div></div></a></div><div><a href="/2026/06/24/foundation/2026-06-24-foundation-kmp-next/" title="每日基础技术总结 · 2026-06-24 · KMP 的 next 数组与失配优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-24</div><div class="title">每日基础技术总结 · 2026-06-24 · KMP 的 next 数组与失配优化</div></div></a></div><div><a href="/2026/06/23/foundation/2026-06-23-foundation-kahn-dfs/" title="每日基础技术总结 · 2026-06-23 · 拓扑排序的 Kahn 算法与 DFS 后序逆序"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-23</div><div class="title">每日基础技术总结 · 2026-06-23 · 拓扑排序的 Kahn 算法与 DFS 后序逆序</div></div></a></div><div><a href="/2026/06/23/foundation/2026-06-23-foundation-tarjan-lowlink/" title="每日基础技术总结 · 2026-06-23 · 强连通分量 Tarjan 算法的 lowlink 更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-23</div><div class="title">每日基础技术总结 · 2026-06-23 · 强连通分量 Tarjan 算法的 lowlink 更新</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-06-28-%C2%B7-LL-1-%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90%E8%A1%A8%E4%B8%8E-FIRST-FOLLOW-%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-06-28 · LL(1) 预测分析表与 FIRST&#x2F;FOLLOW 集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

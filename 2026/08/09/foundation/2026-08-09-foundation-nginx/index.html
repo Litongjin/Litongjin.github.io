@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理📚 今日主题 Nginx 平滑加权轮询算法：动态权重调整的数学原理（后端基础）  1. 核心概念速览平滑加权轮询（Smooth Weighted Round-Robin, SWRR）是Nginx upstream模块在多个后端节点间分配请求的核心算法。它解决的是：在节点权重不一致时，既要按权重比例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/09/foundation/2026-08-09-foundation-nginx/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理📚 今日主题 Nginx 平滑加权轮询算法：动态权重调整的数学原理（后端基础）  1. 核心概念速览平滑加权轮询（Smooth Weighted Round-Robin, SWRR）是Nginx upstream模块在多个后端节点间分配请求的核心算法。它解决的是：在节点权重不一致时，既要按权重比例">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-09T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T12:53:14.678Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/09/foundation/2026-08-09-foundation-nginx/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 20:53:14'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-09T00:00:00.000Z" title="发表于 2026-08-09 08:00:00">2026-08-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T12:53:14.678Z" title="更新于 2026-08-20 20:53:14">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-09-·-Nginx-平滑加权轮询算法：动态权重调整的数学原理"><a href="#每日基础技术总结-·-2026-08-09-·-Nginx-平滑加权轮询算法：动态权重调整的数学原理" class="headerlink" title="每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理"></a>每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Nginx 平滑加权轮询算法：动态权重调整的数学原理</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>平滑加权轮询（Smooth Weighted Round-Robin, SWRR）是Nginx upstream模块在多个后端节点间分配请求的核心算法。它解决的是：在节点权重不一致时，既要按权重比例分配请求，又要避免短时间内的请求集中打到同一节点，即保持分配序列的平滑性。其本质是一种基于’当前有效权重（current_weight）’动态调整的数学过程，通过每次选择最大有效权重节点并递减其值，同时对所有节点累加原始权重，使得权重高的节点被选中次数多，但分布上呈现交替、低峰值的特性。该算法属于负载均衡领域的调度策略，是分布式系统流量入口的关键组件。专业工程师必须掌握它，因为理解其数学原理有助于设计自定义调度策略、诊断流量倾斜问题，并在构建高可用后端服务时做出正确权衡。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>SWRR算法的核心状态为每个节点维护两个权重：weight（固定权重，配置值）和 current_weight（动态变化值）。算法按请求逐个迭代，每一步执行：1. 对每个节点执行 current_weight +&#x3D; weight；2. 选择 current_weight 最大的节点作为本次选中节点；3. 将该节点的 current_weight 减去所有节点的 weight 之和（即总权重）。重复此过程。数学上，该算法保证了在任意长度为总权重（所有weight之和）的连续轮询序列中，每个节点被选中的次数恰好等于其权重，且最大连续选中次数被最小化。伪代码：</p>
+<p>for each request:<br>  total &#x3D; 0<br>  best &#x3D; null<br>  for node in nodes:<br>    node.current_weight +&#x3D; node.weight<br>    total +&#x3D; node.weight<br>    if best &#x3D;&#x3D; null || node.current_weight &gt; best.current_weight:<br>      best &#x3D; node<br>  best.current_weight -&#x3D; total<br>  return best</p>
+<p>关键性质：current_weight 的变化轨迹类似多个累加器的竞争，权重大的节点累加速度快，但被选中后扣减的总权重也大，从而将其’势能’拉低，给其他节点让出机会。这与前端工程中’Java接口与TypeScript接口的区别’形成类比：Java接口是编译期类型契约，强调实现强制性与运行时多态；TS接口只是结构化的类型约束，在编译后消失。二者都在’定义规则’上有相似性，但机制本质不同。SWRR与朴素加权轮询（如按权重比例生成序列，或使用随机权重）的区别，正如Java接口与TS接口的区别：前者是运行时持续演化的动态状态机，后者是静态的、一次性的分配比例。SWRR的动态性来自current_weight的持续累积与扣减，而非简单按比例打散。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下为极简C语言风格伪代码，演示SWRR核心逻辑，不依赖任何框架：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> weight;          <span class="comment">// 配置的固定权重，不变</span></span><br><span class="line">    <span class="type">int</span> current_weight;  <span class="comment">// 当前有效权重，动态变化</span></span><br><span class="line">&#125; Node;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 选择下一个节点，返回其索引</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">swrr_next</span><span class="params">(Node *nodes, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="type">int</span> total = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> best_index = <span class="number">-1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        nodes[i].current_weight += nodes[i].weight;  <span class="comment">// 累加固定权重到当前权重</span></span><br><span class="line">        total += nodes[i].weight;                    <span class="comment">// 计算总权重，用于后续扣减</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (best_index == <span class="number">-1</span> || </span><br><span class="line">            nodes[i].current_weight &gt; nodes[best_index].current_weight) &#123;</span><br><span class="line">            best_index = i;                          <span class="comment">// 选取当前权重最大的节点</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    nodes[best_index].current_weight -= total;       <span class="comment">// 被选中节点扣减总权重，降低其优先级</span></span><br><span class="line">    <span class="keyword">return</span> best_index;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 示例：三个节点A/B/C权重分别为3/1/2，连续调用10次，选择序列为 A,B,C,A,A,C,A,B,C,A 等（按实际计算）</span></span><br><span class="line"><span class="comment">// 核心验证点：任意连续5次内不会出现4次A；整体比例符合3:1:2。</span></span><br></pre></td></tr></table></figure>
+
+<p>若使用Python验证，代码更直观：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">smooth_wrr</span>(<span class="params">weights, requests</span>):</span><br><span class="line">    nodes = [&#123;<span class="string">&#x27;weight&#x27;</span>: w, <span class="string">&#x27;current&#x27;</span>: <span class="number">0</span>&#125; <span class="keyword">for</span> w <span class="keyword">in</span> weights]</span><br><span class="line">    result = []</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(requests):</span><br><span class="line">        total = <span class="number">0</span></span><br><span class="line">        best = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">for</span> node <span class="keyword">in</span> nodes:</span><br><span class="line">            node[<span class="string">&#x27;current&#x27;</span>] += node[<span class="string">&#x27;weight&#x27;</span>]</span><br><span class="line">            total += node[<span class="string">&#x27;weight&#x27;</span>]</span><br><span class="line">            <span class="keyword">if</span> best <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> node[<span class="string">&#x27;current&#x27;</span>] &gt; best[<span class="string">&#x27;current&#x27;</span>]:</span><br><span class="line">                best = node</span><br><span class="line">        best[<span class="string">&#x27;current&#x27;</span>] -= total</span><br><span class="line">        result.append(nodes.index(best))</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(smooth_wrr([<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>], <span class="number">12</span>))</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为SWRR只是简单地把请求按权重比例均匀分布。实际上，SWRR在保证长期比例的同时，还刻意控制短期集中度。例如权重为3:1时，朴素轮询可能产生A,A,A,B，而SWRR产生的序列是A,B,A,A，将B的请求插入到A的连续段之间，降低了突发。若只关注最终比例而忽略平滑性，会导致后端节点瞬时压力不均。</p>
+<p>误区2：认为current_weight每次选中后重置为0或减weight即可。正确操作是减去总权重，而非该节点的weight。如果只减weight，权重大的节点会频繁连续被选，失去平滑性。这个细节是算法正确性的关键。</p>
+<p>思考题：若三个节点权重分别为4,2,2，写出前8次选择的节点序列，并解释为何第4次不会选中权重为4的节点？请从current_weight的数学变化轨迹推导，验证你是否真正理解了’扣减总权重’的机制。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/09/foundation/2026-08-09-foundation-nginx/">https://litongjin.github.io/2026/08/09/foundation/2026-08-09-foundation-nginx/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/10/foundation/2026-08-10-foundation-tcp-nagle/" title="每日基础技术总结 · 2026-08-10 · TCP 的 Nagle 算法与延迟确认：交互规则与禁用场景"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-10 · TCP 的 Nagle 算法与延迟确认：交互规则与禁用场景</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/09/foundation/2026-08-09-foundation-hikaricp/" title="每日基础技术总结 · 2026-08-09 · HikariCP 连接池：连接创建/归还/泄漏检测与池大小设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-09 · HikariCP 连接池：连接创建/归还/泄漏检测与池大小设置</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/28/foundation/2026-05-28-foundation-redis-rdb-aof/" title="每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-tcp-time-wait/" title="每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用</div></div></a></div><div><a href="/2026/05/29/foundation/2026-05-29-foundation-etcd-raft/" title="每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="title">每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-mysql-innodb-mvcc-undo-log/" title="每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-grpc-keepalive/" title="每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-http2/" title="每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-09-%C2%B7-Nginx-%E5%B9%B3%E6%BB%91%E5%8A%A0%E6%9D%83%E8%BD%AE%E8%AF%A2%E7%AE%97%E6%B3%95%EF%BC%9A%E5%8A%A8%E6%80%81%E6%9D%83%E9%87%8D%E8%B0%83%E6%95%B4%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-09 · Nginx 平滑加权轮询算法：动态权重调整的数学原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

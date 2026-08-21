@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升📚 今日主题 V8 垃圾回收：新生代 Scavenge 与对象晋升（前端底层与计算机基础）  1. 核心概念速览V8 的堆内存按代际划分为新生代（New Space）与老生代（Old Space）。新生代采用半空间（Semi-space）复制算法，即 Scavenge：两块等大的空间，From 空">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升">
+<meta property="og:url" content="https://litongjin.github.io/2026/07/30/foundation/2026-07-30-foundation-v8-scavenge/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升📚 今日主题 V8 垃圾回收：新生代 Scavenge 与对象晋升（前端底层与计算机基础）  1. 核心概念速览V8 的堆内存按代际划分为新生代（New Space）与老生代（Old Space）。新生代采用半空间（Semi-space）复制算法，即 Scavenge：两块等大的空间，From 空">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-07-30T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T12:06:05.560Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/07/30/foundation/2026-07-30-foundation-v8-scavenge/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 20:06:05'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-30T00:00:00.000Z" title="发表于 2026-07-30 08:00:00">2026-07-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T12:06:05.560Z" title="更新于 2026-08-20 20:06:05">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-07-30-·-V8-垃圾回收：新生代-Scavenge-与对象晋升"><a href="#每日基础技术总结-·-2026-07-30-·-V8-垃圾回收：新生代-Scavenge-与对象晋升" class="headerlink" title="每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升"></a>每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>V8 垃圾回收：新生代 Scavenge 与对象晋升</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>V8 的堆内存按代际划分为新生代（New Space）与老生代（Old Space）。新生代采用半空间（Semi-space）复制算法，即 Scavenge：两块等大的空间，From 空间负责分配对象，To 空间作为回收目标。当 From 空间耗尽时，标记存活对象并复制到 To 空间，随后 From&#x2F;To 角色互换，原 From 被整体清空。对象晋升（Promotion）指经过多次 Scavenge 后仍存活的对象，或大小超过指定阈值的对象，被移入老生代。该机制解决的核心问题是：大多数对象生命周期极短，复制存活对象比标记-清除整个新生代更高效，且无内存碎片。它在 V8 整体 GC 体系中承担高频的、面向短命对象的回收任务，与老生代的 Mark-Compact 形成层次化配合。专业工程师必须掌握它，因为前端性能瓶颈往往来自 GC 停顿与内存膨胀，理解代际划分和晋升条件才能解释为何某些代码模式（如长期持有临时变量、闭包误用）会导致老生代堆积，从而从底层优化内存与帧率。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>Scavenge 的本质是空间换时间：将新生代均分为两个半区，任何时刻仅一个半区处于激活态（From）。分配指针（bump pointer）在 From 中线性移动，分配成本仅为指针递增。GC 触发时，从根集（栈、寄存器、老生代中的跨代引用）出发标记 From 中的存活对象，按序复制到 To 空间，同时更新对象内部引用及老生代对新生代对象的引用（写屏障记录了这些跨代指针）。复制完成后，From 整体变为废弃空间，To 成为新的 From。晋升机制：对象经历一次 Scavenge 后年龄（age）加 1，若年龄达到阈值（通常 2 次，受动态启发式调整），或对象大小超过 To 空间的一定比例（如 25%，防止复制开销过大），则直接放入老生代。晋升时需保证老生代空间足够，否则触发老生代 GC。伪代码：</p>
+<p>function scavenge() {<br>  fromSpace.foreach(obj &#x3D;&gt; {<br>    if (isLive(obj)) {<br>      if (obj.age &gt;&#x3D; THRESHOLD || obj.size &gt; TO_SPACE_PERCENT * toSpace.size) {<br>        promote(obj); &#x2F;&#x2F; 拷贝到老生代，更新老生代中指向它的引用<br>      } else {<br>        obj.age++;<br>        copyTo(toSpace, obj);<br>      }<br>    }<br>  });<br>  swap(fromSpace, toSpace);<br>  toSpace.wipe(); &#x2F;&#x2F; 逻辑清空<br>}</p>
+<p>与前端已有概念的对比：它类似 Java 的接口与 TypeScript 的接口——名称相似但层次不同。Java 接口是运行时类型系统的契约，参与编译期检查与动态分派；TS 接口仅是编译期结构约束，编译后消失。同样，V8 的 Scavenge 和传统标记-清除都叫 GC 算法，但 Scavenge 依赖代际假设（弱分代假说），只处理新生代；而标记-清除处理整个堆，且不移动对象（产生碎片）。更本质的对比：Scavenge 是复制收集器，牺牲一半空间换取分配效率与无碎片；老生代 Mark-Compact 是标记-整理收集器，牺牲暂停时间换取空间利用率。这与 JS 中 const 与 Object.freeze 的关系类似：const 是编译期不可赋值，Object.freeze 是运行时不可变，不同层面解决不同问题。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">// 以下为可运行的 Node.js 实验，观察对象晋升对内存分布的影响。</span><br><span class="line">// 使用 --max-old-space-size 限制老生代，配合 --trace-gc 观察 GC 日志。</span><br><span class="line"></span><br><span class="line">// 步骤 1：验证新生代对象快速死亡，不进入老生代</span><br><span class="line">function shortLived() &#123;</span><br><span class="line">  for (let i = 0; i &lt; 1e6; i++) &#123;</span><br><span class="line">    const temp = &#123; id: i &#125;; // 每次循环创建新对象，循环结束即失去引用</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">// 运行：node --trace-gc --max-old-space-size=16 experiment.js</span><br><span class="line">// 观察：大量 Scavenge，但老生代增长极少。</span><br><span class="line"></span><br><span class="line">// 步骤 2：验证长期存活对象晋升</span><br><span class="line">let longLived = [];</span><br><span class="line">function promoteDemo() &#123;</span><br><span class="line">  for (let i = 0; i &lt; 10000; i++) &#123;</span><br><span class="line">    longLived.push(&#123; id: i, payload: new Array(1000).fill(i) &#125;); // 大对象，首次晋升</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">// 运行后观察日志中 “Promotion” 相关记录，对象从 new_space 移入 old_space。</span><br><span class="line"></span><br><span class="line">// 步骤 3：使用 WeakRef 观察 GC 后对象是否被回收（需要 --expose-gc）</span><br><span class="line">global.gc(); // 强制 GC</span><br><span class="line">const ref = new WeakRef(&#123; data: 1 &#125;);</span><br><span class="line">console.log(ref.deref()); // &#123; data: 1 &#125;</span><br><span class="line">global.gc();</span><br><span class="line">console.log(ref.deref()); // undefined，说明无强引用时对象被回收</span><br><span class="line"></span><br><span class="line">// 底层解释：</span><br><span class="line">// - 新生代分配是 bump pointer，创建 1e6 个临时对象只会推进分配指针，不会触发老生代 GC。</span><br><span class="line">// - 大对象（超过 To 空间 25%）直接晋升，因为复制大对象成本高，且其寿命往往长。</span><br><span class="line">// - WeakRef 不阻止 GC，但 deref() 在对象被回收后返回 undefined，验证了 GC 确实释放了内存。</span><br><span class="line">// 生产环境中应避免长期持有大对象，防止晋升后触发频繁 Mark-Compact 导致停顿。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区 1：认为对象一旦不再被引用就会立即被 GC 回收。实际上 V8 的 GC 是延迟的、分代的，一个失去引用的新生代对象要等到下一次 Scavenge 才会被回收；若它已经晋升到老生代，则要等老生代 GC。因此内存峰值可能高于预期，尤其在高频创建临时对象的场景（如 React 渲染中的内联对象）。误区 2：认为闭包必然导致内存泄漏。闭包只延长其捕获变量的生命周期，如果闭包本身存活，捕获对象无法被回收，这是语言语义，并非 GC 缺陷；但若闭包被全局引用且捕获了大型对象，则对象会晋升到老生代且长期驻留，造成内存膨胀。</p>
+<p>思考题：V8 在 Scavenge 时需要更新老生代中指向新生代对象的引用。如果不使用写屏障（write barrier）记录这些跨代引用，而是每次 GC 时全量扫描老生代，会对性能产生什么影响？请从分配延迟、GC 暂停时间、缓存局部性三个维度分析，并说明为什么 V8 选择在写入时记录（记忆集）而非扫描时发现。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/07/30/foundation/2026-07-30-foundation-v8-scavenge/">https://litongjin.github.io/2026/07/30/foundation/2026-07-30-foundation-v8-scavenge/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/07/30/foundation/2026-07-30-foundation-v8/" title="每日基础技术总结 · 2026-07-30 · V8 垃圾回收：增量标记与写屏障"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-07-30 · V8 垃圾回收：增量标记与写屏障</div></div></a></div><div class="next-post pull-right"><a href="/2026/07/29/foundation/2026-07-29-foundation-v8-consstring/" title="每日基础技术总结 · 2026-07-29 · V8 字符串：ConsString 的拼接与扁平化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-07-29 · V8 字符串：ConsString 的拼接与扁平化</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-scavenger-mark-compact/" title="每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8/" title="每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-v8-jit-ignition-turbofan/" title="每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-context/" title="每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-07-30-%C2%B7-V8-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%EF%BC%9A%E6%96%B0%E7%94%9F%E4%BB%A3-Scavenge-%E4%B8%8E%E5%AF%B9%E8%B1%A1%E6%99%8B%E5%8D%87"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-07-30 · V8 垃圾回收：新生代 Scavenge 与对象晋升</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

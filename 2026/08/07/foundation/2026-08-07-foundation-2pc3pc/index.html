@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-07 · 分布式事务 2PC/3PC：协调者故障与阻塞问题 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-07 · 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题📚 今日主题 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题（后端基础）  1. 核心概念速览2PC（两阶段提交）与3PC（三阶段提交）是分布式系统中实现跨节点原子提交的同步协议，解决的是『多参与者事务的原子性』问题：要么所有参与者提交，要么全部中止，且系统需满足一致性（所有节点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-07 · 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/07/foundation/2026-08-07-foundation-2pc3pc/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-07 · 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题📚 今日主题 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题（后端基础）  1. 核心概念速览2PC（两阶段提交）与3PC（三阶段提交）是分布式系统中实现跨节点原子提交的同步协议，解决的是『多参与者事务的原子性』问题：要么所有参与者提交，要么全部中止，且系统需满足一致性（所有节点">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-07T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T12:53:14.674Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/07/foundation/2026-08-07-foundation-2pc3pc/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-07 · 分布式事务 2PC/3PC：协调者故障与阻塞问题',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 20:53:14'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-07 · 分布式事务 2PC/3PC：协调者故障与阻塞问题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-07T00:00:00.000Z" title="发表于 2026-08-07 08:00:00">2026-08-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T12:53:14.674Z" title="更新于 2026-08-20 20:53:14">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-07 · 分布式事务 2PC/3PC：协调者故障与阻塞问题"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-07-·-分布式事务-2PC-3PC：协调者故障与阻塞问题"><a href="#每日基础技术总结-·-2026-08-07-·-分布式事务-2PC-3PC：协调者故障与阻塞问题" class="headerlink" title="每日基础技术总结 · 2026-08-07 · 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题"></a>每日基础技术总结 · 2026-08-07 · 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>2PC（两阶段提交）与3PC（三阶段提交）是分布式系统中实现跨节点原子提交的同步协议，解决的是『多参与者事务的原子性』问题：要么所有参与者提交，要么全部中止，且系统需满足一致性（所有节点最终同一状态）与一定程度的安全性。2PC本质是一个中心化协调者驱动的状态机：协调者先向所有参与者发送prepare请求并等待应答，若全体就绪则广播commit，否则广播abort。3PC则在2PC基础上引入pre-commit阶段与超时机制，将协调者故障时的阻塞窗口缩短，但二者均不能完全规避网络分区下的活锁问题。该知识点处于分布式系统理论（FLP不可能性、CAP定理）与工程实践（数据库XA、消息事务、微服务最终一致性）的交界处，是后端工程师理解数据一致性、故障恢复、分布式共识演进的基石。专业工程师必须掌握，因为它是设计高可用数据系统的第一性约束：任何基于状态复制的应用（包括AI训练中的参数服务器、特征存储）都隐式依赖这类原子性语义。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>2PC的运行机制：</p>
+<ol>
+<li>阶段一（canCommit&#x2F;vote）：协调者向所有参与者发送prepare（事务内容），参与者执行事务但未提交，写入undo&#x2F;redo日志，返回ready或abort。若任一参与者返回abort，协调者记决策为abort。</li>
+<li>阶段二（doCommit）：协调者根据所有响应广播commit或abort。参与者收到commit后正式提交并释放锁，收到abort则回滚。<br>核心缺陷：协调者单点阻塞。若协调者在阶段一后、发出最终决策前崩溃，参与者既未收到commit也未收到abort，只能持续持有锁、等待恢复，形成阻塞（blocking）。即使协调者恢复，若其日志丢失，参与者无法得知全局决策，只能无限等待或超时中止（破坏原子性）。</li>
+</ol>
+<p>3PC的改进：</p>
+<ul>
+<li>引入preCommit阶段：协调者收到所有ready后，先广播preCommit；参与者收到preCommit后即知提交意向，并进入待提交状态（可回滚）。随后协调者广播doCommit。</li>
+<li>参与者增加超时自动提交机制：若参与者在等待doCommit时超时，且已收到preCommit，则可自行提交；若未收到preCommit，则中止。</li>
+<li>但3PC的自动提交在『协调者与部分参与者分区』时仍可能违反原子性：部分参与者已执行preCommit后超时提交，而另一部分参与者因未收到preCommit而中止，导致不一致。因此3PC假设网络分区不会同时切断所有节点，且要求参与者必须能区分『协调者崩溃』与『网络故障』，实际中依赖故障检测器。</li>
+</ul>
+<p>与前端知识的类比：前端中『接口』概念（TS的interface）是编译期结构约束，不涉及运行时协议；而分布式事务中的『协议』是运行时的消息交换与状态变迁规则。更像React的协调（Reconciliation）：React协调者（Fiber reconciler）对比新旧状态并调度更新，若中断则可能产生不一致，但React采用可恢复的work loop，而非同步阻塞。前端中『事件循环』是单线程内的时间分片，不会出现跨进程的阻塞；而2PC的阻塞是跨节点的全局资源锁定，本质是分布式系统中『无全局时钟』和『消息延迟上界未知』导致的。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">以下为2PC协调者核心逻辑的极简伪代码（不依赖框架，展示状态机本质）：</span><br><span class="line"></span><br><span class="line">class Coordinator &#123;</span><br><span class="line">  participants: Participant[]</span><br><span class="line">  state: &#x27;IDLE&#x27; | &#x27;WAITING_VOTE&#x27; | &#x27;COMMITTED&#x27; | &#x27;ABORTED&#x27;</span><br><span class="line">  log: DecisionLog  // 持久化日志，用于崩溃恢复</span><br><span class="line"></span><br><span class="line">  void runTransaction(transaction t) &#123;</span><br><span class="line">    this.state = &#x27;WAITING_VOTE&#x27;</span><br><span class="line">    // 阶段一：向所有参与者发送prepare，并等待响应</span><br><span class="line">    for p in participants:</span><br><span class="line">      p.prepare(t)  // 参与者执行事务，记录undo日志，但不提交</span><br><span class="line"></span><br><span class="line">    // 等待所有响应（阻塞直至全部返回或超时）</span><br><span class="line">    boolean allReady = true</span><br><span class="line">    for p in participants:</span><br><span class="line">      if !p.voteResult():</span><br><span class="line">        allReady = false</span><br><span class="line">        break</span><br><span class="line"></span><br><span class="line">    // 决策前先持久化决策，防止协调者崩溃后丢失</span><br><span class="line">    this.log.write(allReady ? &#x27;COMMIT&#x27; : &#x27;ABORT&#x27;)</span><br><span class="line">    </span><br><span class="line">    // 阶段二：广播最终决策</span><br><span class="line">    for p in participants:</span><br><span class="line">      if allReady:</span><br><span class="line">        p.doCommit(t)  // 参与者正式提交，释放锁</span><br><span class="line">      else:</span><br><span class="line">        p.doAbort(t)   // 参与者回滚，释放锁</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">关键点：</span><br><span class="line">- prepare操作必须已写入持久化日志（redo/undo），否则参与者崩溃后无法恢复事务上下文。</span><br><span class="line">- 协调者在阶段一后、阶段二前崩溃，参与者因无决策而阻塞——这正是2PC的致命缺陷。</span><br><span class="line">- 3PC的差别仅在阶段一与二之间插入preCommit，且参与者增加超时自动提交/中止逻辑。</span><br><span class="line"></span><br><span class="line">验证方式：可模拟协调者崩溃（kill -9）后观察参与者锁释放情况，验证阻塞现象。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为3PC完全解决了阻塞问题。实际上3PC只减少了阻塞窗口（从阶段一后到preCommit前），但网络分区时仍可能因参与者超时提交导致原子性破坏，且3PC要求网络故障检测器满足强准确性，这在现实异步网络中不可实现。本质上，3PC是『安全性与可用性』的折中，并未触及分布式共识的根本下限。<br>误区2：混淆『最终一致性』与『分布式事务』。2PC&#x2F;3PC追求的是ACID原子性，是同步强一致；而基于消息队列或补偿事务（Saga）是最终一致性，二者是不同抽象层。前端工程师常将『乐观锁』或『React状态同步』类比为分布式事务，但前端状态更新是单机内存操作，不存在跨进程原子提交问题。</p>
+<p>思考题：在2PC中，如果协调者持久化决策日志后、广播commit之前崩溃，且所有参与者都没有收到任何消息，那么参与者能否安全地自行提交？若不能，为什么？若可以，需要什么条件？请从崩溃恢复协议和原子性角度分析，并指出与3PC超时自动提交的本质差异。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/07/foundation/2026-08-07-foundation-2pc3pc/">https://litongjin.github.io/2026/08/07/foundation/2026-08-07-foundation-2pc3pc/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/08/foundation/2026-08-08-foundation-eureka-ap-cp/" title="每日基础技术总结 · 2026-08-08 · Eureka 的服务发现与自保护模式：AP 与 CP 的取舍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-08 · Eureka 的服务发现与自保护模式：AP 与 CP 的取舍</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/07/foundation/2026-08-07-foundation-raft-term-log/" title="每日基础技术总结 · 2026-08-07 · Raft 协议：选举限制（Term 与 Log 匹配）与日志复制安全性"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-07 · Raft 协议：选举限制（Term 与 Log 匹配）与日志复制安全性</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/28/foundation/2026-05-28-foundation-redis-rdb-aof/" title="每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-tcp-time-wait/" title="每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用</div></div></a></div><div><a href="/2026/05/29/foundation/2026-05-29-foundation-etcd-raft/" title="每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="title">每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-mysql-innodb-mvcc-undo-log/" title="每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-grpc-keepalive/" title="每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-http2/" title="每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-07-%C2%B7-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-2PC-3PC%EF%BC%9A%E5%8D%8F%E8%B0%83%E8%80%85%E6%95%85%E9%9A%9C%E4%B8%8E%E9%98%BB%E5%A1%9E%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-07 · 分布式事务 2PC&#x2F;3PC：协调者故障与阻塞问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

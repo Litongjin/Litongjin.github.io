@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性📚 今日主题 DNS 的 TTL 与缓存一致性（网络基础）  1. 核心概念速览DNS TTL（Time To Live）是资源记录（RR）中携带的生存时间，单位为秒，它定义了一条 DNS 应答可以被解析器（Resolver）或操作系统缓存的最长时长。其本质是分布式缓存系统的一致性时间窗口：TTL 不是绝对失效时间，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/17/foundation/2026-08-17-foundation-dns-ttl/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性📚 今日主题 DNS 的 TTL 与缓存一致性（网络基础）  1. 核心概念速览DNS TTL（Time To Live）是资源记录（RR）中携带的生存时间，单位为秒，它定义了一条 DNS 应答可以被解析器（Resolver）或操作系统缓存的最长时长。其本质是分布式缓存系统的一致性时间窗口：TTL 不是绝对失效时间，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-17T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T12:53:14.697Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="网络基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/17/foundation/2026-08-17-foundation-dns-ttl/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 20:53:14'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-17T00:00:00.000Z" title="发表于 2026-08-17 08:00:00">2026-08-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T12:53:14.697Z" title="更新于 2026-08-20 20:53:14">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-17-·-DNS-的-TTL-与缓存一致性"><a href="#每日基础技术总结-·-2026-08-17-·-DNS-的-TTL-与缓存一致性" class="headerlink" title="每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性"></a>每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>DNS 的 TTL 与缓存一致性</strong>（网络基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>DNS TTL（Time To Live）是资源记录（RR）中携带的生存时间，单位为秒，它定义了一条 DNS 应答可以被解析器（Resolver）或操作系统缓存的最长时长。其本质是分布式缓存系统的一致性时间窗口：TTL 不是绝对失效时间，而是服务端允许客户端对旧数据持续信任的上限。它解决的核心问题是：在无需让每个客户端每次查询都穿透到权威服务器的情况下，通过可控的过期策略平衡查询延迟、权威服务器负载与数据变更传播速度。DNS 的 TTL 位于整个互联网域名解析链路中的缓存层级之间，包括浏览器缓存、OS 缓存、递归解析器缓存、权威服务器自身。专业工程师必须掌握它，因为它是构建高可用服务（如切流、故障转移、CDN 调度、灰度发布）时，变更生效延迟的最底层决定因素；同时它也是理解 HTTP 缓存（Cache-Control max-age）思想在更底层协议中的对应物，但机制与粒度截然不同。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>DNS 解析是一个多级缓存协作的读取模型。客户端发起解析请求时，先查浏览器缓存和 OS 缓存，未命中则发送到递归解析器（如 8.8.8.8），递归解析器沿着根、顶级域、权威服务器的链逐级查询，最终获得权威应答。权威应答中每条记录附带 TTL，递归解析器缓存该记录，并在 TTL 内对后续查询直接返回缓存结果。TTL 的递减机制：递归解析器在缓存期间，如果收到一个 TTL 为 3600 的记录，它会在自己的缓存中保留该记录，并在这 3600 秒内对客户端响应时返回一个递减后的 TTL（即剩余时间）。这导致一个关键性质：TTL 在每级缓存中不是简单的重复缓存，而是不断被削減，因此离客户端越近的缓存，其 TTL 值越小。但客户端（浏览器&#x2F;OS）通常只看第一次拿到时的 TTL，然后在本地倒计时，所以整体一致性的上限取决于初始 TTL。</p>
+<p>底层逻辑可以用以下伪代码精确描述：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 递归解析器查询逻辑</span><br><span class="line">function resolve(name) &#123;</span><br><span class="line">  entry = cache.lookup(name);</span><br><span class="line">  if (entry &amp;&amp; entry.expireAt &gt; now()) &#123;</span><br><span class="line">    entry.ttl_remaining = entry.expireAt - now();</span><br><span class="line">    return &#123; ip: entry.ip, ttl: entry.ttl_remaining &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  // 未命中或过期，向权威服务器发起迭代查询</span><br><span class="line">  response = queryAuthoritative(name);</span><br><span class="line">  record = response.answer[0];</span><br><span class="line">  cache.store(name, record.ip, now() + record.ttl);</span><br><span class="line">  return &#123; ip: record.ip, ttl: record.ttl &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意这里 TTL 是一个“倒计时剩余时间”，而不是绝对时间戳。每个缓存节点各自计算自己的过期时刻，因此整个链路的实际生效时间是初始 TTL 与各级缓存延迟之和。如果权威记录 TTL&#x3D;300，但某级递归缓存已缓存 299 秒，那么客户端拿到后仍可能再缓存 300 秒，导致最长可达初始 TTL + 各级剩余时间。</p>
+<p>与前端已有概念对比：DNS TTL 类似于 HTTP 的 <code>Cache-Control: max-age</code>，但有几个关键区别：</p>
+<ol>
+<li>粒度：DNS 缓存对象是资源记录（A&#x2F;AAAA&#x2F;CNAME 等），HTTP 缓存对象是响应体。</li>
+<li>验证机制：HTTP 有 <code>ETag/Last-Modified</code> 进行条件请求（revalidation），DNS 没有标准的基于值的验证，只能等 TTL 过期后重新查询。</li>
+<li>层级：DNS 的每级缓存（浏览器→OS→递归器→权威）都会独立应用 TTL，而 HTTP 的代理缓存与浏览器缓存层级类似但控制头可以覆盖（如 <code>no-cache</code>、<code>s-maxage</code>）。</li>
+<li>时间粒度：DNS TTL 通常为 30~86400 秒，HTTP max-age 可以到秒以下甚至 0。</li>
+<li>一致性模型：DNS 是最终一致性，且没有原子切换；HTTP 缓存则通过请求头字段（如 <code>Cache-Control: no-cache</code>）让客户端强制每次校验。</li>
+</ol>
+<p>本质上来讲，TTL 是缓存一致性中的“租约”机制：权威服务器将“我可以信任这个数据一段时间”的权利租给客户端，过期后必须重新续租。没有 TTL，DNS 要么每次全量穿透（性能灾难），要么永久缓存（变更永远不生效）。TTL 就是性能与一致性之间的旋钮。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>由于 DNS TTL 的行为本质上发生在系统库和网络协议栈中，这里给出两段纯基础代码来验证缓存效果和 TTL 递减。</p>
+<ol>
+<li>用 Python 标准库验证 DNS 缓存的 TTL 递减：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> dns.resolver  <span class="comment"># 需要 dnspython，但核心逻辑不依赖框架</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第一次查询，拿到权威返回的 TTL（通常为 300/3600 等）</span></span><br><span class="line">answer = dns.resolver.resolve(<span class="string">&#x27;example.com&#x27;</span>, <span class="string">&#x27;A&#x27;</span>)</span><br><span class="line">first_ttl = answer.rrset.ttl</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&#x27;第一次拿到 TTL: <span class="subst">&#123;first_ttl&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">time.sleep(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二次查询，如果使用同一个 resolver 对象，dnspython 默认不缓存，所以会再次走网络，</span></span><br><span class="line"><span class="comment"># 但这里演示的是：我们自己手动模拟一个缓存层</span></span><br><span class="line">cached_until = time.time() + first_ttl</span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    remaining = cached_until - time.time()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&#x27;当前剩余 TTL: <span class="subst">&#123;remaining:<span class="number">.1</span>f&#125;</span>s&#x27;</span>)</span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line"><span class="comment"># 实际运行中，第二次查询如果从系统缓存获得，则 TTL 会变小；</span></span><br><span class="line"><span class="comment"># 如果系统不支持查看 TTL，可用 `dig` 命令观察：dig @8.8.8.8 example.com +noall +answer 两次查询的 TTL 差异。</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>用 <code>dig</code> 命令验证递归解析器返回的 TTL 递减（伪代码&#x2F;步骤）：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">步骤1：清空本地缓存（Linux: sudo systemd-resolve --flush-caches; macOS: sudo killall -HUP mDNSResponder）</span><br><span class="line">步骤2：dig @1.1.1.1 example.com A +noall +answer</span><br><span class="line">步骤3：等待 10 秒，再次执行相同命令</span><br><span class="line">步骤4：对比两次输出的 TTL 数值，第二次的 TTL 通常比第一次小（或相同，取决于服务器返回策略），但不会大于第一次。</span><br><span class="line"></span><br><span class="line">说明：</span><br><span class="line">- 第一次返回的 TTL 是权威记录的真实 TTL。</span><br><span class="line">- 第二次返回的 TTL 是递归服务器中该记录剩余的生存时间，证明 TTL 在缓存层被递减。</span><br><span class="line">- 如果递归服务器配置了“缓存未过期时返回原 TTL”的选项（如 BIND 的 max-cache-ttl 与 min-cache-ttl），则可能不递减，但标准实现会递减。</span><br></pre></td></tr></table></figure>
+
+<p>对于前端工程师，可以类比 HTTP 缓存验证：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 前端模拟 DNS TTL 的缓存逻辑</span></span><br><span class="line"><span class="keyword">const</span> dnsCache = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">resolveWithTTL</span>(<span class="params">name, getAnswer</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> now = <span class="title class_">Date</span>.<span class="title function_">now</span>();</span><br><span class="line">  <span class="keyword">const</span> entry = dnsCache.<span class="title function_">get</span>(name);</span><br><span class="line">  <span class="keyword">if</span> (entry &amp;&amp; entry.<span class="property">expireAt</span> &gt; now) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="attr">ip</span>: entry.<span class="property">ip</span>,</span><br><span class="line">      <span class="attr">ttl</span>: <span class="title class_">Math</span>.<span class="title function_">floor</span>((entry.<span class="property">expireAt</span> - now) / <span class="number">1000</span>)</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> answer = <span class="title function_">getAnswer</span>(name); <span class="comment">// 假设返回 &#123;ip, ttl&#125;</span></span><br><span class="line">  dnsCache.<span class="title function_">set</span>(name, &#123; <span class="attr">ip</span>: answer.<span class="property">ip</span>, <span class="attr">expireAt</span>: now + answer.<span class="property">ttl</span> * <span class="number">1000</span> &#125;);</span><br><span class="line">  <span class="keyword">return</span> answer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这行代码 <code>expireAt: now + answer.ttl * 1000</code> 体现了 TTL 的本质：将服务端给定的秒数转换为本地绝对过期时间，后续所有查询只判断过期时间，不重新询问服务端。这就是缓存一致性的全部秘密。</p>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为 TTL 是绝对时间戳，过了 TTL 后所有缓存同时失效。实际上每个缓存节点独立计算自己的过期时刻，一个记录在不同层级可能已经存在不同的时间，所以实际生效时间会大于初始 TTL。例如：权威设置 TTL&#x3D;60，但某个递归缓存已经缓存了 30 秒，客户端再缓存 60 秒，最坏情况下 90 秒后才看到变更。因此做 DNS 变更（如切 IP）时，必须等待“所有递归服务器剩余 TTL + 客户端本地 TTL”的全局最大时间，而不是简单的 TTL 时间。</p>
+<p>误区2：以为 TTL 越小越好，就能立即生效。实际上 TTL 过小会导致权威服务器负载急剧上升，因为递归服务器在 TTL 到期后会重新查询。同时，客户端（浏览器&#x2F;OS）可能存在最小 TTL 限制（如 Windows 默认将 TTL 低于 5 秒的视为 5 秒），导致你设置的 1 秒 TTL 不会按预期生效。此外，某些递归服务器（如运营商）会忽略权威返回的较小 TTL 而强制使用自己的最小值。</p>
+<p>进阶思考题：假设你的域名记录在权威服务器上从 IP A 变更为 IP B，且权威 TTL 设置为 300 秒。同时你有一个递归解析器集群，其中 30% 的服务器在变更前 120 秒已缓存了该记录，另外 70% 在变更前 10 秒才缓存。请问：在权威变更后的什么时间点，可以保证所有客户端（包括浏览器和 OS 缓存）一定解析到新 IP？请给出最坏情况的时间计算，并说明为什么不能仅仅依赖权威 TTL。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/17/foundation/2026-08-17-foundation-dns-ttl/">https://litongjin.github.io/2026/08/17/foundation/2026-08-17-foundation-dns-ttl/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">网络基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/18/foundation/2026-08-18-foundation-v8-sparkplug-turbofan/" title="每日基础技术总结 · 2026-08-18 · V8 的 Sparkplug 与 TurboFan：基线编译器与优化编译器的协作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-18 · V8 的 Sparkplug 与 TurboFan：基线编译器与优化编译器的协作</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/17/foundation/2026-08-17-foundation-http3-quic/" title="每日基础技术总结 · 2026-08-17 · HTTP/3 与 QUIC 协议"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-17 · HTTP/3 与 QUIC 协议</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/07/foundation/2026-06-07-foundation-ip-mtu/" title="每日基础技术总结 · 2026-06-07 · IP 分片与路径 MTU 发现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="title">每日基础技术总结 · 2026-06-07 · IP 分片与路径 MTU 发现</div></div></a></div><div><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-nagle-ack/" title="每日基础技术总结 · 2026-06-06 · TCP Nagle 算法与延迟 ACK 交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="title">每日基础技术总结 · 2026-06-06 · TCP Nagle 算法与延迟 ACK 交互</div></div></a></div><div><a href="/2026/06/06/foundation/2026-06-06-foundation-tcp-sack/" title="每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="title">每日基础技术总结 · 2026-06-06 · TCP 快速重传与选择性确认 SACK</div></div></a></div><div><a href="/2026/06/07/foundation/2026-06-07-foundation-udp/" title="每日基础技术总结 · 2026-06-07 · UDP 校验和计算与伪头部"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="title">每日基础技术总结 · 2026-06-07 · UDP 校验和计算与伪头部</div></div></a></div><div><a href="/2026/06/08/foundation/2026-06-08-foundation-dns-ttl/" title="每日基础技术总结 · 2026-06-08 · DNS 缓存 TTL 与缓存污染"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="title">每日基础技术总结 · 2026-06-08 · DNS 缓存 TTL 与缓存污染</div></div></a></div><div><a href="/2026/06/08/foundation/2026-06-08-foundation-dns/" title="每日基础技术总结 · 2026-06-08 · DNS 递归与迭代解析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="title">每日基础技术总结 · 2026-06-08 · DNS 递归与迭代解析</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-17-%C2%B7-DNS-%E7%9A%84-TTL-%E4%B8%8E%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-17 · DNS 的 TTL 与缓存一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

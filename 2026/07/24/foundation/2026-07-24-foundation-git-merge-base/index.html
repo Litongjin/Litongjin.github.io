@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记📚 今日主题 Git 的 merge-base 与三路合并及冲突标记（架构与设计）  1. 核心概念速览merge-base 是给定两个提交（通常是两个分支的末端）在提交图中计算出的最近公共祖先（LCA）。三路合并以该 merge-base 作为基准（base），分别计算两个目标版本（ours">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记">
+<meta property="og:url" content="https://litongjin.github.io/2026/07/24/foundation/2026-07-24-foundation-git-merge-base/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记📚 今日主题 Git 的 merge-base 与三路合并及冲突标记（架构与设计）  1. 核心概念速览merge-base 是给定两个提交（通常是两个分支的末端）在提交图中计算出的最近公共祖先（LCA）。三路合并以该 merge-base 作为基准（base），分别计算两个目标版本（ours">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-07-24T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T12:06:05.547Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="架构与设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/07/24/foundation/2026-07-24-foundation-git-merge-base/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 20:06:05'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-24T00:00:00.000Z" title="发表于 2026-07-24 08:00:00">2026-07-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T12:06:05.547Z" title="更新于 2026-08-20 20:06:05">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-07-24-·-Git-的-merge-base-与三路合并及冲突标记"><a href="#每日基础技术总结-·-2026-07-24-·-Git-的-merge-base-与三路合并及冲突标记" class="headerlink" title="每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记"></a>每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Git 的 merge-base 与三路合并及冲突标记</strong>（架构与设计）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>merge-base 是给定两个提交（通常是两个分支的末端）在提交图中计算出的最近公共祖先（LCA）。三路合并以该 merge-base 作为基准（base），分别计算两个目标版本（ours 与 theirs）相对 base 的增量，再尝试自动合并这些增量；若两边增量在相同位置发生冲突，Git 将冲突区域用 &lt;&lt;&lt;&lt;&lt;&lt;&lt;、&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;、&gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记写入工作区文件。该机制是 Git 合并、rebase、cherry-pick 的核心算法，属于版本控制系统的底层基础。专业工程师必须掌握它，因为冲突解决不是随机修改，而是理解“谁基于什么版本做了什么改动”的推理过程。这与前端中 Object.assign 之类的二路合并有本质区别：二路合并没有 base，无法区分“保留”与“修改”；三路合并通过 base 将两侧改动解析为独立增量，从而能自动合并绝大多数不冲突的改动。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>三路合并的底层过程可形式化为：</p>
+<ol>
+<li>在提交图中定位 merge-base：从两个目标提交沿父指针向上做双向广度优先遍历，第一个共同到达的提交即 LCA；若存在多个 LCA（合并历史复杂时），Git 的 recursive 策略会先对它们做虚拟合并生成一个虚拟提交作为 base。</li>
+<li>对仓库中的每个文件，读取 base、ours、theirs 三个版本。</li>
+<li>分别计算 base→ours 与 base→theirs 的差异（diff），通常以行为单位生成 hunk。</li>
+<li>将两个 hunk 集合应用到 base 上，规则为：某区域只有一侧有改动，则采用该侧改动；两侧均无改动，则保留 base；两侧都有改动且改动内容一致，则保留；两侧都有改动且内容不同，则判定冲突。</li>
+<li>冲突时，工作区文件写入冲突标记，索引记录该文件为未合并状态（stage 1&#x2F;2&#x2F;3）；非冲突部分自动合并并暂存。<br>该过程与前端中 React 的 reconciler 的“三个孩子节点比较”有异曲同工之妙，但 React 是树级别的双向比较，Git 是文件行级别的三路增量合并。更精确的对比是 TypeScript 的接口合并：多个声明合并为同一接口，但没有 base 冲突检测，因此后者不能用于版本语义合并。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">以下为验证三路合并的极简脚本（假设 Bash 环境）：</span><br><span class="line"># 初始化仓库</span><br><span class="line">git init demo</span><br><span class="line">cd demo</span><br><span class="line">git config user.email &#x27;test@test.com&#x27;</span><br><span class="line">git config user.name Test</span><br><span class="line"># 创建 base 提交：文件包含三行</span><br><span class="line">echo &#x27;line1&#x27; &gt; file.txt</span><br><span class="line">echo &#x27;line2&#x27; &gt;&gt; file.txt</span><br><span class="line">echo &#x27;line3&#x27; &gt;&gt; file.txt</span><br><span class="line">git add file.txt</span><br><span class="line">git commit -m &#x27;base commit&#x27;</span><br><span class="line"># 创建 feature 分支，修改 line2</span><br><span class="line">git checkout -b feature</span><br><span class="line">sed -i &#x27;s/line2/feature-line2/&#x27; file.txt</span><br><span class="line">git commit -am &#x27;modify line2 in feature&#x27;</span><br><span class="line"># 回到 master，对同一行做不同修改</span><br><span class="line">git checkout master</span><br><span class="line">sed -i &#x27;s/line2/master-line2/&#x27; file.txt</span><br><span class="line">git commit -am &#x27;modify line2 in master&#x27;</span><br><span class="line"># 合并：两边均修改同一行，必然冲突</span><br><span class="line">git merge feature</span><br><span class="line"># 查看冲突标记</span><br><span class="line">cat file.txt</span><br><span class="line">输出：</span><br><span class="line">line1</span><br><span class="line">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span><br><span class="line">master-line2</span><br><span class="line">=======</span><br><span class="line">feature-line2</span><br><span class="line">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature</span><br><span class="line">line3</span><br><span class="line">其中 &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD 之后是当前分支（ours）的版本，======= 之后是待合并分支（theirs）的版本，&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature 表示冲突块结束。由于只有 line2 被双方修改，line1 和 line3 保留 base 原样。索引中该文件处于 Unmerged 状态（stage 1 为 base，stage 2 为 ours，stage 3 为 theirs），可通过 git ls-files -u 查看。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区：</p>
+<ol>
+<li>认为冲突标记是 Git 合并失败时留下的错误信息，需要手动删除。实际上冲突标记是工作区文件中表示冲突区域的文本，是合并算法的输出；解决冲突时，需要编辑文件，保留想要的代码，并删除标记行，然后 git add 标记为已解决。</li>
+<li>认为三路合并只需要比较两个分支的当前状态，不需要 base。这是根本性误解。没有 base，就无法判断某行是“新增”还是“删除”，也无法区分“修改”和“保留”。例如，如果仅比较 ours 和 theirs，一行只在 theirs 中出现，无法知道是 theirs 新增的还是 base 中原本就有而 ours 删除了。只有 base 才能提供语义锚点。<br>思考题：如果两个分支相对于 base 都新增了同一个文件，但内容完全不同，三路合并会产生冲突吗？为什么？提示：想想 Git 对新增文件的处理是否也依赖 base 的缺失状态。</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/07/24/foundation/2026-07-24-foundation-git-merge-base/">https://litongjin.github.io/2026/07/24/foundation/2026-07-24-foundation-git-merge-base/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1/">架构与设计</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/07/24/foundation/2026-07-24-foundation-linux-slub-per-cpu/" title="每日基础技术总结 · 2026-07-24 · Linux 的 slub 分配器与 per-CPU 页缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-07-24 · Linux 的 slub 分配器与 per-CPU 页缓存</div></div></a></div><div class="next-post pull-right"><a href="/2026/07/24/foundation/2026-07-24-foundation-rust-sendsync/" title="每日基础技术总结 · 2026-07-24 · Rust 的所有权与借用检查在并发中的 Send/Sync"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-07-24 · Rust 的所有权与借用检查在并发中的 Send/Sync</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/07/21/foundation/2026-07-21-foundation-b/" title="每日基础技术总结 · 2026-07-21 · B+树索引页分裂与合并的写放大控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-21</div><div class="title">每日基础技术总结 · 2026-07-21 · B+树索引页分裂与合并的写放大控制</div></div></a></div><div><a href="/2026/07/21/foundation/2026-07-21-foundation-kafka-isr-hw/" title="每日基础技术总结 · 2026-07-21 · Kafka 分区副本的 ISR 收缩与 HW 截断机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-21</div><div class="title">每日基础技术总结 · 2026-07-21 · Kafka 分区副本的 ISR 收缩与 HW 截断机制</div></div></a></div><div><a href="/2026/07/21/foundation/2026-07-21-foundation-redis/" title="每日基础技术总结 · 2026-07-21 · Redis 主从复制的全量重同步与部分重同步偏移量"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-21</div><div class="title">每日基础技术总结 · 2026-07-21 · Redis 主从复制的全量重同步与部分重同步偏移量</div></div></a></div><div><a href="/2026/07/23/foundation/2026-07-23-foundation-grpc-http2-goaway/" title="每日基础技术总结 · 2026-07-23 · gRPC 的 HTTP&#x2F;2 流控与 GOAWAY 优雅退出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-23</div><div class="title">每日基础技术总结 · 2026-07-23 · gRPC 的 HTTP&#x2F;2 流控与 GOAWAY 优雅退出</div></div></a></div><div><a href="/2026/07/23/foundation/2026-07-23-foundation-lmax-disruptor/" title="每日基础技术总结 · 2026-07-23 · LMAX Disruptor 的环形缓冲区与序列屏障"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-23</div><div class="title">每日基础技术总结 · 2026-07-23 · LMAX Disruptor 的环形缓冲区与序列屏障</div></div></a></div><div><a href="/2026/07/22/foundation/2026-07-22-foundation-jvm-safepoint/" title="每日基础技术总结 · 2026-07-22 · JVM 的 SafePoint 与偏向锁撤销时机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-22</div><div class="title">每日基础技术总结 · 2026-07-22 · JVM 的 SafePoint 与偏向锁撤销时机</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-07-24-%C2%B7-Git-%E7%9A%84-merge-base-%E4%B8%8E%E4%B8%89%E8%B7%AF%E5%90%88%E5%B9%B6%E5%8F%8A%E5%86%B2%E7%AA%81%E6%A0%87%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-07-24 · Git 的 merge-base 与三路合并及冲突标记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

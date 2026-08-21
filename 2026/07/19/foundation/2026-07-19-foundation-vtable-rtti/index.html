@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现📚 今日主题 虚函数表 vtable 与 RTTI 的实现（编程语言底层）  1. 核心概念速览虚函数表（vtable）是C++实现运行时多态的核心数据结构，本质是一个函数指针数组，存储类中所有虚函数的实际地址。每个含有虚函数的类在编译期生成唯一的vtable，每个对象实例通过一个隐藏的vptr指针指向其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现">
+<meta property="og:url" content="https://litongjin.github.io/2026/07/19/foundation/2026-07-19-foundation-vtable-rtti/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现📚 今日主题 虚函数表 vtable 与 RTTI 的实现（编程语言底层）  1. 核心概念速览虚函数表（vtable）是C++实现运行时多态的核心数据结构，本质是一个函数指针数组，存储类中所有虚函数的实际地址。每个含有虚函数的类在编译期生成唯一的vtable，每个对象实例通过一个隐藏的vptr指针指向其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-07-19T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T11:22:05.463Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="编程语言底层">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/07/19/foundation/2026-07-19-foundation-vtable-rtti/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 19:22:05'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-19T00:00:00.000Z" title="发表于 2026-07-19 08:00:00">2026-07-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T11:22:05.463Z" title="更新于 2026-08-20 19:22:05">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-07-19-·-虚函数表-vtable-与-RTTI-的实现"><a href="#每日基础技术总结-·-2026-07-19-·-虚函数表-vtable-与-RTTI-的实现" class="headerlink" title="每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现"></a>每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>虚函数表 vtable 与 RTTI 的实现</strong>（编程语言底层）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>虚函数表（vtable）是C++实现运行时多态的核心数据结构，本质是一个函数指针数组，存储类中所有虚函数的实际地址。每个含有虚函数的类在编译期生成唯一的vtable，每个对象实例通过一个隐藏的vptr指针指向其所属类的vtable。RTTI（运行时类型信息）是程序在运行时获取对象真实类型的能力，C++通过typeid操作符和dynamic_cast实现，底层依赖vtable中保存的type_info指针。这两者构成C++动态类型系统的底层机制，解决编译期无法确定调用目标的问题，以及类型安全的向下转型问题。在计算机&#x2F;AI体系结构中，这属于语言运行时和编译器实现层面，与对象内存布局、函数调用约定、ABI兼容性直接相关。在AI推理框架（如TensorRT、ONNX Runtime）和性能敏感的后端服务中，理解vtable有助于优化虚函数调用、避免不必要的dynamic_cast，并理解插件化架构的实现原理。专业工程师必须掌握，因为这是编写高效、可维护的C++代码的基础，也是理解编译器生成二进制结构的关键。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>一、对象内存布局：C++标准未规定vtable的具体位置，但主流ABI（如Itanium C++ ABI）约定：每个含有虚函数的类对象，在内存起始位置有一个vptr指针，指向该类的vtable。vtable布局通常依次为：type_info指针（用于RTTI）、offset_to_top（用于多重继承调整this指针）、虚析构函数指针、以及按声明顺序排列的虚函数地址。调用虚函数时，编译器通过对象的vptr取出vtable，再根据函数索引偏移（编译期已知）取出函数指针并间接调用。<br>二、继承链中的vtable：单一继承时，派生类vtable复制基类vtable，然后重写覆盖的虚函数地址，追加新虚函数。多重继承时，派生类包含多个vptr，每个对应一条继承路径，每个vtable包含对应的基类虚函数和派生类新增虚函数（新增虚函数通常放在主基类的vtable末尾）。<br>三、RTTI实现：typeid(obj)返回一个const type_info&amp;，该引用从obj的vptr指向的vtable中存储的type_info指针获取。dynamic_cast&lt;D*&gt;(ptr)的实现更复杂：对于向上转型（派生到基类）可编译期确定；对于向下转型或交叉转型，编译器通过遍历继承图，利用每个vtable中的offset和类型信息进行运行时检查。Itanium ABI使用__dynamic_cast运行时函数，结合vtable中的type_info和偏移信息完成安全转换。<br>四、对比前端已有概念：</p>
+<ul>
+<li><p>TypeScript的interface是纯编译期结构，编译后类型被擦除，没有运行时任何痕迹；而C++虚函数表是运行时实体。</p>
+</li>
+<li><p>JavaScript的prototype链是动态对象查找机制，每个对象通过原型链逐层查找方法，没有编译器生成的函数表，也没有类型信息；而C++是间接跳转一次到位，且带有类型元数据。</p>
+</li>
+<li><p>Java的接口方法与C++虚函数类似，JVM中每个类有MethodTable，实现机制类似vtable，但Java的RTTI（instanceof）直接基于类元数据，而C++的RTTI通过vptr间接获取。<br>五、伪代码展示调用过程：<br>  &#x2F;&#x2F; 定义<br>  class Base { virtual void f(); virtual void g(); };<br>  class Derived : public Base { void f() override; void h(); };</p>
+<p>  &#x2F;&#x2F; 编译期生成的vtable（概念）<br>  Base::vtable &#x3D; { &amp;typeid(Base), 0, &amp;Base::f, &amp;Base::g };<br>  Derived::vtable &#x3D; { &amp;typeid(Derived), 0, &amp;Derived::f, &amp;Base::g, &amp;Derived::h };</p>
+<p>  &#x2F;&#x2F; 调用 Base* b &#x3D; new Derived(); b-&gt;f();<br>  &#x2F;&#x2F; 编译器生成：<br>  &#x2F;&#x2F; b.vptr -&gt; Derived::vtable<br>  &#x2F;&#x2F; 索引2（或偏移）处的函数指针 -&gt; &amp;Derived::f<br>  &#x2F;&#x2F; 间接调用</p>
+</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;typeinfo&gt;</span><br><span class="line"></span><br><span class="line">class Base &#123;</span><br><span class="line">public:</span><br><span class="line">    virtual void show() &#123; std::cout &lt;&lt; &quot;Base\n&quot;; &#125;</span><br><span class="line">    virtual ~Base() = default;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">class Derived : public Base &#123;</span><br><span class="line">public:</span><br><span class="line">    void show() override &#123; std::cout &lt;&lt; &quot;Derived\n&quot;; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">    Base* b = new Derived();</span><br><span class="line">    // b-&gt;show()：编译器通过b的vptr取出Derived::vtable，</span><br><span class="line">    // 按show在vtable中的索引取出Derived::show并间接调用。</span><br><span class="line">    b-&gt;show();</span><br><span class="line">    </span><br><span class="line">    // typeid(*b)：通过b的vptr指向的vtable中的type_info指针</span><br><span class="line">    // 获取真实类型Derived的type_info。</span><br><span class="line">    std::cout &lt;&lt; typeid(*b).name() &lt;&lt; &#x27;\n&#x27;;</span><br><span class="line">    </span><br><span class="line">    // dynamic_cast：运行时检查b的vtable中的type_info是否与Derived匹配，</span><br><span class="line">    // 匹配则返回调整后的指针，否则返回nullptr。</span><br><span class="line">    Derived* d = dynamic_cast&lt;Derived*&gt;(b);</span><br><span class="line">    if (d) &#123; /* 转型成功 */ &#125;</span><br><span class="line">    </span><br><span class="line">    delete b;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区一：认为虚函数调用一定比普通函数调用慢很多。实际上，现代CPU对间接分支有预测机制，单次间接跳转的成本可被掩盖，真正的代价是编译器无法内联虚函数，可能损失优化机会。在性能关键路径中，应优先考虑能否通过模板或设计模式减少虚调用，而不是盲目改用函数指针。<br>常见误区二：认为dynamic_cast可以随便用，或者用static_cast替代dynamic_cast。static_cast在编译期完成，不检查运行时类型，用于向下转型时若类型不匹配会产生未定义行为；而dynamic_cast会遍历继承体系，安全但开销更高。正确的做法是：在确定类型无误时用static_cast，在需要安全多态转换时用dynamic_cast，并避免在热路径上频繁使用。<br>深度思考题：在多重继承中，若派生类Derived同时继承Base1和Base2，且Derived自身新增一个虚函数h()，那么h()的地址会出现在哪个vtable中？为什么？请结合对象的内存布局（多个vptr）和this指针调整机制解释。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/07/19/foundation/2026-07-19-foundation-vtable-rtti/">https://litongjin.github.io/2026/07/19/foundation/2026-07-19-foundation-vtable-rtti/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%BA%95%E5%B1%82/">编程语言底层</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/07/19/foundation/2026-07-19-foundation-cjava/" title="每日基础技术总结 · 2026-07-19 · 类型系统：协变与逆变（C#/Java 泛型）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-07-19 · 类型系统：协变与逆变（C#/Java 泛型）</div></div></a></div><div class="next-post pull-right"><a href="/2026/07/19/foundation/2026-07-19-foundation/" title="每日基础技术总结 · 2026-07-19 · 尾调用优化与蹦床函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-07-19 · 尾调用优化与蹦床函数</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/07/13/foundation/2026-07-13-foundation-go-channel-hchan/" title="每日基础技术总结 · 2026-07-13 · Go 的 channel 底层实现（hchan 结构）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-13</div><div class="title">每日基础技术总结 · 2026-07-13 · Go 的 channel 底层实现（hchan 结构）</div></div></a></div><div><a href="/2026/07/13/foundation/2026-07-13-foundation-go-gmp-work-stealing/" title="每日基础技术总结 · 2026-07-13 · Go 的 GMP 调度器与 work stealing"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-13</div><div class="title">每日基础技术总结 · 2026-07-13 · Go 的 GMP 调度器与 work stealing</div></div></a></div><div><a href="/2026/07/14/foundation/2026-07-14-foundation-g1-satb-rset/" title="每日基础技术总结 · 2026-07-14 · G1 的 SATB 写屏障与 RSet"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-14</div><div class="title">每日基础技术总结 · 2026-07-14 · G1 的 SATB 写屏障与 RSet</div></div></a></div><div><a href="/2026/07/14/foundation/2026-07-14-foundation-gc/" title="每日基础技术总结 · 2026-07-14 · 三色标记与增量式 GC"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-14</div><div class="title">每日基础技术总结 · 2026-07-14 · 三色标记与增量式 GC</div></div></a></div><div><a href="/2026/07/13/foundation/2026-07-13-foundation-jvm/" title="每日基础技术总结 · 2026-07-13 · JVM 对象头与锁升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-13</div><div class="title">每日基础技术总结 · 2026-07-13 · JVM 对象头与锁升级</div></div></a></div><div><a href="/2026/07/14/foundation/2026-07-14-foundation-zgc/" title="每日基础技术总结 · 2026-07-14 · ZGC 的染色指针与读屏障"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-14</div><div class="title">每日基础技术总结 · 2026-07-14 · ZGC 的染色指针与读屏障</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-07-19-%C2%B7-%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8-vtable-%E4%B8%8E-RTTI-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-07-19 · 虚函数表 vtable 与 RTTI 的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

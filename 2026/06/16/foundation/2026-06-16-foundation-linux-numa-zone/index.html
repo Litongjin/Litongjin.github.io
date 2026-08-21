@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理📚 今日主题 Linux 的 NUMA 内存分配策略与 zone 管理（操作系统基础）  1. 核心概念速览NUMA（Non-Uniform Memory Access）是一种多处理器系统的内存架构，其本质是内存控制器与处理器集成，导致内存访问延迟随物理距离而不同：访问本地内存（所属node）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理">
+<meta property="og:url" content="https://litongjin.github.io/2026/06/16/foundation/2026-06-16-foundation-linux-numa-zone/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理📚 今日主题 Linux 的 NUMA 内存分配策略与 zone 管理（操作系统基础）  1. 核心概念速览NUMA（Non-Uniform Memory Access）是一种多处理器系统的内存架构，其本质是内存控制器与处理器集成，导致内存访问延迟随物理距离而不同：访问本地内存（所属node）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-06-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-21T01:45:10.695Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="操作系统基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/06/16/foundation/2026-06-16-foundation-linux-numa-zone/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 09:45:10'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-16T00:00:00.000Z" title="发表于 2026-06-16 08:00:00">2026-06-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T01:45:10.695Z" title="更新于 2026-08-21 09:45:10">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-06-16-·-Linux-的-NUMA-内存分配策略与-zone-管理"><a href="#每日基础技术总结-·-2026-06-16-·-Linux-的-NUMA-内存分配策略与-zone-管理" class="headerlink" title="每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理"></a>每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Linux 的 NUMA 内存分配策略与 zone 管理</strong>（操作系统基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>NUMA（Non-Uniform Memory Access）是一种多处理器系统的内存架构，其本质是内存控制器与处理器集成，导致内存访问延迟随物理距离而不同：访问本地内存（所属node）快，访问远程内存（其他node）慢。Linux通过NUMA调度和内存分配策略，在保持系统全局一致性的前提下，最大化利用局部性，降低平均内存访问延迟。Zone管理是Linux物理内存的分区机制，将每个node的内存划分为DMA、DMA32、Normal、Movable等区，用于应对不同设备的DMA能力限制、隔离可移动页面以支持内存热插拔和防碎片。该机制解决的核心问题是：如何在异构内存拓扑下高效、公平地分配内存，同时满足硬件约束和系统稳定性。在整个计算机体系中，它位于操作系统内存管理核心，与CPU调度、文件系统、容器隔离直接相关。专业工程师必须掌握它，因为性能调优、NUMA感知的进程部署、数据库和虚拟化场景均依赖对内存分配路径和跨节点访问代价的深刻理解。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>Linux内存分配的核心路径是：分配请求经由<code>alloc_pages</code>，从当前CPU所在node的zonelist出发，按zone优先级（Normal→DMA32→DMA）遍历，检查zone水位（watermark），若满足则从伙伴系统（buddy allocator）摘取页面；若本地node全部失败，则通过<code>__alloc_pages_slowpath</code>进行回收、远程node分配或OOM。NUMA策略嵌入在zonelist的构建中：每个node的zonelist默认按“本地优先”排序（node distance从小到大），且允许通过<code>numa_zonelist_order</code>（default&#x2F;Node&#x2F;Zone）调整顺序，形成node-local、node-lazy等模式。Zone管理体现在每个zone维护独立的<code>free_area</code>和<code>lowmem_reserve</code>，且Movable zone内的页面可被migrate，用于反碎片（compaction）。对比前端已有概念：NUMA的本地内存优先策略类似于HTTP缓存中的强制缓存（优先使用本地缓存，未命中才回源），而远程访问则类似协商缓存需要往返验证；Zone管理类似于V8堆中的新生代&#x2F;老生代分代——不同区域有不同分配策略和回收条件，且对象可在区域间迁移（类似页面迁移）。与Java接口和TS接口的“同名不同语义”类似，NUMA和Zone在抽象上都包含“分层&#x2F;分区”思想，但一个针对物理延迟，一个针对对象生命周期，各自解决不同问题。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下为Linux内核页面分配核心流程的精确伪代码（非实际源码，但反映机制）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 分配页面入口，gfp_mask 包含分配标志，order 为 2^order 页数</span></span><br><span class="line"><span class="keyword">struct</span> page *<span class="title function_">alloc_pages</span><span class="params">(<span class="type">gfp_t</span> gfp, <span class="type">unsigned</span> <span class="type">int</span> order)</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 获取当前CPU所在NUMA节点编号（本地优先的起点）</span></span><br><span class="line">    <span class="type">int</span> preferred_nid = numa_node_id();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 根据gfp_mask和首选节点构建zonelist（已按距离排序）</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">zonelist</span> *<span class="title">zl</span> =</span> node_zonelist(preferred_nid, gfp);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 快速路径：遍历zonelist中的每个zone（如Normal→DMA32→DMA）</span></span><br><span class="line">    for_each_zone_zonelist(zone, z, zl) &#123;</span><br><span class="line">        <span class="comment">// 检查该zone的水位（WMARK_MIN），确保有足够空闲页</span></span><br><span class="line">        <span class="keyword">if</span> (!zone_watermark_ok(zone, order, min_wmark_pages(zone), preferred_nid)) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 4. 从该zone的伙伴系统摘取连续页面（可能使用per-cpu page list）</span></span><br><span class="line">        page = rmqueue(zone, order);</span><br><span class="line">        <span class="keyword">if</span> (page) &#123;</span><br><span class="line">            <span class="keyword">return</span> page;  <span class="comment">// 本地/近邻成功</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 5. 慢速路径：本地内存不足时，尝试回收页面、压缩内存或跨节点分配</span></span><br><span class="line">    page = __alloc_pages_slowpath(gfp, order, preferred_nid);</span><br><span class="line">    <span class="keyword">return</span> page;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键行注释：<code>numa_node_id()</code> 体现CPU与内存的亲和性；<code>node_zonelist</code> 决定了NUMA策略（如default&#x3D;本地优先，Node&#x3D;按节点距离）；<code>zone_watermark_ok</code> 是zone管理水位机制的核心，防止低zone内存被耗尽；<code>rmqueue</code> 完成实际物理页的摘取。可用 <code>numactl --hardware</code> 查看实际NUMA拓扑和节点距离矩阵，用 <code>numastat</code> 观察进程的内存分配分布，从而验证本地分配优先策略。</p>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为NUMA机器上“内存总量足够”就不会出现性能问题。实际上，若进程的内存被分配到远程节点，访问延迟可能增加数倍，导致吞吐量骤降。常见错误是忽略CPU绑定（taskset）与内存绑定（numactl –membind）的配合，导致线程调度到node0但内存分配在node1。误区2：将zone管理单纯视为硬件限制（如DMA zone），而忽略Movable zone对内存碎片化的关键作用。Linux的<code>/proc/pagetypeinfo</code>展示了不同zone的页面类型分布，若不可移动页面过多，会导致高order分配失败，即使空闲总量充足。思考题：在NUMA节点0内存耗尽、节点1仍有大量空闲内存时，为什么Linux默认不会自动将节点0的进程内存迁移到节点1，而是可能触发swap或OOM？请从内存分配策略的“本地优先”与“回收&#x2F;迁移代价”权衡的角度分析，并说明什么场景下应调整<code>numa_zonelist_order</code>或使用<code>numad</code>守护进程。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/06/16/foundation/2026-06-16-foundation-linux-numa-zone/">https://litongjin.github.io/2026/06/16/foundation/2026-06-16-foundation-linux-numa-zone/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/">操作系统基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/17/foundation/2026-06-17-foundation-hsts/" title="每日基础技术总结 · 2026-06-17 · HSTS 与超域预加载及证书错误覆盖"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-06-17 · HSTS 与超域预加载及证书错误覆盖</div></div></a></div><div class="next-post pull-right"><a href="/2026/06/16/foundation/2026-06-16-foundation-mcs-qspinlock/" title="每日基础技术总结 · 2026-06-16 · 自旋锁与锁竞争：MCS 锁与 qspinlock"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-06-16 · 自旋锁与锁竞争：MCS 锁与 qspinlock</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/06/13/foundation/2026-06-13-foundation-mmap-aslr/" title="每日基础技术总结 · 2026-06-13 · 进程地址空间布局：栈、堆、mmap 与 ASLR"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="title">每日基础技术总结 · 2026-06-13 · 进程地址空间布局：栈、堆、mmap 与 ASLR</div></div></a></div><div><a href="/2026/06/13/foundation/2026-06-13-foundation-linux-fork-cow/" title="每日基础技术总结 · 2026-06-13 · Linux 的 fork 与写时复制 COW 机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="title">每日基础技术总结 · 2026-06-13 · Linux 的 fork 与写时复制 COW 机制</div></div></a></div><div><a href="/2026/06/14/foundation/2026-06-14-foundation-linux-oom/" title="每日基础技术总结 · 2026-06-14 · Linux 的 OOM 评分与内存回收策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-14</div><div class="title">每日基础技术总结 · 2026-06-14 · Linux 的 OOM 评分与内存回收策略</div></div></a></div><div><a href="/2026/06/14/foundation/2026-06-14-foundation-inode/" title="每日基础技术总结 · 2026-06-14 · 文件描述符表、文件表与 inode 表的关系"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-14</div><div class="title">每日基础技术总结 · 2026-06-14 · 文件描述符表、文件表与 inode 表的关系</div></div></a></div><div><a href="/2026/06/13/foundation/2026-06-13-foundation-tls/" title="每日基础技术总结 · 2026-06-13 · 线程切换的上下文开销：寄存器、TLS 与缓存失效"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="title">每日基础技术总结 · 2026-06-13 · 线程切换的上下文开销：寄存器、TLS 与缓存失效</div></div></a></div><div><a href="/2026/06/15/foundation/2026-06-15-foundation-mmap-readwrite/" title="每日基础技术总结 · 2026-06-15 · mmap 与 read&#x2F;write 的拷贝路径对比"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-15</div><div class="title">每日基础技术总结 · 2026-06-15 · mmap 与 read&#x2F;write 的拷贝路径对比</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-06-16-%C2%B7-Linux-%E7%9A%84-NUMA-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5%E4%B8%8E-zone-%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-06-16 · Linux 的 NUMA 内存分配策略与 zone 管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

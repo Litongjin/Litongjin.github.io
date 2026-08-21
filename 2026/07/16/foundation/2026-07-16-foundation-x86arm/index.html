@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-07-16 · x86/ARM 内存屏障指令与编译器屏障 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-07-16 · x86&#x2F;ARM 内存屏障指令与编译器屏障📚 今日主题 x86&#x2F;ARM 内存屏障指令与编译器屏障（编程语言底层）  1. 核心概念速览内存屏障（Memory Barrier&#x2F;Fence）是一类 CPU 指令，用于约束处理器和内存子系统对内存访问指令的重排序与可见性；编译器屏障（Compiler Barrier）是编译期优">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-07-16 · x86&#x2F;ARM 内存屏障指令与编译器屏障">
+<meta property="og:url" content="https://litongjin.github.io/2026/07/16/foundation/2026-07-16-foundation-x86arm/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-07-16 · x86&#x2F;ARM 内存屏障指令与编译器屏障📚 今日主题 x86&#x2F;ARM 内存屏障指令与编译器屏障（编程语言底层）  1. 核心概念速览内存屏障（Memory Barrier&#x2F;Fence）是一类 CPU 指令，用于约束处理器和内存子系统对内存访问指令的重排序与可见性；编译器屏障（Compiler Barrier）是编译期优">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-07-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-20T11:22:05.456Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="编程语言底层">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/07/16/foundation/2026-07-16-foundation-x86arm/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-07-16 · x86/ARM 内存屏障指令与编译器屏障',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-20 19:22:05'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-07-16 · x86/ARM 内存屏障指令与编译器屏障</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-16T00:00:00.000Z" title="发表于 2026-07-16 08:00:00">2026-07-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-20T11:22:05.456Z" title="更新于 2026-08-20 19:22:05">2026-08-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-07-16 · x86/ARM 内存屏障指令与编译器屏障"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-07-16-·-x86-ARM-内存屏障指令与编译器屏障"><a href="#每日基础技术总结-·-2026-07-16-·-x86-ARM-内存屏障指令与编译器屏障" class="headerlink" title="每日基础技术总结 · 2026-07-16 · x86&#x2F;ARM 内存屏障指令与编译器屏障"></a>每日基础技术总结 · 2026-07-16 · x86&#x2F;ARM 内存屏障指令与编译器屏障</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>x86&#x2F;ARM 内存屏障指令与编译器屏障</strong>（编程语言底层）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>内存屏障（Memory Barrier&#x2F;Fence）是一类 CPU 指令，用于约束处理器和内存子系统对内存访问指令的重排序与可见性；编译器屏障（Compiler Barrier）是编译期优化抑制手段，告知编译器不得将内存操作跨越屏障调度，但不生成任何硬件指令。其本质是‘顺序与可见性约束’：硬件屏障在运行时强制全局内存序，编译器屏障在代码生成阶段强制局部源码序。解决的问题是多核&#x2F;多线程下因乱序执行、Store Buffer、Invalidation Queue 等导致的读写不一致。机制上，硬件屏障通过刷新写缓冲、等待无效队列处理、协调缓存一致性点来实现；编译器屏障通过阻断编译器对内存指令的移动来实现。在计算机体系结构中，内存屏障位于并发抽象（锁、无锁队列、原子操作）与 CPU 微架构（流水线、缓存一致性协议）之间，是底层并发正确性的基石。专业工程师必须掌握，因为无锁编程、性能优化、驱动&#x2F;OS 同步、跨平台并发库的实现都依赖对内存序的精确控制，错误的屏障使用会导致难以复现的数据竞争与偶发崩溃。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>现代 CPU 为提升性能引入多级缓存、Store Buffer（写缓冲）、Invalidation Queue（失效队列）以及乱序执行。内存访问因此存在多种重排序可能：Store-Load、Store-Store、Load-Load、Load-Store。x86 采用 TSO（Total Store Order）模型，普通访问仅允许 Store-Load 重排序（由于 Store Buffer 的异步提交）；ARM 为弱内存模型，几乎允许所有类型重排序（除数据依赖和地址依赖外）。</p>
+<p>x86 屏障指令：</p>
+<ul>
+<li>lfence：阻止 Load-Load &#x2F; Load-Store 重排，等待所有先前 Load 完成。</li>
+<li>sfence：阻止 Store-Store 重排，等待所有先前 Store 写入全局可见。</li>
+<li>mfence：全屏障，阻止所有内存访问重排，并等待所有先前读写完成。</li>
+</ul>
+<p>ARM 屏障指令：</p>
+<ul>
+<li>dmb（Data Memory Barrier）：保证内存访问顺序，但不等待指令完成，不阻止后序指令执行。</li>
+<li>dsb（Data Synchronization Barrier）：等待先前内存访问全部完成，并阻断后序内存访问&#x2F;指令执行，直到完成。</li>
+<li>isb（Instruction Synchronization Barrier）：清空流水线，用于指令缓存&#x2F;TLB 变更后的同步。</li>
+</ul>
+<p>dmb 与 dsb 均有作用域限定：ish（Inner Shareable）、sh（Outer Shareable）、sy（系统全范围），多核并发常用 dmb ish。</p>
+<p>编译器屏障典型形式：asm volatile(“” ::: “memory”)。它告诉 GCC&#x2F;Clang：此处内存可能被任意修改，不得将任意内存访问跨过该点重排。但它不会生成任何 CPU 指令，只能抑制编译期重排。</p>
+<p>执行流伪代码：</p>
+<ol>
+<li>源码：data&#x3D;42; COMPILER_BARRIER(); flag&#x3D;1;</li>
+<li>编译期：编译器无法将 data 的存储移动到 flag 存储之后，否则破坏源码序。</li>
+<li>运行期：x86 CPU 可能将 flag 的读取提前越过 data 的读取（Store-Load），此时需要 mfence 或 lock 前缀。ARM CPU 可能将 data 和 flag 的存储重排，此时需要 dmb ish。</li>
+</ol>
+<p>与前端工程知识对比：TypeScript 的 interface 只在编译期存在，编译后完全擦除；Java 的 interface 在运行时保留（可通过反射查看）。这对应编译器屏障与硬件屏障的层次差异：编译器屏障是“编译期存在”的约束，最终不产生运行时指令；硬件屏障是“运行时存在”的强制机制，真实改变 CPU 行为。前端中类似现象是 JavaScript 的 <code>Atomics</code> 对象：它在规范层面定义了内存序，但底层由引擎编译为不同平台的屏障指令，这与 C11 原子操作一致。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">#include &lt;stdatomic.h&gt;</span><br><span class="line"></span><br><span class="line">int data = 0;</span><br><span class="line">atomic_int flag; // 原子变量，用于发布/获取同步</span><br><span class="line"></span><br><span class="line">void* producer(void* arg) &#123;</span><br><span class="line">    data = 42; // 普通写操作，编译器可能将其与后续 flag 存储交换</span><br><span class="line">    // release 语义：禁止之前的内存操作被重排到 release 之后</span><br><span class="line">    // x86 上编译为普通 mov + 编译器屏障（TSO 保证 Store-Store 有序）</span><br><span class="line">    // ARM 上编译为 stlr 指令（等价于 dmb ish + str）</span><br><span class="line">    atomic_store_explicit(&amp;flag, 1, memory_order_release);</span><br><span class="line">    return NULL;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void* consumer(void* arg) &#123;</span><br><span class="line">    // acquire 语义：禁止之后的内存操作被重排到 acquire 之前</span><br><span class="line">    // x86 上编译为普通 mov（TSO 保证 Load-Load 有序）</span><br><span class="line">    // ARM 上编译为 ldar 指令（等价于 ldr + dmb ish）</span><br><span class="line">    while (atomic_load_explicit(&amp;flag, memory_order_acquire) == 0) &#123;</span><br><span class="line">        // 忙等，等待生产者发布 flag</span><br><span class="line">    &#125;</span><br><span class="line">    // 若没有 acquire/release，可能在此读到 data=0（数据竞争）</span><br><span class="line">    printf(&quot;data=%d\n&quot;, data);</span><br><span class="line">    return NULL;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">    pthread_t t1, t2;</span><br><span class="line">    atomic_init(&amp;flag, 0);</span><br><span class="line">    pthread_create(&amp;t1, NULL, producer, NULL);</span><br><span class="line">    pthread_create(&amp;t2, NULL, consumer, NULL);</span><br><span class="line">    pthread_join(t1, NULL);</span><br><span class="line">    pthread_join(t2, NULL);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 若要显式使用屏障指令，可定义：</span><br><span class="line">// #define COMPILER_BARRIER() asm volatile(&quot;&quot; ::: &quot;memory&quot;)</span><br><span class="line">// #define X86_MFENCE() asm volatile(&quot;mfence&quot; ::: &quot;memory&quot;)</span><br><span class="line">// #define ARM_DMB_ISH() asm volatile(&quot;dmb ish&quot; ::: &quot;memory&quot;)</span><br><span class="line">// 但 C11 atomic 已经封装了上述语义，且跨平台可移植。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区 1：x86 内存模型是强一致的，所以不需要任何内存屏障。<br>纠正：x86 TSO 模型确实保证大部分普通读写的顺序，但存在 Store-Load 重排：CPU 可以将后序 Load 提前到前序 Store 之前执行（因为 Store 进入 Store Buffer 后尚未全局可见时，Load 可能直接读到旧值）。因此，在需要阻止 Store-Load 重排的算法（如双检查锁、序列锁、无锁队列中的某些环节）中，必须使用 mfence 或 lock 前缀指令。此外，编译器仍可能重排代码，必须同时使用编译器屏障。</p>
+<p>误区 2：编译器屏障（asm volatile(“” ::: “memory”)）就是内存屏障。<br>纠正：编译器屏障只影响编译期指令调度，不会生成任何 CPU 屏障指令。在 ARM 等弱内存模型下，CPU 仍可自由重排内存访问；即使编译器没有重排，硬件也会乱序。因此多核场景必须使用硬件屏障指令（如 dmb&#x2F;dsb&#x2F;mfence）或带内存序的原子操作。把编译器屏障当作硬件屏障使用，在弱一致性架构上会导致隐蔽的数据竞争。</p>
+<p>思考题：在 C&#x2F;C++ 中，将共享变量声明为 <code>volatile int flag</code>，并在自旋锁中使用 <code>while(flag) &#123;&#125;</code> 等待，为什么不能替代 <code>atomic_flag</code> 或带 <code>memory_order</code> 的原子操作？请从原子性和内存模型两个层面分析。volatile 只保证编译器不缓存变量到寄存器，不提供原子性（读改写非原子），也不提供任何内存屏障语义，无法阻止 CPU 重排其他普通变量的访问。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/07/16/foundation/2026-07-16-foundation-x86arm/">https://litongjin.github.io/2026/07/16/foundation/2026-07-16-foundation-x86arm/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%BA%95%E5%B1%82/">编程语言底层</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/07/16/foundation/2026-07-16-foundation-michael-scott-aba/" title="每日基础技术总结 · 2026-07-16 · 无锁队列 Michael-Scott 与 ABA 问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-07-16 · 无锁队列 Michael-Scott 与 ABA 问题</div></div></a></div><div class="next-post pull-right"><a href="/2026/07/15/foundation/2026-07-15-foundation-java-volatile-final/" title="每日基础技术总结 · 2026-07-15 · Java 内存模型中的 volatile 与 final 的内存语义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-07-15 · Java 内存模型中的 volatile 与 final 的内存语义</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/07/13/foundation/2026-07-13-foundation-go-channel-hchan/" title="每日基础技术总结 · 2026-07-13 · Go 的 channel 底层实现（hchan 结构）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-13</div><div class="title">每日基础技术总结 · 2026-07-13 · Go 的 channel 底层实现（hchan 结构）</div></div></a></div><div><a href="/2026/07/13/foundation/2026-07-13-foundation-go-gmp-work-stealing/" title="每日基础技术总结 · 2026-07-13 · Go 的 GMP 调度器与 work stealing"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-13</div><div class="title">每日基础技术总结 · 2026-07-13 · Go 的 GMP 调度器与 work stealing</div></div></a></div><div><a href="/2026/07/14/foundation/2026-07-14-foundation-g1-satb-rset/" title="每日基础技术总结 · 2026-07-14 · G1 的 SATB 写屏障与 RSet"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-14</div><div class="title">每日基础技术总结 · 2026-07-14 · G1 的 SATB 写屏障与 RSet</div></div></a></div><div><a href="/2026/07/14/foundation/2026-07-14-foundation-gc/" title="每日基础技术总结 · 2026-07-14 · 三色标记与增量式 GC"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-14</div><div class="title">每日基础技术总结 · 2026-07-14 · 三色标记与增量式 GC</div></div></a></div><div><a href="/2026/07/13/foundation/2026-07-13-foundation-jvm/" title="每日基础技术总结 · 2026-07-13 · JVM 对象头与锁升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-13</div><div class="title">每日基础技术总结 · 2026-07-13 · JVM 对象头与锁升级</div></div></a></div><div><a href="/2026/07/14/foundation/2026-07-14-foundation-zgc/" title="每日基础技术总结 · 2026-07-14 · ZGC 的染色指针与读屏障"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-14</div><div class="title">每日基础技术总结 · 2026-07-14 · ZGC 的染色指针与读屏障</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-07-16-%C2%B7-x86-ARM-%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C%E6%8C%87%E4%BB%A4%E4%B8%8E%E7%BC%96%E8%AF%91%E5%99%A8%E5%B1%8F%E9%9A%9C"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-07-16 · x86&#x2F;ARM 内存屏障指令与编译器屏障</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

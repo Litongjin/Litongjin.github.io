@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理📚 今日主题 SSE（Server-Sent Events）协议原理（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览SSE（Server-Sent Events）是一种基于 HTTP 的服务器向客户端单向推送事件的协议。其本质是客户端通过 HTTP 请求建立一条长连接，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理📚 今日主题 SSE（Server-Sent Events）协议原理（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览SSE（Server-Sent Events）是一种基于 HTTP 的服务器向客户端单向推送事件的协议。其本质是客户端通过 HTTP 请求建立一条长连接，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-21T09:41:49.000Z">
+<meta property="article:modified_time" content="2026-08-21T09:48:59.575Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础（LLM &amp; Agent）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-21 17:48:59'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-21T09:48:59.575Z" title="更新于 2026-08-21 17:48:59">2026-08-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-21-·-SSE（Server-Sent-Events）协议原理"><a href="#每日基础技术总结-·-2026-08-21-·-SSE（Server-Sent-Events）协议原理" class="headerlink" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理"></a>每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>SSE（Server-Sent Events）协议原理</strong>（AI 开发基础（LLM &amp; Agent））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>SSE（Server-Sent Events）是一种基于 HTTP 的服务器向客户端单向推送事件的协议。其本质是客户端通过 HTTP 请求建立一条长连接，服务器在该连接上以纯文本流（text&#x2F;event-stream）的形式分块写入数据，客户端通过 EventSource API 按事件类型接收并处理。它解决的核心问题是：在不需要双向通信的前提下，如何以标准 HTTP 协议实现服务器到客户端的持续、可靠、自动重连的数据推送。与 WebSocket 不同，SSE 只支持服务器到客户端，但天然具备 HTTP 的兼容性、自动重连、事件 ID 和自定义事件类型等机制。在 AI 开发中，SSE 是 LLM 流式输出（如 OpenAI 兼容接口的 &#x2F;chat&#x2F;completions 流式响应）的标准传输方式，用于将 token 逐个或分批推送给前端。专业工程师必须掌握它，因为它是构建流式 AI 应用（聊天机器人、实时生成）的底层协议，且其语义与前端熟悉的 XMLHttpRequest&#x2F;fetch 完全不同，误解其传输模型会导致流式处理失败。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>SSE 的底层机制是 HTTP 长连接的流式响应。当客户端发起 GET 请求并设置 Accept: text&#x2F;event-stream 后，服务器返回 200 状态码，并设置 Content-Type: text&#x2F;event-stream，同时关闭对响应的缓冲（如 Transfer-Encoding: chunked 或直接 flush）。此后服务器可以持续向该响应体写入文本块，每个事件由多个字段组成，字段之间以换行符分隔，事件之间以空行（两个连续换行）分隔。基本事件格式如下：</p>
+<p>id: &lt;事件ID&gt;\ndata: &lt;第一行数据&gt;\ndata: &lt;第二行数据&gt;\nevent: &lt;事件类型&gt;\nretry: &lt;重连毫秒数&gt;\n\n</p>
+<p>其中 data 字段可以出现多行，客户端会将连续多行 data 按换行拼接成一个完整数据；event 字段指定事件名，若省略则默认触发 message 事件；id 字段用于断线重连时发送 Last-Event-ID 请求头；retry 字段告诉客户端重连间隔。服务器发送注释行（以冒号开头）可作为心跳包，防止代理超时。</p>
+<p>传输过程中，响应体不是一次返回，而是持续打开，HTTP 1.1 的 chunked 编码允许服务器不断发送数据块。与前端已有的 fetch 相比，fetch 的 response.body 是一个 ReadableStream，SSE 本质就是对该流按特定文本协议进行解析。但 SSE 不是对 ReadableStream 的简单封装，因为 EventSource 内置了重连、事件 ID、自定义事件等状态管理机制。与 WebSocket 相比，WebSocket 是双向二进制&#x2F;文本帧协议，需要升级握手，而 SSE 仍然是普通 HTTP 响应，这意味着它天然穿越防火墙和代理，且可以使用普通 HTTP 缓存、认证、重定向等机制。</p>
+<p>底层状态机：客户端维护一个 readyState（CONNECTING&#x2F;OPEN&#x2F;CLOSED），连接断开后自动根据 retry 字段或默认值（3 秒）重试，若最后一次收到的事件带有 id 字段，重连请求头会自动带上 Last-Event-ID。服务器无法主动关闭连接（除非返回非 200 或非 text&#x2F;event-stream 的响应），客户端调用 EventSource.close() 才能关闭。</p>
+<p>伪代码描述：</p>
+<p>客户端：</p>
+<ol>
+<li>构造 HTTP GET 请求，头 Accept: text&#x2F;event-stream，若之前有 lastEventId，则加 Last-Event-ID</li>
+<li>收到响应头，检查 Content-Type，若不匹配则触发 error 并关闭</li>
+<li>读取响应体字节流，按 UTF-8 解码，按 ‘\n’ 缓冲行，按空行分割事件块</li>
+<li>解析事件块中的字段（id, event, data, retry），生成 Event 对象派发</li>
+<li>若流断开，检查请求头中 retry 字段设置延迟，然后回到步骤 1（自动重连）</li>
+</ol>
+<p>服务器：</p>
+<ol>
+<li>收到请求，校验 Accept 头</li>
+<li>设置 Content-Type: text&#x2F;event-stream; charset&#x3D;utf-8，Cache-Control: no-cache，Connection: keep-alive</li>
+<li>循环写入事件块（每个事件以\n\n结尾），每次写入后 flush 底层 socket</li>
+<li>需要保持连接时周期发送冒号注释行作为心跳</li>
+<li>当服务器异常终止时，直接关闭响应体，客户端会检测到断流并重连</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">// 纯前端验证 SSE 协议，不依赖任何框架。底层网络由浏览器 EventSource 实现，但协议解析和重连机制需要理解。</span><br><span class="line">// 由于 EventSource 是浏览器内置 API，无法在 Node 中直接使用，这里展示服务端和客户端的最小验证代码。</span><br><span class="line"></span><br><span class="line">// ---- 服务端（Node.js 原生 http 模块）----</span><br><span class="line">const http = require(&#x27;http&#x27;);</span><br><span class="line"></span><br><span class="line">http.createServer((req, res) =&gt; &#123;</span><br><span class="line">  // 关键：只有 Accept 头包含 text/event-stream 的请求才走 SSE 逻辑</span><br><span class="line">  if (req.url === &#x27;/events&#x27; &amp;&amp; req.headers.accept === &#x27;text/event-stream&#x27;) &#123;</span><br><span class="line">    res.writeHead(200, &#123;</span><br><span class="line">      &#x27;Content-Type&#x27;: &#x27;text/event-stream; charset=utf-8&#x27;, // 告知客户端这是 SSE 流</span><br><span class="line">      &#x27;Cache-Control&#x27;: &#x27;no-cache&#x27;, // 禁用缓存，确保每次都是新数据</span><br><span class="line">      &#x27;Connection&#x27;: &#x27;keep-alive&#x27;, // 保持 TCP 连接不关闭</span><br><span class="line">      &#x27;Access-Control-Allow-Origin&#x27;: &#x27;*&#x27; // 跨域支持</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    let eventId = 0;</span><br><span class="line">    // 每 1 秒推送一个事件，验证分块传输</span><br><span class="line">    const timer = setInterval(() =&gt; &#123;</span><br><span class="line">      eventId++;</span><br><span class="line">      // SSE 协议格式：id 行 + data 行 + 空行结束事件</span><br><span class="line">      // 必须写入空行（\n\n），客户端才会解析为一个完整事件</span><br><span class="line">      res.write(`id: $&#123;eventId&#125;\n`);</span><br><span class="line">      res.write(`data: &#123;&quot;message&quot;: &quot;hello&quot;, &quot;id&quot;: $&#123;eventId&#125;&#125;\n`);</span><br><span class="line">      res.write(`\n`);</span><br><span class="line">      // 注意：res.write 不会自动 flush，但对于 Node http 响应，数据会写入内核缓冲；高并发下可调用 res.flushHeaders() 或使用压缩等机制，此处不深入</span><br><span class="line">    &#125;, 1000);</span><br><span class="line"></span><br><span class="line">    req.on(&#x27;close&#x27;, () =&gt; &#123; // 客户端断开时清除定时器</span><br><span class="line">      clearInterval(timer);</span><br><span class="line">      res.end();</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    res.writeHead(404);</span><br><span class="line">    res.end();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;).listen(3000);</span><br><span class="line"></span><br><span class="line">// ---- 客户端（浏览器原生 EventSource）----</span><br><span class="line">const es = new EventSource(&#x27;http://localhost:3000/events&#x27;);</span><br><span class="line"></span><br><span class="line">// message 事件：当事件块中没有 event 字段时默认触发</span><br><span class="line">es.onmessage = (event) =&gt; &#123;</span><br><span class="line">  console.log(&#x27;收到数据:&#x27;, event.data); // event.data 为字符串</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 监听自定义事件：若服务器写入 event: custom\n，则触发 custom 事件</span><br><span class="line">// es.addEventListener(&#x27;custom&#x27;, (e) =&gt; &#123; ... &#125;);</span><br><span class="line"></span><br><span class="line">es.onerror = (e) =&gt; &#123;</span><br><span class="line">  // 连接错误或断线时触发。EventSource 会自动重连，无需手动处理</span><br><span class="line">  console.error(&#x27;SSE 错误:&#x27;, e);</span><br><span class="line">  // 若希望手动关闭：es.close();</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 上述代码中，EventSource 底层会自动完成：</span><br><span class="line">// 1. 发送 GET 请求，Accept: text/event-stream</span><br><span class="line">// 2. 解析流式响应，按空行切分事件</span><br><span class="line">// 3. 处理重连逻辑和 Last-Event-ID</span><br><span class="line">// 开发者只需关注事件回调，这验证了 SSE 协议的核心机制。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为 SSE 可以像 WebSocket 一样从客户端向服务器发送数据。实际上 SSE 是单工协议，客户端无法在同一个连接中发送额外数据。若需要发送数据，只能额外发起 HTTP 请求（如 fetch）。这个误区会导致设计上试图在 EventSource 上调用 send 方法，或者期望服务器能通过 req 对象读取后续数据，但 SSE 的请求体在握手后就不再被使用，服务器只能从 req 上读取初始请求信息（如查询参数、Header）。</p>
+<p>误区二：认为 SSE 的数据是普通 JSON 一次性返回，或者认为响应体的 content-type 为 application&#x2F;json。SSE 是纯文本流，且必须是 text&#x2F;event-stream。如果将服务器返回的流当作 JSON 解析，会得到语法错误。另一个常见错误是忘记在服务端关闭缓冲（如 nginx 的 proxy_buffering），导致数据不是逐块到达而是攒到一定大小才一次性 flush，造成前端长时间无响应。</p>
+<p>深度思考题：在一个 SSE 连接中，服务器连续发送了两个事件，第一个事件块带有 id: 1，第二个事件块没有 id 字段。当连接在第二个事件发送后断开，客户端自动重连时，请求头 Last-Event-ID 的值是多少？为什么？请结合 SSE 协议的字段继承规则与重连机制，解释你对底层状态的理解。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/">https://litongjin.github.io/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%88LLM-Agent%EF%BC%89/">AI 开发基础（LLM &amp; Agent）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">工作台日报 · 2026-08-21</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/21/foundation/2026-08-21-foundation/" title="每日基础技术总结 · 2026-08-21 · 原型链与闭包"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-21 · 原型链与闭包</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理</div></div></a></div><div><a href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-22</div><div class="title">每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响</div></div></a></div><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-scavenger-mark-compact/" title="每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8/" title="每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">292</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-21-%C2%B7-SSE%EF%BC%88Server-Sent-Events%EF%BC%89%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22">工作台日报 · 2026-08-22</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-http-https/" title="每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-22 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-346e78c1/" title="每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线">每日基础技术总结 · 2026-08-22 · 浏览器渲染流水线</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响">每日基础技术总结 · 2026-08-22 · Temperature / Top-P 等参数对输出的影响</a><time datetime="2026-08-21T23:00:49.000Z" title="发表于 2026-08-22 07:00:49">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21">工作台日报 · 2026-08-21</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-08-21T09:41:49.000Z" title="发表于 2026-08-21 17:41:49">2026-08-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
