@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-23 · V8 引擎执行机制 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-23 · V8 引擎执行机制📚 今日主题 V8 引擎执行机制（前端底层与计算机基础）  1. 核心概念速览V8 引擎执行机制是 JavaScript 代码从源码到机器指令的完整处理链路，本质是一种基于类型反馈的即时编译（JIT）系统。它解决的核心问题是：动态类型语言在运行时难以高效生成机器码，因此 V8 采用“解释执行 + 热点代码优化编译”的混合策略，在启">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-23 · V8 引擎执行机制">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/23/foundation/2026-08-23-foundation-v8/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-23 · V8 引擎执行机制📚 今日主题 V8 引擎执行机制（前端底层与计算机基础）  1. 核心概念速览V8 引擎执行机制是 JavaScript 代码从源码到机器指令的完整处理链路，本质是一种基于类型反馈的即时编译（JIT）系统。它解决的核心问题是：动态类型语言在运行时难以高效生成机器码，因此 V8 采用“解释执行 + 热点代码优化编译”的混合策略，在启">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-22T22:55:52.000Z">
+<meta property="article:modified_time" content="2026-08-22T23:01:27.962Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/23/foundation/2026-08-23-foundation-v8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-23 · V8 引擎执行机制',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-23 07:01:27'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">299</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-23 · V8 引擎执行机制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-22T22:55:52.000Z" title="发表于 2026-08-23 06:55:52">2026-08-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-22T23:01:27.962Z" title="更新于 2026-08-23 07:01:27">2026-08-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-23 · V8 引擎执行机制"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-23-·-V8-引擎执行机制"><a href="#每日基础技术总结-·-2026-08-23-·-V8-引擎执行机制" class="headerlink" title="每日基础技术总结 · 2026-08-23 · V8 引擎执行机制"></a>每日基础技术总结 · 2026-08-23 · V8 引擎执行机制</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>V8 引擎执行机制</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>V8 引擎执行机制是 JavaScript 代码从源码到机器指令的完整处理链路，本质是一种基于类型反馈的即时编译（JIT）系统。它解决的核心问题是：动态类型语言在运行时难以高效生成机器码，因此 V8 采用“解释执行 + 热点代码优化编译”的混合策略，在启动速度与峰值性能之间取得平衡。在整个计算机体系里，V8 位于语言运行时层，是 JavaScript 虚拟机的代表实现，直接决定了前端代码的底层执行效率。专业工程师必须掌握它，因为前端性能优化、内存调优、代码书写风格（如属性访问稳定性、函数内联）都源于 V8 的编译与优化机制，忽视这些底层原理就无法理解为什么某些写法高效、某些写法触发反优化。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>V8 执行流程分为多个阶段：</p>
+<ol>
+<li>词法&#x2F;语法分析：源码经 Scanner 和 Parser 生成 AST（抽象语法树）。</li>
+<li>字节码生成：Ignition 解释器将 AST 转换为平台无关的字节码（Bytecode），并直接解释执行。字节码是中间表示，避免一开始就做昂贵的机器码生成。</li>
+<li>类型反馈与热点检测：解释执行时记录对象属性访问的隐藏类（Hidden Class）和值类型，形成反馈向量（Feedback Vector）。当函数被多次调用成为“热点”后，TurboFan 编译器根据反馈类型推测性地生成高度优化的机器码。</li>
+<li>优化编译与反优化：优化后的机器码假定属性结构稳定、类型一致。若运行时遇到反馈中未出现的类型或对象形状变化，则触发反优化（Deoptimization），回退到解释执行并重新收集反馈。<br>关键机制：</li>
+</ol>
+<ul>
+<li>隐藏类：V8 为对象动态创建类似“类”的结构，记录属性偏移量，使属性访问从哈希查找退化为索引偏移，类似 C++ 的成员访问。</li>
+<li>内联缓存（IC）：每次属性访问点根据隐藏类缓存查找结果，后续相同隐藏类的访问直接命中缓存，避免重复查找。<br>与前端已有概念的对比：</li>
+<li>V8 的隐藏类不同于 TypeScript 的接口。TS 接口是编译期约束，运行时被完全擦除，无任何性能影响；而 V8 隐藏类是运行时动态构建的，直接参与内存布局和访问优化。TS 接口描述契约，隐藏类描述物理结构。</li>
+<li>V8 的 JIT 优化类似于前端构建中的 Babel 转译，但 Babel 是静态的、一次性的，而 JIT 是基于运行时类型反馈的、动态的、可反优化的。Babel 生成的是标准 JS，V8 生成的是机器码。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">以下代码用于演示 V8 隐藏类与内联缓存机制，在 Node.js 中可用 --trace-opt 观察优化过程。</span><br><span class="line">// 定义一个构造函数，创建对象时 V8 会分配隐藏类。</span><br><span class="line">function Point(x, y) &#123;</span><br><span class="line">  this.x = x; // 第一次 this.x 赋值，确定隐藏类包含 x，并记录偏移量。</span><br><span class="line">  this.y = y; // 添加 y，产生新的隐藏类，并链接到之前。</span><br><span class="line">&#125;</span><br><span class="line">// 多次调用同一函数，使该函数成为热点，触发 TurboFan 优化。</span><br><span class="line">function sum(p) &#123;</span><br><span class="line">  return p.x + p.y; // 每次访问 p.x，V8 会检查 p 的隐藏类是否与缓存一致，一致则直接按偏移量取值。</span><br><span class="line">&#125;</span><br><span class="line">for (let i = 0; i &lt; 100000; i++) &#123;</span><br><span class="line">  const p = new Point(i, i + 1);</span><br><span class="line">  sum(p); // 相同的对象形状，隐藏类稳定，内联缓存命中，sum 被优化为高效机器码。</span><br><span class="line">&#125;</span><br><span class="line">// 如果中途突然传入不同形状的对象，例如：</span><br><span class="line">// const q = &#123;x:1, z:2, y:3&#125;; // 属性顺序不同，隐藏类不同，导致 sum 反优化。</span><br><span class="line">// 注释：V8 根据属性添加顺序决定隐藏类，因此对象字面量属性顺序不同会生成不同隐藏类。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区一：认为 V8 始终是 JIT 编译执行。实际上 V8 先通过 Ignition 解释器执行字节码，只有当函数执行次数超过阈值（如 1000 次）才会被 TurboFan 优化为机器码。这避免了所有代码都经历昂贵的编译，但导致早期执行性能较低，且优化存在启动延迟。<br>常见误区二：混淆隐藏类与面向对象中的“类”。隐藏类没有继承、多态等语义，它只是运行时属性布局的缓存。两个对象即使构造函数不同，只要属性添加顺序和类型相同，就共享同一个隐藏类；反之，同一构造函数下若属性类型改变，也可能分裂为多个隐藏类。<br>思考题：假设一个函数 f 在循环中分别用字符串、整数和浮点数三种类型调用同一个参数，最终 V8 会如何决策？请解释 TurboFan 在处理多类型参数时的机制（是生成多态内联缓存还是反优化后重新解释？），并结合实际场景说明为什么开发中应保持参数类型一致。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/23/foundation/2026-08-23-foundation-v8/">https://litongjin.github.io/2026/08/23/foundation/2026-08-23-foundation-v8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/23/daily/2026-08-23-workbench-daily/" title="工作台日报 · 2026-08-23"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">工作台日报 · 2026-08-23</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/23/foundation/2026-08-23-foundation-javascript/" title="每日基础技术总结 · 2026-08-23 · JavaScript 垃圾回收机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-23 · JavaScript 垃圾回收机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-scavenger-mark-compact/" title="每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8/" title="每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-v8-jit-ignition-turbofan/" title="每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-context/" title="每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">299</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-23-%C2%B7-V8-%E5%BC%95%E6%93%8E%E6%89%A7%E8%A1%8C%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-23 · V8 引擎执行机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/daily/2026-08-23-workbench-daily/" title="工作台日报 · 2026-08-23">工作台日报 · 2026-08-23</a><time datetime="2026-08-22T22:55:52.000Z" title="发表于 2026-08-23 06:55:52">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/foundation/2026-08-23-foundation-v8/" title="每日基础技术总结 · 2026-08-23 · V8 引擎执行机制">每日基础技术总结 · 2026-08-23 · V8 引擎执行机制</a><time datetime="2026-08-22T22:55:52.000Z" title="发表于 2026-08-23 06:55:52">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/foundation/2026-08-23-foundation-javascript/" title="每日基础技术总结 · 2026-08-23 · JavaScript 垃圾回收机制">每日基础技术总结 · 2026-08-23 · JavaScript 垃圾回收机制</a><time datetime="2026-08-22T22:55:52.000Z" title="发表于 2026-08-23 06:55:52">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/foundation/2026-08-23-foundation-nosql-redis/" title="每日基础技术总结 · 2026-08-23 · NoSQL 与 Redis 基础">每日基础技术总结 · 2026-08-23 · NoSQL 与 Redis 基础</a><time datetime="2026-08-22T22:55:52.000Z" title="发表于 2026-08-23 06:55:52">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-fa4bb7c3/" title="每日基础技术总结 · 2026-08-22 · 事件循环中的宏任务与微任务调度">每日基础技术总结 · 2026-08-22 · 事件循环中的宏任务与微任务调度</a><time datetime="2026-08-22T00:00:00.000Z" title="发表于 2026-08-22 08:00:00">2026-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/22/foundation/2026-08-22-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-08-22 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-08-22 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-08-22T00:00:00.000Z" title="发表于 2026-08-22 08:00:00">2026-08-22</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
