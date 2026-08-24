@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-25 · Java 面向对象与接口 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口📚 今日主题 Java 面向对象与接口（后端基础（Node.js &#x2F; Java &#x2F; Python））  1. 核心概念速览Java 面向对象（OOP）是基于类（class）与对象（object）的编程范式，核心机制是封装（访问控制与数据隐藏）、继承（单继承类层次）、多态（运行时动态分派）。接口（inter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/25/foundation/2026-08-25-foundation-java/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口📚 今日主题 Java 面向对象与接口（后端基础（Node.js &#x2F; Java &#x2F; Python））  1. 核心概念速览Java 面向对象（OOP）是基于类（class）与对象（object）的编程范式，核心机制是封装（访问控制与数据隐藏）、继承（单继承类层次）、多态（运行时动态分派）。接口（inter">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-24T22:56:15.000Z">
+<meta property="article:modified_time" content="2026-08-24T23:02:26.074Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础（Node.js &#x2F; Java &#x2F; Python）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/25/foundation/2026-08-25-foundation-java/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-25 · Java 面向对象与接口',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-25 07:02:26'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">311</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-25 · Java 面向对象与接口</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-24T22:56:15.000Z" title="发表于 2026-08-25 06:56:15">2026-08-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-24T23:02:26.074Z" title="更新于 2026-08-25 07:02:26">2026-08-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-25-·-Java-面向对象与接口"><a href="#每日基础技术总结-·-2026-08-25-·-Java-面向对象与接口" class="headerlink" title="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口"></a>每日基础技术总结 · 2026-08-25 · Java 面向对象与接口</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Java 面向对象与接口</strong>（后端基础（Node.js &#x2F; Java &#x2F; Python））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Java 面向对象（OOP）是基于类（class）与对象（object）的编程范式，核心机制是封装（访问控制与数据隐藏）、继承（单继承类层次）、多态（运行时动态分派）。接口（interface）是一种引用类型，定义了一组抽象方法（Java 8 后含默认方法与静态方法）及常量，用于建立类型契约（contract）并实现多类型继承（multiple inheritance of type）。它解决的问题是：将‘做什么’与‘怎么做’分离，使代码依赖抽象而非具体实现，从而支持模块化、可测试性与可扩展性。在计算机体系中的位置：接口是 JVM 类型系统的一部分，编译后生成独立的 class 文件，是运行时多态的基础设施之一。后端与 AI 工程中，依赖倒置、策略模式、依赖注入、RPC 服务定义（如接口描述）均直接依赖接口抽象；专业工程师必须掌握接口的语法语义、JVM 分派机制以及与类继承的边界，否则无法理解框架底层（如 Spring 动态代理、MyBatis Mapper）的实现原理。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>Java 接口的底层机制可从 JVM 类型系统与方法分派两个层面剖析。</p>
+<ol>
+<li><p>类型系统：接口编译后生成 .class 文件，结构上包含方法描述符、常量池、异常表等。接口字段隐式为 public static final（编译期常量），接口方法隐式为 public abstract（Java 8 前）。类实现接口时，JVM 在类加载阶段（linking 的 verification 与 preparation）会建立该类与接口的‘实现关系’，存储于 Klass 结构的 secondary_supers 数组中，用于运行时类型检查（instanceof &#x2F; checkcast）与方法查找。</p>
+</li>
+<li><p>方法分派：调用接口方法时，字节码指令为 invokeinterface。JVM 在运行时从接收者对象的实际类开始，沿类继承链查找匹配方法签名；若未找到，则从该类实现的接口及其父接口中查找（Java 8 后需考虑默认方法的优先级：类自身方法 &gt; 父类方法 &gt; 接口默认方法；多个无关接口提供相同默认方法时产生冲突，必须显式覆盖）。invokeinterface 比 invokevirtual（虚方法调用）慢，因为接口方法表（itable）的索引不固定，需要线性搜索或缓存优化。</p>
+</li>
+</ol>
+<p>与前端 TypeScript 接口的本质区别：</p>
+<ul>
+<li>TS 接口是纯编译期结构，用于静态类型检查，编译后（转译为 JS）完全消失，无运行时开销，且采用结构化类型（structural typing）——只要对象形状匹配即满足接口。</li>
+<li>Java 接口是运行时的类型与约束，采用名义化类型（nominal typing）——必须显式 implements 才成立，JVM 会强制检查。</li>
+<li>Java 接口可包含默认方法与静态方法（本质上是方法实现），而 TS 接口不能有方法体（只能声明签名），TS 中类似功能需用抽象类或 mixin。</li>
+<li>Java 接口的字段是编译期常量（static final），TS 接口只能声明属性类型，不产生常量。</li>
+<li>Java 通过接口实现多继承的类型抽象，但类继承仍是单继承；TS 接口可 extends 多个接口，且类可实现多个接口，与 Java 类似，但 TS 无运行时继承机制。</li>
+</ul>
+<ol start="3">
+<li>继承与多态：Java 类单继承（extends）只能有一个父类，但可实现多个接口。多态的基础是动态分派：调用类方法时，JVM 依据对象实际类型选择方法版本（vtable 机制）。接口的加入使分派层级多了一条‘接口实现’路径，从而支持更灵活的类型抽象。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">public class InterfaceDemo &#123;</span><br><span class="line">    // 定义一个接口：只描述行为契约，不含状态</span><br><span class="line">    interface Greeter &#123;</span><br><span class="line">        String greet(String name);  // 隐式 public abstract</span><br><span class="line">        // Java 8+ 默认方法：提供实现，子类可覆盖</span><br><span class="line">        default String defaultGreet() &#123;</span><br><span class="line">            return &quot;Hello&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">        // 接口常量：隐式 public static final</span><br><span class="line">        int MAX_LEN = 100;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 实现类：必须实现抽象方法 greet</span><br><span class="line">    static class ChineseGreeter implements Greeter &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public String greet(String name) &#123;</span><br><span class="line">            return &quot;你好, &quot; + name;</span><br><span class="line">        &#125;</span><br><span class="line">        // 可覆盖默认方法，也可以不覆盖</span><br><span class="line">        @Override</span><br><span class="line">        public String defaultGreet() &#123;</span><br><span class="line">            return &quot;默认中文问候&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        // 编译时类型为接口，运行时对象为 ChineseGreeter</span><br><span class="line">        Greeter g = new ChineseGreeter();</span><br><span class="line">        // invokeinterface 指令：JVM 运行时在对象实际类中查找 greet 方法</span><br><span class="line">        System.out.println(g.greet(&quot;Tom&quot;));        // 输出: 你好, Tom</span><br><span class="line">        // 默认方法分派：由于子类覆盖了 defaultGreet，调用的是覆盖后的版本</span><br><span class="line">        System.out.println(g.defaultGreet());       // 输出: 默认中文问候</span><br><span class="line">        // 接口常量直接访问（无需实例）</span><br><span class="line">        System.out.println(Greeter.MAX_LEN);        // 输出: 100</span><br><span class="line">        // 运行时类型检查：确认 g 的实际类型实现了 Greeter 接口</span><br><span class="line">        System.out.println(g instanceof Greeter);   // true</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 关键注释：</span><br><span class="line">// 1. interface Greeter 编译后生成 Greeter.class，方法描述符中无方法体（除 default/static）。</span><br><span class="line">// 2. ChineseGreeter implements Greeter 建立实现关系，JVM 的 Klass 结构记录该接口。</span><br><span class="line">// 3. g.greet(&quot;Tom&quot;) 编译为 invokeinterface Greeter.greet:(String)String，运行时从 ChineseGreeter 类的方法表（vtable）中查找并执行。</span><br><span class="line">// 4. g instanceof Greeter 通过 secondary_supers 数组快速判断类型匹配，不要求运行时类型与接口有继承关系。</span><br><span class="line">// 5. 默认方法的意义：在不破坏实现类二进制兼容的前提下扩展接口，其实现体被编译为接口类中的静态方法（或实例方法），通过 invokeinterface 分派到该默认实现。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为 Java 接口可以定义实例字段（状态）。接口中的字段隐式为 public static final，本质是常量，不是实例状态。原因：接口用于定义契约，不承载状态；多个实现类若各自持有状态，应使用抽象类。混淆此点会导致试图用接口保存可变数据，违背设计初衷且编译报错。</p>
+<p>误区二：将 Java 接口与 TS 接口等同，认为接口只做编译期类型检查。实际上 Java 接口参与运行时类型判断（instanceof）、方法分派（invokeinterface）、动态代理（Proxy）等，是有运行时开销和语义的；而 TS 接口编译后消失。忽视这一差异会误解框架（如 Spring AOP 为何基于接口代理，若使用类代理则需 CGLIB 等子类化机制）。</p>
+<p>进阶思考题：Java 8 中接口默认方法如何影响 JVM 的 method resolution 顺序？当一个类同时继承父类中的具体方法和实现接口中的默认方法，且两个方法签名相同，实际调用的是哪一个？请从 JVM 类加载与分派层面给出精确规则，并说明该规则在“类优先于接口”原则下的设计动机。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/25/foundation/2026-08-25-foundation-java/">https://litongjin.github.io/2026/08/25/foundation/2026-08-25-foundation-java/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80%EF%BC%88Node-js-Java-Python%EF%BC%89/">后端基础（Node.js / Java / Python）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/25/foundation/2026-08-25-foundation-dns/" title="每日基础技术总结 · 2026-08-25 · DNS 解析流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-25 · DNS 解析流程</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/25/foundation/2026-08-25-foundation-token/" title="每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-nodejs-io/" title="每日基础技术总结 · 2026-08-21 · Node.js 事件驱动与非阻塞 I&#x2F;O"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · Node.js 事件驱动与非阻塞 I&#x2F;O</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-docker/" title="每日基础技术总结 · 2026-08-21 · Docker 基础概念与镜像原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · Docker 基础概念与镜像原理</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-acid/" title="每日基础技术总结 · 2026-08-21 · 事务的 ACID 特性"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · 事务的 ACID 特性</div></div></a></div><div><a href="/2026/08/23/foundation/2026-08-23-foundation-nosql-redis/" title="每日基础技术总结 · 2026-08-23 · NoSQL 与 Redis 基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-23</div><div class="title">每日基础技术总结 · 2026-08-23 · NoSQL 与 Redis 基础</div></div></a></div><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">311</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-25-%C2%B7-Java-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E4%B8%8E%E6%8E%A5%E5%8F%A3"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-25 · Java 面向对象与接口</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/25/daily/2026-08-25-workbench-daily/" title="工作台日报 · 2026-08-25">工作台日报 · 2026-08-25</a><time datetime="2026-08-24T22:56:15.000Z" title="发表于 2026-08-25 06:56:15">2026-08-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/25/foundation/2026-08-25-foundation-dns/" title="每日基础技术总结 · 2026-08-25 · DNS 解析流程">每日基础技术总结 · 2026-08-25 · DNS 解析流程</a><time datetime="2026-08-24T22:56:15.000Z" title="发表于 2026-08-25 06:56:15">2026-08-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/25/foundation/2026-08-25-foundation-java/" title="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口">每日基础技术总结 · 2026-08-25 · Java 面向对象与接口</a><time datetime="2026-08-24T22:56:15.000Z" title="发表于 2026-08-25 06:56:15">2026-08-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/25/foundation/2026-08-25-foundation-token/" title="每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制">每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制</a><time datetime="2026-08-24T22:56:15.000Z" title="发表于 2026-08-25 06:56:15">2026-08-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/24/foundation/2026-08-24-foundation-85c6f0a1/" title="每日基础技术总结 · 2026-08-24 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解">每日基础技术总结 · 2026-08-24 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解</a><time datetime="2026-08-24T00:00:00.000Z" title="发表于 2026-08-24 08:00:00">2026-08-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/24/foundation/2026-08-24-foundation-rsa-oaep-bleichenbacher/" title="每日基础技术总结 · 2026-08-24 · RSA 的 OAEP 填充与 Bleichenbacher 攻击">每日基础技术总结 · 2026-08-24 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</a><time datetime="2026-08-24T00:00:00.000Z" title="发表于 2026-08-24 08:00:00">2026-08-24</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
