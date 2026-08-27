@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用📚 今日主题 TCP 的 TIME_WAIT 状态与端口复用（后端基础）  1. 核心概念速览TIME_WAIT 是 TCP 连接关闭过程中，主动关闭连接的一端在发送最后一个 ACK 后进入的稳态，持续时间为 2×MSL（Maximum Segment Lifetime，RFC 793 建议 2 分钟；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-tcp-time-wait/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用📚 今日主题 TCP 的 TIME_WAIT 状态与端口复用（后端基础）  1. 核心概念速览TIME_WAIT 是 TCP 连接关闭过程中，主动关闭连接的一端在发送最后一个 ACK 后进入的稳态，持续时间为 2×MSL（Maximum Segment Lifetime，RFC 793 建议 2 分钟；">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-27T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-27T23:06:47.380Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-tcp-time-wait/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-28 07:06:47'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">332</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-27T00:00:00.000Z" title="发表于 2026-08-27 08:00:00">2026-08-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-27T23:06:47.380Z" title="更新于 2026-08-28 07:06:47">2026-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-27-·-TCP-的-TIME-WAIT-状态与端口复用"><a href="#每日基础技术总结-·-2026-08-27-·-TCP-的-TIME-WAIT-状态与端口复用" class="headerlink" title="每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用"></a>每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>TCP 的 TIME_WAIT 状态与端口复用</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>TIME_WAIT 是 TCP 连接关闭过程中，主动关闭连接的一端在发送最后一个 ACK 后进入的稳态，持续时间为 2×MSL（Maximum Segment Lifetime，RFC 793 建议 2 分钟；Linux 常将 MSL 设为 30s&#x2F;60s）。其本质是一个分布式状态机中的安全等待期，承担两个核心职责：1) 保证最后的 ACK 即使丢失，也能响应对端重传的 FIN；2) 让本连接在网络中的所有旧分组在复用四元组（源 IP、源端口、目的 IP、目的端口）的新连接建立前自然消亡，防止延迟重复分组被新连接错误接收。它解决的不是“资源回收”问题，而是“协议可靠性”与“网络乱序&#x2F;延迟”之间的冲突。在整个计算机体系里，它是 TCP&#x2F;IP 传输层协议状态机的一部分，向上决定应用层连接生命周期，向下与 ICMP&#x2F;路由生存时间（TTL）和 MSL 关联；在 AI&#x2F;分布式系统中，所有远程过程调用、消息队列、数据复制都依赖 TCP 的可靠传输，TIME_WAIT 策略直接影响高并发短连接下的端口分配与服务可用性。专业工程师必须掌握它，否则在压测、容器频繁重启、Nginx&#x2F;Redis 高连接波动时，无法准确诊断 Address already in use、connect timeout、ephemeral port exhaustion 等故障。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>主动关闭方的精确状态迁移：</p>
+<ol>
+<li>调用 close()，内核发送 FIN，状态 FIN_WAIT_1。</li>
+<li>对端回 ACK，状态 FIN_WAIT_2。</li>
+<li>对端发送 FIN，本端回 ACK，状态进入 TIME_WAIT。</li>
+<li>在 TIME_WAIT 中等待 2×MSL，若收到对端重传的 FIN，则重发 ACK；等待结束后关闭 socket。</li>
+</ol>
+<p>为什么是 2×MSL：一个 MSL 用于让本端最后一次 ACK 到达对端；另一个 MSL 用于等待对端可能因 ACK 丢失而重传的 FIN 到达本端。同时 2×MSL 也保证旧连接的任意数据片段在网络中彻底消失。</p>
+<p>端口复用约束：TCP 连接由四元组唯一标识。TIME_WAIT 禁止的是“相同四元组”的复用，而不仅仅是“端口号”的复用。服务端端口 80 可以同时保留大量 TIME_WAIT 连接，因为每个四元组中远端地址&#x2F;端口不同，不影响接受新连接；但对客户端短连接场景，本地临时端口与同一服务端的四元组组合在一段时间内不可复用，因此高并发客户端会耗尽本地端口。服务端重启时需要 bind 相同的监听端口，虽然监听 socket 已关闭，但已建立连接的 TIME_WAIT socket 仍占用本地端口，此时 bind 会 EADDRINUSE；SO_REUSEADDR 允许新 socket bind 到处于 TIME_WAIT 的本地端口，因为它向内核声明“我允许替换旧的 TIME_WAIT socket”，但注意它并不会绕过四元组冲突，也不能让两个监听 socket 同时 bind 同一个端口。Linux 上 tcp_tw_reuse（仅客户端主动连接场景，需 TCP timestamps）允许在时间戳递增的前提下安全复用 TIME_WAIT 四元组；tcp_tw_recycle 因破坏时间戳递增语义已被废弃。</p>
+<p>与前端概念的异同：正如 Java 的 interface 是运行期多态契约，而 TS 的 interface 是编译期结构类型约束——两者名字相同但层级完全不同；TCP TIME_WAIT 也常与 HTTP keep-alive 里的“连接复用”混淆。HTTP keep-alive 解决的是应用层复用已建立的 TCP 连接以减少握手开销，它并不是 TIME_WAIT 的替代品；连接最终关闭时，TIME_WAIT 照样会出现。前端所见浏览器的“Connection 复用池”属于操作系统 socket 与 HTTP 会话之间的调度逻辑，而 TIME_WAIT 是内核 TCP 协议栈对安全性的硬性约束，二者在抽象层次、职责边界和触发条件上均不同。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">以下脚本使用纯标准库制造一个服务端 TIME_WAIT，并验证 SO_REUSEADDR 对端口绑定的影响：</span><br><span class="line"></span><br><span class="line">import socket</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">def make_timewait(port=8080):</span><br><span class="line">    # 创建监听 socket</span><br><span class="line">    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">    srv.bind((&#x27;0.0.0.0&#x27;, port))</span><br><span class="line">    srv.listen(1)</span><br><span class="line"></span><br><span class="line">    # 同一进程内发起一个客户端连接</span><br><span class="line">    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">    client.connect((&#x27;127.0.0.1&#x27;, port))</span><br><span class="line"></span><br><span class="line">    # accept 返回已连接的 socket；服务端立即 close，成为主动关闭方</span><br><span class="line">    conn, _ = srv.accept()</span><br><span class="line">    conn.close()   # 内核发送 FIN，随后状态变为 FIN_WAIT_1 -&gt; ... -&gt; TIME_WAIT</span><br><span class="line"></span><br><span class="line">    # 关闭监听和客户端；客户端 close 也会产生自己的 TIME_WAIT，但不会影响服务端端口</span><br><span class="line">    srv.close()</span><br><span class="line">    client.close()</span><br><span class="line"></span><br><span class="line">make_timewait()</span><br><span class="line"></span><br><span class="line"># 等待状态稳定（可省略，这里只是确保内核状态迁移完成）</span><br><span class="line">time.sleep(0.1)</span><br><span class="line"></span><br><span class="line"># 直接 bind 同一个端口：因为存在 TIME_WAIT socket，默认失败</span><br><span class="line">s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">try:</span><br><span class="line">    s2.bind((&#x27;0.0.0.0&#x27;, 8080))</span><br><span class="line">    print(&#x27;bind without SO_REUSEADDR: ok&#x27;)</span><br><span class="line">except OSError as e:</span><br><span class="line">    print(&#x27;bind without SO_REUSEADDR: EADDRINUSE&#x27;, e.errno)</span><br><span class="line"></span><br><span class="line"># 设置 SO_REUSEADDR 后重新 bind：内核允许它抢占 TIME_WAIT 的本地端口</span><br><span class="line">s3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">s3.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # 本质是向内核申请复用处于 TIME_WAIT 的地址/端口</span><br><span class="line">s3.bind((&#x27;0.0.0.0&#x27;, 8080))</span><br><span class="line">print(&#x27;bind with SO_REUSEADDR: ok&#x27;)</span><br><span class="line"></span><br><span class="line">说明：conn.close() 是主动关闭的入口。TIME_WAIT 是内核行为，进程退出后 socket 状态仍由内核保存；SO_REUSEADDR 不会缩短 TIME_WAIT 的持续时间，只是允许 bind 阶段绕过“端口占用”检查。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为 TIME_WAIT 是“异常”或“等待回收”，于是通过 SO_LINGER&#x3D;0 强制 RST 关闭连接。RST 会跳过 FIN&#x2F;ACK 握手，使对端可能丢数据，且本端不进入 TIME_WAIT，破坏了 TCP 的可靠性；这只能用于明确丢弃数据的场景。<br>误区2：混淆 SO_REUSEADDR 与 SO_REUSEPORT，或认为设置 SO_REUSEADDR 就可以随便复用 TIME_WAIT 进行出站连接。实际上 SO_REUSEADDR 只影响 bind 阶段对 TIME_WAIT 端口的占用判断；SO_REUSEPORT 用于多个 socket 同时 listen 负载均衡，与 TIME_WAIT 复用无关。tcp_tw_reuse 是针对客户端四元组复用的参数，且依赖 TCP timestamps 保证安全。<br>思考题：假设系统开启了 net.ipv4.tcp_tw_reuse，一个客户端快速循环与同一服务端建立和关闭连接。为何新连接在时间戳严格递增时才是安全的？如果攻击者伪造绝对时间戳，会发生什么后果？请结合 TCP 序列号和时间戳在旧连接延迟包鉴别中的作用分析。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-tcp-time-wait/">https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-tcp-time-wait/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/27/daily/2026-08-27-workbench-daily/" title="工作台日报 · 2026-08-27"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-08-27</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/28/foundation/2026-05-28-foundation-redis-rdb-aof/" title="每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · Redis 的 RDB 与 AOF 持久化</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-tcp-time-wait/" title="每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · TCP 的 TIME_WAIT 状态与端口复用</div></div></a></div><div><a href="/2026/05/29/foundation/2026-05-29-foundation-etcd-raft/" title="每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="title">每日基础技术总结 · 2026-05-29 · etcd 的 Raft 协议与领导者选举</div></div></a></div><div><a href="/2026/05/28/foundation/2026-05-28-foundation-mysql-innodb-mvcc-undo-log/" title="每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="title">每日基础技术总结 · 2026-05-28 · MySQL InnoDB 的 MVCC 与 undo log</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-grpc-keepalive/" title="每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · gRPC 流式调用与 keepalive</div></div></a></div><div><a href="/2026/05/30/foundation/2026-05-30-foundation-http2/" title="每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-30</div><div class="title">每日基础技术总结 · 2026-05-30 · HTTP&#x2F;2 多路复用与流控制</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">332</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-27-%C2%B7-TCP-%E7%9A%84-TIME-WAIT-%E7%8A%B6%E6%80%81%E4%B8%8E%E7%AB%AF%E5%8F%A3%E5%A4%8D%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/daily/2026-08-28-workbench-daily/" title="工作台日报 · 2026-08-28">工作台日报 · 2026-08-28</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/foundation/2026-08-28-foundation-system-prompt/" title="每日基础技术总结 · 2026-08-28 · System Prompt 的角色设定">每日基础技术总结 · 2026-08-28 · System Prompt 的角色设定</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/foundation/2026-08-28-foundation-5a97741b/" title="每日基础技术总结 · 2026-08-28 · 进程与线程的区别">每日基础技术总结 · 2026-08-28 · 进程与线程的区别</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/foundation/2026-08-28-foundation-linux/" title="每日基础技术总结 · 2026-08-28 · Linux 常用命令与权限管理">每日基础技术总结 · 2026-08-28 · Linux 常用命令与权限管理</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/27/foundation/2026-08-27-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-08-27 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-08-27 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-08-27T00:00:00.000Z" title="发表于 2026-08-27 08:00:00">2026-08-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记">每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记</a><time datetime="2026-08-27T00:00:00.000Z" title="发表于 2026-08-27 08:00:00">2026-08-27</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

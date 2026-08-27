@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记📚 今日主题 V8 中 Smi 与 HeapNumber 的指针标记（前端底层与计算机基础）  1. 核心概念速览V8 的指针标记（pointer tagging）是将 JS 值编码为单个机器字的底层表示技术。一个 tagged value 的低位携带类型标签：LSB&#x3D;0 表示 Smi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记📚 今日主题 V8 中 Smi 与 HeapNumber 的指针标记（前端底层与计算机基础）  1. 核心概念速览V8 的指针标记（pointer tagging）是将 JS 值编码为单个机器字的底层表示技术。一个 tagged value 的低位携带类型标签：LSB&#x3D;0 表示 Smi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-27T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-27T23:06:47.379Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-28 07:06:47'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">332</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-27T00:00:00.000Z" title="发表于 2026-08-27 08:00:00">2026-08-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-27T23:06:47.379Z" title="更新于 2026-08-28 07:06:47">2026-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-27-·-V8-中-Smi-与-HeapNumber-的指针标记"><a href="#每日基础技术总结-·-2026-08-27-·-V8-中-Smi-与-HeapNumber-的指针标记" class="headerlink" title="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记"></a>每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>V8 中 Smi 与 HeapNumber 的指针标记</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>V8 的指针标记（pointer tagging）是将 JS 值编码为单个机器字的底层表示技术。一个 tagged value 的低位携带类型标签：LSB&#x3D;0 表示 Smi（Small Integer），LSB&#x3D;1 表示 HeapObject 指针。Smi 把整数值直接编码在 tagged word 的剩余位中，不分配堆内存；HeapNumber 是 HeapObject 之一，内部存储 64 位 IEEE 754 double，用于无法由 Smi 表达的数值。该机制解决的核心问题是避免每个 number 都成为堆对象，从而减少 GC 扫描与内存分配，并使加法、比较等热路径只需一次位运算即可区分类型。它位于运行时类型表示层，与 JIT、隐藏类、GC 共同构成 JS 引擎性能地基；也是理解 WebAssembly、TensorFlow.js 等数值密集型运行时为何能避免装箱拷贝的基础。专业工程师必须掌握它，才能理解为什么 JS number 有时是 32 位整数语义、为什么大整数或小数会触发堆分配，以及优化编译器如何逃逸堆表示。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>TaggedValue 的结构本质上是把一个机器字拆成 tag 区和 payload 区。</p>
+<ul>
+<li>bit0 是 tag：0 表示 Smi，1 表示 HeapObject 指针。</li>
+<li>Smi 的 payload 是左移一位后的有符号整数，即 raw &#x3D; int_value &lt;&lt; 1；解码时执行 int_value &#x3D; raw &gt;&gt; 1。</li>
+<li>HeapObject 的真实指针由硬件按字对齐，所以 bit0 原本为 0；VM 将 bit0 置 1 使其成为 HeapObject 标签，识别时只需 raw &amp; 1。</li>
+</ul>
+<p>对于非整数或超出 Smi 范围的整数，V8 执行 number promotion：在堆上分配一个 HeapNumber 对象，并把该对象的 tagged pointer 的 LSB 置 1 返回。HeapNumber 内部有一个 double 字段，典型布局是 [map pointer, double bits]。从语义层看，JS 的 typeof 对 Smi 与 HeapNumber 都返回 number，语言层抽象隐藏了两个 representation。</p>
+<p>与前端已有概念的对比：</p>
+<ol>
+<li>JS primitive 自动装箱与 HeapNumber 的差异：访问 (1.5).toFixed() 时，规范临时创建可观察的 Number 包装对象；但 HeapNumber 是 VM 内部 primitive 值的堆表示，用户拿不到引用，也不具备对象身份。</li>
+<li>Java 的 int 与 Integer 的类比：Smi 类似 int 的值语义，HeapNumber 类似 Integer 的堆分配语义；但 HeapNumber 不可变、不要求可空，由 VM 自动升降级。</li>
+<li>Java interface 与 TS interface 的启发：Java 的 interface 是运行时真实存在的类型，TS 的 interface 只在编译期做结构约束，运行时完全擦除；同理，JS 语言层只有一个 number 类型，而 V8 运行时内部却分裂为 Smi 与 HeapNumber 两种表示。理解这种编译期&#x2F;运行时差异，才能避免被语言抽象误导。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">以下为 C++ 风格伪代码，展示 tagged value 的编解码与加法快速路径：</span><br><span class="line"></span><br><span class="line">using Tagged = uintptr_t;</span><br><span class="line">constexpr uintptr_t kSmiTag = 0;</span><br><span class="line">constexpr uintptr_t kHeapTag = 1;</span><br><span class="line">constexpr uintptr_t kTagMask = 1;</span><br><span class="line"></span><br><span class="line">inline bool IsSmi(Tagged t) &#123;</span><br><span class="line">  return (t &amp; kTagMask) == kSmiTag;  // 一条位与指令判定值类型</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">inline int32_t SmiToInt(Tagged t) &#123;</span><br><span class="line">  return static_cast&lt;int32_t&gt;(t &gt;&gt; 1); // 算术右移还原整数值，bit0 被丢弃</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">inline Tagged IntToSmi(int32_t v) &#123;</span><br><span class="line">  return static_cast&lt;Tagged&gt;(static_cast&lt;uint32_t&gt;(v) &lt;&lt; 1); // 左移为 tag 让出 bit0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// HeapNumber 构造：需要堆分配，比 Smi 昂贵</span><br><span class="line">HeapNumber* MakeHeapNumber(double d) &#123;</span><br><span class="line">  HeapNumber* h = AllocateHeapNumber();</span><br><span class="line">  h-&gt;set_map(HeapNumberMapRuntime());</span><br><span class="line">  h-&gt;set_double_bits(bit_cast&lt;uint64_t&gt;(d));</span><br><span class="line">  return h;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 数字加法快速路径：Smi + Smi 尽量原地计算</span><br><span class="line">Tagged Add(Tagged a, Tagged b) &#123;</span><br><span class="line">  if (IsSmi(a) &amp;&amp; IsSmi(b)) &#123;</span><br><span class="line">    int32_t sum = SmiToInt(a) + SmiToInt(b);</span><br><span class="line">    if (SmiRangeCheck(sum)) return IntToSmi(sum); // 结果仍为 Smi，不触发 GC</span><br><span class="line">    return MakeHeapNumber(sum);                   // 溢出则 promote 为 HeapNumber</span><br><span class="line">  &#125;</span><br><span class="line">  double da = TaggedToDouble(a);</span><br><span class="line">  double db = TaggedToDouble(b);</span><br><span class="line">  return MakeHeapNumber(da + db);                 // 小数或混合运算必然堆分配</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// V8 调试可用（需要 --allow-natives-syntax）：</span><br><span class="line">%DebugPrint(1);   // 输出类似 Smi: 1</span><br><span class="line">%DebugPrint(1.5); // 输出类似 HeapNumber: 1.5</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：把 HeapNumber 等同于 JS 的 Number 对象。<br>HeapNumber 是 primitive number 的 VM 内部堆表示，不是 new Number() 产生的对象；new Number(1) 是一个真正的 JS Object，typeof 为 object，而 1.5 的 HeapNumber 表示在语言层仍是 primitive，typeof 为 number。两者在 GC 管理、隐藏类、方法查找上完全不同。</p>
+<p>误区二：认为 Smi&#x2F;HeapNumber 是 number 的唯一运行时形态，忽略优化编译器。<br>在 TurboFan 的进阶编译阶段，局部变量中的 number 可能被直接放在寄存器或栈槽中作为 raw double 或 int64，不需要 HeapObject 包装。Smi&#x2F;HeapNumber 是解释器与 GC 可见的 tagged value 经典表示，不是 JIT 优化后的全部事实。</p>
+<p>思考题：<br>既然 Smi 的标签在 bit0，为什么 V8 不允许 Smi 的值占满整个机器字？请推导一条 tagged value 在左移一位后，bit0 为何恒为 0；若尝试用最高位做 Smi 标签，那么 C++ 中 int32_t &gt;&gt; 31 对负数会得到 -1，这会对解码造成什么破坏？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/">https://litongjin.github.io/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/27/foundation/2026-08-27-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-08-27 · TCP 三次握手与 SYN Cookie"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-27 · TCP 三次握手与 SYN Cookie</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/27/foundation/2026-08-27-foundation-tcp-time-wait/" title="每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-27 · TCP 的 TIME_WAIT 状态与端口复用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-scavenger-mark-compact/" title="每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8/" title="每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-v8-jit-ignition-turbofan/" title="每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-context/" title="每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">332</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-27-%C2%B7-V8-%E4%B8%AD-Smi-%E4%B8%8E-HeapNumber-%E7%9A%84%E6%8C%87%E9%92%88%E6%A0%87%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/daily/2026-08-28-workbench-daily/" title="工作台日报 · 2026-08-28">工作台日报 · 2026-08-28</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/foundation/2026-08-28-foundation-system-prompt/" title="每日基础技术总结 · 2026-08-28 · System Prompt 的角色设定">每日基础技术总结 · 2026-08-28 · System Prompt 的角色设定</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/foundation/2026-08-28-foundation-5a97741b/" title="每日基础技术总结 · 2026-08-28 · 进程与线程的区别">每日基础技术总结 · 2026-08-28 · 进程与线程的区别</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/28/foundation/2026-08-28-foundation-linux/" title="每日基础技术总结 · 2026-08-28 · Linux 常用命令与权限管理">每日基础技术总结 · 2026-08-28 · Linux 常用命令与权限管理</a><time datetime="2026-08-27T22:55:48.000Z" title="发表于 2026-08-28 06:55:48">2026-08-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/27/foundation/2026-08-27-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-08-27 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-08-27 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-08-27T00:00:00.000Z" title="发表于 2026-08-27 08:00:00">2026-08-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/27/foundation/2026-08-27-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记">每日基础技术总结 · 2026-08-27 · V8 中 Smi 与 HeapNumber 的指针标记</a><time datetime="2026-08-27T00:00:00.000Z" title="发表于 2026-08-27 08:00:00">2026-08-27</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
