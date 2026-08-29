@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击📚 今日主题 RSA 的 OAEP 填充与 Bleichenbacher 攻击（安全基础）  1. 核心概念速览RSA的OAEP填充（Optimal Asymmetric Encryption Padding）是将确定性公钥置换（RSA原函数）转换为带随机性的安全加密方案的填充协议。它">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击">
+<meta property="og:url" content="https://litongjin.github.io/2026/08/29/foundation/2026-08-29-foundation-rsa-oaep-bleichenbacher/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击📚 今日主题 RSA 的 OAEP 填充与 Bleichenbacher 攻击（安全基础）  1. 核心概念速览RSA的OAEP填充（Optimal Asymmetric Encryption Padding）是将确定性公钥置换（RSA原函数）转换为带随机性的安全加密方案的填充协议。它">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-08-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-29T23:08:19.580Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="安全基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/08/29/foundation/2026-08-29-foundation-rsa-oaep-bleichenbacher/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-08-30 07:08:19'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">346</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">31</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-29T00:00:00.000Z" title="发表于 2026-08-29 08:00:00">2026-08-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-29T23:08:19.580Z" title="更新于 2026-08-30 07:08:19">2026-08-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-08-29-·-RSA-的-OAEP-填充与-Bleichenbacher-攻击"><a href="#每日基础技术总结-·-2026-08-29-·-RSA-的-OAEP-填充与-Bleichenbacher-攻击" class="headerlink" title="每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击"></a>每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>RSA 的 OAEP 填充与 Bleichenbacher 攻击</strong>（安全基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>RSA的OAEP填充（Optimal Asymmetric Encryption Padding）是将确定性公钥置换（RSA原函数）转换为带随机性的安全加密方案的填充协议。它解决的是’明文可预测性’和’密文可篡改性’问题：原始RSA加密 y &#x3D; m^e mod n 是确定性的，同一明文永远得到同一密文，且满足乘法同态，无法抵抗选择明文攻击。OAEP在加密前对明文进行Feistel网络变换，混入随机种子并用私钥侧可验证的冗余（标签哈希、0x01分隔符）约束密文的合法性，使得密文的任何扰动在解密时以压倒性概率导致整体校验失败。Bleichenbacher攻击则是针对旧版PKCS#1 v1.5填充的著名攻击：由于v1.5填充的合法结构（0x00 0x02 … 0x00 M）易被检测，服务器对密文解密后是否合法的响应构成了一个’padding oracle’，攻击者通过大量选择密文查询和区间收缩算法，可以在多项式时间内恢复任意密文对应的明文。OAEP由此成为现代RSA加密标准（PKCS#1 v2.x）的推荐填充方案。该知识处于密码学&#x2F;公钥加密与可证明安全的交汇点，也是TLS握手（RSA密钥交换）历史漏洞链条的核心环节。专业工程师必须理解它，才能在系统设计中避免误用填充模式、正确评估密码学库的安全边界，并识别类似’oracle’泄露模式。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>一、RSA代数基础<br>RSA加密 y &#x3D; x^e mod n 是对整数模n的置换。由于是对乘法群中的元素求幂，它天然同态：对任意s，有 (x^e mod n) * (s^e mod n) ≡ (x<em>s)^e mod n。因此，攻击者如果要解密c &#x3D; m^e mod n，可以先选随机数s，计算c’ &#x3D; c * s^e mod n，这样c’对应的明文是m</em>s mod n。如果服务器解密c’后暴露了关于m*s的某些信息（例如是否符合某种填充格式），攻击者就能反过来约束m的取值。这一机制是所有padding oracle攻击的代数核心，Bleichenbacher是其中最著名的一种。<br>二、OAEP编码与可证明安全<br>OAEP使用两个哈希机制：Hash（如SHA-256）和MGF1（Mask Generation Function，以Hash为底层，重复计算Hash(seed || counter)生成任意长度伪随机掩码）。记模长为k字节，Hash长度为hLen。加密前：</p>
+<ol>
+<li>生成随机种子r（长度hLen）。</li>
+<li>lHash &#x3D; Hash(L)，L是标签（通常为空）。</li>
+<li>构造数据块DB &#x3D; lHash || PS || 0x01 || 消息M，其中PS是零字节填充，使得DB长度k-hLen-1。</li>
+<li>用随机种子r生成掩码，遮蔽DB：maskedDB &#x3D; DB XOR MGF1(r, k-hLen-1)。</li>
+<li>再生成掩码遮蔽种子：seedMask &#x3D; MGF1(maskedDB, hLen)，maskedSeed &#x3D; r XOR seedMask。</li>
+<li>最终EM &#x3D; 0x00 || maskedSeed || maskedDB，并转为整数进行RSA运算。<br>解密过程反向执行：先计算RSA逆，然后恢复r和DB，先验证首字节为0，再验证lHash一致，再验证0x01分隔符前都是0。所有验证失败必须返回相同的错误（甚至相同耗时），任何区分都会变成oracle。OAEP在随机预言机模型下被证明是IND-CCA2安全的：即使攻击者选择任意密文，也无法从解密响应中提取关于明文的有效信息。<br>三、Bleichenbacher攻击算法概要<br>目标：恢复密文c对应的明文m。假设服务器存在v1.5 oracle，返回TRUE表示解密结果以0x00 0x02开头，FALSE表示不是。攻击者维护关于m的候选区间集合S（初始为[2B, 3B)，其中B&#x3D;2^(8(k-2))），不断选择整数s，发送c’ &#x3D; c<em>s^e mod n。若oracle返回TRUE，则说明m</em>s mod n落在合法填充区间[2B, 3B)，据此可以将S每个区间与m*s mod n ∈ [2B, 3B)的集合取交，逐步缩小候选区间。重复若干轮后，S中只剩一个数，即m。Bleichenbacher原始论文给出约2^20次查询即可恢复明文，在特定TLS实现上可在数分钟内完成，因此该攻击曾对TLS 1.0等造成严重威胁。<br>四、与前端已有概念的对比<br>OAEP的’可验证冗余’类似TypeScript接口在编译时的结构约束，但OAEP在运行时强制执行，且对篡改极为敏感。前端常见错误是’不同错误分支返回不同message’，这恰恰就构成oracle。Bleichenbacher攻击本质上是利用布尔型反馈（合法&#x2F;非法）作为边信道，与前端通过JSON错误码推断数据库结构的场景同构。MGF1的迭代结构类似流密码的密钥流生成，但这里的掩码是公开构造的一部分，其安全性依赖于掩码与数据的互不可分性。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"># RSA-OAEP 核心编解码（仅演示格式，真实RSA大数运算省略）</span><br><span class="line">import os, hmac, hashlib</span><br><span class="line"></span><br><span class="line">def H(data):</span><br><span class="line">    return hashlib.sha256(data).digest()</span><br><span class="line"></span><br><span class="line">def mgf1(seed, length):</span><br><span class="line">    out = b&#x27;&#x27;</span><br><span class="line">    c = 0</span><br><span class="line">    while len(out) &lt; length:</span><br><span class="line">        out += H(seed + c.to_bytes(4, &#x27;big&#x27;))   # 掩码流：Hash(seed || counter)</span><br><span class="line">        c += 1</span><br><span class="line">    return out[:length]</span><br><span class="line"></span><br><span class="line">def xor(a, b):</span><br><span class="line">    return bytes(x ^ y for x, y in zip(a, b))</span><br><span class="line"></span><br><span class="line">def constant_time_eq(a, b):</span><br><span class="line">    return hmac.compare_digest(a, b)  # 恒时比较，防止时序侧信道</span><br><span class="line"></span><br><span class="line">def oaep_encode(m, k, label=b&#x27;&#x27;):</span><br><span class="line">    h_len = len(H(b&#x27;&#x27;))</span><br><span class="line">    assert len(m) &lt;= k - 2*h_len - 2</span><br><span class="line">    r = os.urandom(h_len)            # 随机种子，使每次加密结果不同</span><br><span class="line">    l_hash = H(label)                # 标签哈希，固定上下文的校验值</span><br><span class="line">    ps_len = k - len(m) - 2*h_len - 2</span><br><span class="line">    db = l_hash + b&#x27;\x00&#x27; * ps_len + b&#x27;\x01&#x27; + m  # 0x01是明文的起始标记</span><br><span class="line">    masked_db = xor(db, mgf1(r, k - h_len - 1))</span><br><span class="line">    masked_seed = xor(r, mgf1(masked_db, h_len))</span><br><span class="line">    return b&#x27;\x00&#x27; + masked_seed + masked_db</span><br><span class="line"></span><br><span class="line">def oaep_decode(em, label=b&#x27;&#x27;):</span><br><span class="line">    k = len(em)</span><br><span class="line">    if em[0] != 0:                  # 首字节必须为0，作为整体完整性检查之一</span><br><span class="line">        return None</span><br><span class="line">    h_len = len(H(b&#x27;&#x27;))</span><br><span class="line">    masked_seed = em[1:1+h_len]</span><br><span class="line">    masked_db = em[1+h_len:]</span><br><span class="line">    r = xor(masked_seed, mgf1(masked_db, h_len))</span><br><span class="line">    db = xor(masked_db, mgf1(r, len(masked_db)))</span><br><span class="line">    if not constant_time_eq(db[:h_len], H(label)):  # 标签校验，错误时返回统一值</span><br><span class="line">        return None</span><br><span class="line">    i = db.find(b&#x27;\x01&#x27;, h_len)</span><br><span class="line">    if i &lt; 0:                       # 找不到分隔符，说明结构被破坏</span><br><span class="line">        return None</span><br><span class="line">    if any(x != 0 for x in db[h_len:i]):  # 0x01之前必须是全零PS</span><br><span class="line">        return None</span><br><span class="line">    return db[i+1:]                 # 提取真实明文</span><br><span class="line"></span><br><span class="line"># Bleichenbacher attack 的 oracle 示意：</span><br><span class="line"># for s in range(1, B):</span><br><span class="line">#     if oracle(c * pow(s, e, n) % n):</span><br><span class="line">#         # 合法填充 -&gt; 收紧 m 的有效区间</span><br><span class="line">#         update_bounds(s)</span><br><span class="line"># 这个循环配合区间相交算法，最终唯一确定 m。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区：</p>
+<ol>
+<li>认为’填充只是为了保证长度’。实际上OAEP填充的核心不是让明文长度凑满模长，而是创建一种’带公钥可验证的冗余结构’，将RSA的确定性置换转变为带随机且可验证的加密方案。仅仅用传统padding（如PKCS#1 v1.5）虽然长度合法，但缺少可证明安全性，会直接被Bleichenbacher oracle打穿。</li>
+<li>认为’只要统一错误信息就安全’。忽略侧信道攻击者可以通过响应耗时、内存访问模式、CPU功耗等区分不同失败路径。OAEP实现中必须使用恒时比较、恒定流程和统一返回，否则时序差异本身就是可用的oracle。<br>思考题：假设服务器实现了RSA-OAEP解密，并对所有解密失败返回同一个布尔值，但在处理’首字节非0’时耗时极短（提前返回），而处理’标签校验失败’时进行了恒时但更长的运算。请说明攻击者如何利用这个可观测的时间差构造一个oracle，并设计一个最小化的Bleichenbacher式语义恢复攻击来破解一个已知密文？（提示：时间差将’首字节校验’这一内部状态开放为外部信号。）</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/08/29/foundation/2026-08-29-foundation-rsa-oaep-bleichenbacher/">https://litongjin.github.io/2026/08/29/foundation/2026-08-29-foundation-rsa-oaep-bleichenbacher/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/">安全基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/08/29/foundation/2026-08-29-foundation-74d8cf7d/" title="每日基础技术总结 · 2026-08-29 · 跳跃表的层数随机化与查找/插入路径"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-08-29 · 跳跃表的层数随机化与查找/插入路径</div></div></a></div><div class="next-post pull-right"><a href="/2026/08/29/foundation/2026-08-29-foundation-85c6f0a1/" title="每日基础技术总结 · 2026-08-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-08-29 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/26/foundation/2026-05-26-foundation-diffie-hellman/" title="每日基础技术总结 · 2026-05-26 · Diffie-Hellman 的素数与子群限制攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-26</div><div class="title">每日基础技术总结 · 2026-05-26 · Diffie-Hellman 的素数与子群限制攻击</div></div></a></div><div><a href="/2026/05/26/foundation/2026-05-26-foundation-rsa-oaep-bleichenbacher/" title="每日基础技术总结 · 2026-05-26 · RSA 的 OAEP 填充与 Bleichenbacher 攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-26</div><div class="title">每日基础技术总结 · 2026-05-26 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</div></div></a></div><div><a href="/2026/05/31/foundation/2026-05-31-foundation-drbg-devurandom-getrandom/" title="每日基础技术总结 · 2026-05-31 · 密码学随机数与 DRBG 的熵池：&#x2F;dev&#x2F;urandom 与 getrandom"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-31</div><div class="title">每日基础技术总结 · 2026-05-31 · 密码学随机数与 DRBG 的熵池：&#x2F;dev&#x2F;urandom 与 getrandom</div></div></a></div><div><a href="/2026/05/31/foundation/2026-05-31-foundation-montgomery/" title="每日基础技术总结 · 2026-05-31 · 椭圆曲线密码中的无效曲线攻击与 Montgomery 阶梯"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-31</div><div class="title">每日基础技术总结 · 2026-05-31 · 椭圆曲线密码中的无效曲线攻击与 Montgomery 阶梯</div></div></a></div><div><a href="/2026/06/01/foundation/2026-06-01-foundation-jwt-algnone-rs256hs256/" title="每日基础技术总结 · 2026-06-01 · JWT 的 alg&#x3D;none 与 RS256&#x2F;HS256 混淆攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-01</div><div class="title">每日基础技术总结 · 2026-06-01 · JWT 的 alg&#x3D;none 与 RS256&#x2F;HS256 混淆攻击</div></div></a></div><div><a href="/2026/05/26/foundation/2026-05-26-foundation-aes-gcm-nonce-ghash/" title="每日基础技术总结 · 2026-05-26 · AES-GCM 的 nonce 复用与 GHASH 碰撞"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-26</div><div class="title">每日基础技术总结 · 2026-05-26 · AES-GCM 的 nonce 复用与 GHASH 碰撞</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">346</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">31</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-08-29-%C2%B7-RSA-%E7%9A%84-OAEP-%E5%A1%AB%E5%85%85%E4%B8%8E-Bleichenbacher-%E6%94%BB%E5%87%BB"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/30/daily/2026-08-30-workbench-daily/" title="工作台日报 · 2026-08-30">工作台日报 · 2026-08-30</a><time datetime="2026-08-29T22:57:23.000Z" title="发表于 2026-08-30 06:57:23">2026-08-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/30/foundation/2026-08-30-foundation-docker/" title="每日基础技术总结 · 2026-08-30 · Docker 基础概念与镜像原理">每日基础技术总结 · 2026-08-30 · Docker 基础概念与镜像原理</a><time datetime="2026-08-29T22:57:23.000Z" title="发表于 2026-08-30 06:57:23">2026-08-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/30/foundation/2026-08-30-foundation-http-https/" title="每日基础技术总结 · 2026-08-30 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-08-30 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-08-29T22:57:23.000Z" title="发表于 2026-08-30 06:57:23">2026-08-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/30/foundation/2026-08-30-foundation-acid/" title="每日基础技术总结 · 2026-08-30 · 事务的 ACID 特性">每日基础技术总结 · 2026-08-30 · 事务的 ACID 特性</a><time datetime="2026-08-29T22:57:23.000Z" title="发表于 2026-08-30 06:57:23">2026-08-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/29/foundation/2026-08-29-foundation-74d8cf7d/" title="每日基础技术总结 · 2026-08-29 · 跳跃表的层数随机化与查找/插入路径">每日基础技术总结 · 2026-08-29 · 跳跃表的层数随机化与查找/插入路径</a><time datetime="2026-08-29T00:00:00.000Z" title="发表于 2026-08-29 08:00:00">2026-08-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/29/foundation/2026-08-29-foundation-rsa-oaep-bleichenbacher/" title="每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击">每日基础技术总结 · 2026-08-29 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</a><time datetime="2026-08-29T00:00:00.000Z" title="发表于 2026-08-29 08:00:00">2026-08-29</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
