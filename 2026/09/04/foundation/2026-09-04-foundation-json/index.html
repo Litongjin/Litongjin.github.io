@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-04 · JSON 结构化输出 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-04 · JSON 结构化输出📚 今日主题 JSON 结构化输出（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览JSON 结构化输出（Structured Outputs &#x2F; 约束解码）指在 LLM 自回归解码阶段，将 JSON 文法与 JSON Schema 编译为确定性的 token 级状态机（FSM&#x2F;下推自">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-04 · JSON 结构化输出">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/04/foundation/2026-09-04-foundation-json/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-04 · JSON 结构化输出📚 今日主题 JSON 结构化输出（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览JSON 结构化输出（Structured Outputs &#x2F; 约束解码）指在 LLM 自回归解码阶段，将 JSON 文法与 JSON Schema 编译为确定性的 token 级状态机（FSM&#x2F;下推自">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-03T23:01:36.000Z">
+<meta property="article:modified_time" content="2026-09-03T23:14:25.842Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础（LLM &amp; Agent）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/04/foundation/2026-09-04-foundation-json/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-04 · JSON 结构化输出',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-04 07:14:25'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">378</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-04 · JSON 结构化输出</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-03T23:14:25.842Z" title="更新于 2026-09-04 07:14:25">2026-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-04 · JSON 结构化输出"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-04-·-JSON-结构化输出"><a href="#每日基础技术总结-·-2026-09-04-·-JSON-结构化输出" class="headerlink" title="每日基础技术总结 · 2026-09-04 · JSON 结构化输出"></a>每日基础技术总结 · 2026-09-04 · JSON 结构化输出</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>JSON 结构化输出</strong>（AI 开发基础（LLM &amp; Agent））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>JSON 结构化输出（Structured Outputs &#x2F; 约束解码）指在 LLM 自回归解码阶段，将 JSON 文法与 JSON Schema 编译为确定性的 token 级状态机（FSM&#x2F;下推自动机），每一步生成时硬性屏蔽所有会导致最终序列违反 Schema 的 token，使输出必然落在合法语言 L(Schema) 内。其本质不是『生成后校验』，而是『生成前约束』：将开放词表上的概率分布截断到合法子空间并重新归一化，把格式正确性从概率问题转化为计算问题。它解决的核心矛盾是：语言模型的自由概率采样与机器可解析的形式化数据契约之间不可调和的冲突。该机制位于 LLM 推理与确定性程序（函数调用、Agent 循环、RAG 管线、API 编排）的边界，是模型输出可编程化的底层基础设施。专业工程师必须掌握它，因为任何以 JSON 作为进程间契约的系统，若仅依赖提示词或解析容错来保证格式，其可靠性上限是概率性的；结构化输出将这一上限提升为确定性的，是 Agent 系统能否稳定进入生产环境的决定性因素之一。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层机制分三层。</p>
+<ol>
+<li>文法编译层：JSON 由 RFC 8259 定义，是上下文无关文法；JSON Schema 是在该文法之上施加的类型与结构谓词（required、type、additionalProperties、enum 等）。将 Schema 编译为下推自动机或递归状态机——嵌套结构要求超越正则语言的表达能力，因此实际实现（如 Outlines、Pydantic、llama.cpp GBNF）采用类似 Earley 解析器的状态集合，每个状态记录『已生成 token 前缀』对应的解析进度与 Schema 约束上下文。</li>
+<li>解码约束层：第 t 步模型输出词表 V 上的 logits。约束解码器依据当前状态计算合法 token 集合 M_t，将 i ∉ M_t 的 logit 置为 -inf，再对 M_t 上的分布做 softmax 重归一化后采样。等价于在条件分布 P(y|x) 上施加硬约束：P’(y|x) ∝ P(y|x) · 1[y ∈ L(Schema)]。由于每一步都保证状态转移合法，最终序列必然可解析且满足 Schema——不是高概率，而是必然。</li>
+<li>工程实现层：OpenAI 的 strict structured outputs、vLLM 的 guided decoding、Outlines、llama.cpp 的 GBNF grammar 均为此原理，差异仅在状态机构造算法与批量掩码优化。注意区分两个强度层级：JSON mode（如早期 response_format&#x3D;{‘type’:’json_object’}）只保证语法合法，用一个识别 JSON 文法的自动机即可；JSON Schema mode 还需将 Schema 谓词编译进转移条件，保证语义约束。<br>与前端已有概念的对比：TS interface 是编译期擦除的静态类型，只存在于类型空间，运行时零存在感；JSON Schema 是运行时数据契约，而约束解码让该契约从『事后校验』升级为『生成期强制执行』——类比理解，TS 类型相当于编译期检查，结构化输出相当于把类型检查器搬进了 CPU 的指令执行路径。前端 zod&#x2F;yup 校验是先取值再判错（后验，失败只能回滚）；约束解码是采样前剪枝（先验，非法状态不可达）。前者是测试，后者是编译。这与 Java interface（编译期与 JVM 边界的契约强制）在『契约由编译器&#x2F;运行时强制执行而非靠约定』这一点上同构，区别是 Java 约束的是方法调用，结构化输出约束的是 token 序列的转移图。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"># 极简验证：约束解码的本质 = 非法 token 的 logit 屏蔽 + 截断分布重归一化</span><br><span class="line"># 目标语言：合法 JSON 数字（正则 -?[0-9]+(\.[0-9]+)?），编译为五状态 FSM</span><br><span class="line"># 状态编码：0=起始, 1=负号后, 2=整数部分, 3=小数点后, 4=小数部分；-1=非法转移</span><br><span class="line"></span><br><span class="line">import random</span><br><span class="line"></span><br><span class="line">def step(state, ch):</span><br><span class="line">    if state == 0 and ch == &#x27;-&#x27;: return 1</span><br><span class="line">    if state == 0 and ch.isdigit(): return 2</span><br><span class="line">    if state == 1 and ch.isdigit(): return 2</span><br><span class="line">    if state == 2 and ch.isdigit(): return 2</span><br><span class="line">    if state == 2 and ch == &#x27;.&#x27;: return 3</span><br><span class="line">    if state == 3 and ch.isdigit(): return 4</span><br><span class="line">    if state == 4 and ch.isdigit(): return 4</span><br><span class="line">    return -1</span><br><span class="line"></span><br><span class="line">def allowed(state):</span><br><span class="line">    # 由当前状态反推合法 token 集合：凡 step 返回非 -1 的字符</span><br><span class="line">    return &#123;c for c in &#x27;0123456789-.&#x27; if step(state, c) &gt;= 0&#125;</span><br><span class="line"></span><br><span class="line">def is_accept(state):</span><br><span class="line">    return state in (2, 4)  # 合法数字不能以 &#x27;-&#x27; 或 &#x27;.&#x27; 结尾</span><br><span class="line"></span><br><span class="line">def constrained_sample(probs, allowed_set):</span><br><span class="line">    # 核心机制：非法 token 概率置 0，合法 token 重新归一化</span><br><span class="line">    masked = &#123;c: (p if c in allowed_set else 0.0) for c, p in probs.items()&#125;</span><br><span class="line">    total = sum(masked.values())</span><br><span class="line">    norm = &#123;c: p / total for c, p in masked.items()&#125;  # 截断后重归一化</span><br><span class="line">    r = random.random(); acc = 0.0</span><br><span class="line">    for c, p in norm.items():</span><br><span class="line">        acc += p</span><br><span class="line">        if r &lt; acc:</span><br><span class="line">            return c</span><br><span class="line"></span><br><span class="line"># 模拟一个语感很差的模型：50% 概率倾向输出非法字符 &#x27;x&#x27;</span><br><span class="line">model_probs = &#123;&#x27;1&#x27;: 0.2, &#x27;2&#x27;: 0.2, &#x27;x&#x27;: 0.5, &#x27;-&#x27;: 0.1&#125;</span><br><span class="line"></span><br><span class="line">state, out = 0, &#x27;&#x27;</span><br><span class="line">while not is_accept(state):</span><br><span class="line">    c = constrained_sample(model_probs, allowed(state))  # 采样空间已被硬剪枝</span><br><span class="line">    out += c</span><br><span class="line">    state = step(state, c)</span><br><span class="line"></span><br><span class="line">print(out)  # 无论模型分布多偏好 &#x27;x&#x27;，输出必为合法 JSON 数字</span><br><span class="line"># 结论：合法性由 FSM 硬保证，模型分布只在合法集合内部决定『选哪个』</span><br><span class="line"></span><br><span class="line"># 生产环境中的同一机制（OpenAI Structured Outputs）：</span><br><span class="line"># strict=True 即开启服务端约束解码，而非依赖提示词约束</span><br><span class="line">from openai import OpenAI</span><br><span class="line">import json</span><br><span class="line">client = OpenAI()</span><br><span class="line">resp = client.chat.completions.create(</span><br><span class="line">    model=&#x27;gpt-4o&#x27;,</span><br><span class="line">    messages=[&#123;&#x27;role&#x27;: &#x27;user&#x27;, &#x27;content&#x27;: &#x27;返回北京市今天的气温&#x27;&#125;],</span><br><span class="line">    response_format=&#123;&#x27;type&#x27;: &#x27;json_schema&#x27;, &#x27;json_schema&#x27;: &#123;</span><br><span class="line">        &#x27;name&#x27;: &#x27;weather&#x27;, &#x27;strict&#x27;: True,</span><br><span class="line">        &#x27;schema&#x27;: &#123;&#x27;type&#x27;: &#x27;object&#x27;,</span><br><span class="line">                   &#x27;properties&#x27;: &#123;&#x27;temperature&#x27;: &#123;&#x27;type&#x27;: &#x27;number&#x27;&#125;&#125;,</span><br><span class="line">                   &#x27;required&#x27;: [&#x27;temperature&#x27;],</span><br><span class="line">                   &#x27;additionalProperties&#x27;: False&#125;</span><br><span class="line">    &#125;&#125;</span><br><span class="line">)</span><br><span class="line">data = json.loads(resp.choices[0].message.content)  # 必然可解析且满足 schema</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为『结构化输出 &#x3D; 提示词约束 + JSON.parse 兜底』。提示词是软约束，模型以概率服从；JSON.parse 是后验检测，能发现非法却无法阻止非法 token 的产生。真实的结构化输出是解码期的硬约束：非法 token 在采样前 logit 已被置为 -inf，非法状态在概率空间不可达。工程上若只用提示词 + 解析重试，错误率随输出长度与 Schema 复杂度指数上升，且失败路径无法穷举。<br>误区二：混淆『JSON mode』与『JSON Schema mode』。response_format&#x3D;{‘type’:’json_object’} 只保证输出是合法 JSON 语法，不保证满足任何字段级约束——缺少 required 字段、出现额外字段、类型不符都是合法 JSON。只有将 Schema 编译进解码状态机的严格模式（strict:true &#x2F; guided_json）才提供语义级保证。同理，『校验』与『约束』不是一回事：校验是事后判定，约束是事前剪枝，前者无法提升一次生成的合法性概率，后者将合法性概率直接置为 1。<br>思考题：设第 t 步合法 token 集合 M_t 的原始概率质量 Z_t &#x3D; Σ_{i∈M_t} softmax(logits)_i 极低（如 0.001）。约束解码将分布截断并重归一化，等价于在分布上施加了一个巨大的 KL 惩罚。请分析：当采样温度 τ→0（贪心）时，这种强制截断会如何影响后续 token 的长期依赖？而当 τ 较大时，为何这种截断的破坏性反而较小？由此推导结构化输出的本质代价是什么——即『格式确定性』与『模型分布自然度』之间的兑换率由什么决定？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/04/foundation/2026-09-04-foundation-json/">https://litongjin.github.io/2026/09/04/foundation/2026-09-04-foundation-json/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%88LLM-Agent%EF%BC%89/">AI 开发基础（LLM &amp; Agent）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/04/foundation/2026-09-04-foundation-dns/" title="每日基础技术总结 · 2026-09-04 · DNS 解析流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-04 · DNS 解析流程</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/04/foundation/2026-09-04-foundation-sql-join/" title="每日基础技术总结 · 2026-09-04 · SQL 基础查询与 JOIN"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-04 · SQL 基础查询与 JOIN</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</div></div></a></div><div><a href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-22</div><div class="title">每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响</div></div></a></div><div><a href="/2026/08/24/foundation/2026-08-24-foundation-transformer/" title="每日基础技术总结 · 2026-08-24 · Transformer 架构简述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-24</div><div class="title">每日基础技术总结 · 2026-08-24 · Transformer 架构简述</div></div></a></div><div><a href="/2026/08/25/foundation/2026-08-25-foundation-token/" title="每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制</div></div></a></div><div><a href="/2026/08/26/foundation/2026-08-26-foundation-json/" title="每日基础技术总结 · 2026-08-26 · JSON 结构化输出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-26</div><div class="title">每日基础技术总结 · 2026-08-26 · JSON 结构化输出</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">378</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-04-%C2%B7-JSON-%E7%BB%93%E6%9E%84%E5%8C%96%E8%BE%93%E5%87%BA"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-04 · JSON 结构化输出</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/04/daily/2026-09-04-workbench-daily/" title="工作台日报 · 2026-09-04">工作台日报 · 2026-09-04</a><time datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/04/foundation/2026-09-04-foundation-dns/" title="每日基础技术总结 · 2026-09-04 · DNS 解析流程">每日基础技术总结 · 2026-09-04 · DNS 解析流程</a><time datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/04/foundation/2026-09-04-foundation-json/" title="每日基础技术总结 · 2026-09-04 · JSON 结构化输出">每日基础技术总结 · 2026-09-04 · JSON 结构化输出</a><time datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/04/foundation/2026-09-04-foundation-sql-join/" title="每日基础技术总结 · 2026-09-04 · SQL 基础查询与 JOIN">每日基础技术总结 · 2026-09-04 · SQL 基础查询与 JOIN</a><time datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/03/foundation/2026-09-03-foundation-74d8cf7d/" title="每日基础技术总结 · 2026-09-03 · 跳跃表的层数随机化与查找/插入路径">每日基础技术总结 · 2026-09-03 · 跳跃表的层数随机化与查找/插入路径</a><time datetime="2026-09-03T00:00:00.000Z" title="发表于 2026-09-03 08:00:00">2026-09-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/03/foundation/2026-09-03-foundation-85c6f0a1/" title="每日基础技术总结 · 2026-09-03 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解">每日基础技术总结 · 2026-09-03 · 反向传播中梯度消失与梯度爆炸的数学根源与缓解</a><time datetime="2026-09-03T00:00:00.000Z" title="发表于 2026-09-03 08:00:00">2026-09-03</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
