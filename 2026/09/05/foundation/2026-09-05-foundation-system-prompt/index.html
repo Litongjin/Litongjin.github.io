@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定📚 今日主题 System Prompt 的角色设定（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览System Prompt 是发送给大语言模型（LLM）的、位于用户对话之前的首条系统级指令，其本质是模型生成过程的先验约束条件。它不参与用户业务内容本身，而是通过设定模型的角色身份、任">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/05/foundation/2026-09-05-foundation-system-prompt/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定📚 今日主题 System Prompt 的角色设定（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览System Prompt 是发送给大语言模型（LLM）的、位于用户对话之前的首条系统级指令，其本质是模型生成过程的先验约束条件。它不参与用户业务内容本身，而是通过设定模型的角色身份、任">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-04T23:14:02.000Z">
+<meta property="article:modified_time" content="2026-09-04T23:18:31.601Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础（LLM &amp; Agent）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/05/foundation/2026-09-05-foundation-system-prompt/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-05 07:18:31'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">382</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-04T23:14:02.000Z" title="发表于 2026-09-05 07:14:02">2026-09-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-04T23:18:31.601Z" title="更新于 2026-09-05 07:18:31">2026-09-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-05-·-System-Prompt-的角色设定"><a href="#每日基础技术总结-·-2026-09-05-·-System-Prompt-的角色设定" class="headerlink" title="每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定"></a>每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>System Prompt 的角色设定</strong>（AI 开发基础（LLM &amp; Agent））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>System Prompt 是发送给大语言模型（LLM）的、位于用户对话之前的首条系统级指令，其本质是模型生成过程的先验约束条件。它不参与用户业务内容本身，而是通过设定模型的角色身份、任务边界、输出格式、价值观过滤与推理策略，直接改变模型在高维概率空间中的条件概率分布。它解决的问题是：让一个通用语言模型在特定上下文中表现出领域专用、行为可控、输出稳定的能力。机制上，System Prompt 与用户消息拼接后作为模型的完整上下文输入，模型基于该分段前缀进行自回归解码，因此它对后续所有生成token的分布产生系统性偏移。在AI体系中的位置：它是LLM应用层与模型能力层之间的‘契约层’，是Agent设计中控制行为的主要杠杆之一。专业工程师必须掌握它，因为它决定了系统行为的确定性边界；不理解System Prompt即是无法理解LLM应用系统的行为可控性来源。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层运行本质：LLM是一个条件语言模型 P(x_{t+1}|x_1,…,x_t)。System Prompt 被拼接在序列的最前端，作为前缀的一部分参与注意力计算。在Transformer的自回归解码中，每个新token的条件概率依赖于整个前缀的注意力加权表征；因此System Prompt中的语义信息会通过多头自注意力机制传播到所有后续位置，从根因上改变解码分布。伪代码描述：1. 构造输入序列 tokens &#x3D; [BOS] + tokenize(system_prompt) + tokenize(user_message) + …；2. 模型计算每个位置的hidden state，其中system_prompt对应的hidden state通过attention机制影响user_message位置；3. 解码下一个token时，softmax输出概率为 P(next|tokens, weights)；System Prompt的作用等价于在prefix中注入先验分布，类似于贝叶斯推断中的先验，但它是通过梯度训练和上下文学习共同实现的。与前端概念的对比：类比TypeScript的接口与Java的接口——System Prompt类似TS的接口（结构化约定，运行时通过编译期约束影响行为），但底层完全不同。TS接口只在编译期进行类型检查，不生成运行时代码；System Prompt在运行期直接参与模型推理计算。Java接口是运行时多态契约，强制实现类遵循方法签名；System Prompt是‘软契约’，模型并非强制遵循，而是倾向于遵循，其约束力来自训练数据和注意力权重，而非语言规范。真正的底层异同：System Prompt不是可执行代码，而是数据；它的执行者不是虚拟机，而是神经网络的前向传播。因此其效果具有概率性、上下文相关性和可操纵性。更精确的模型：System Prompt可以视为对模型hidden state的一个定向干预，等价于在特征空间中施加一个方向向量，使得生成轨迹偏向该方向。多个System Prompt共存时，其作用近似于向量的线性叠加（但非严格线性，因为注意力机制非线性）。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">极简验证代码（无需深度框架，使用OpenAI API风格，实际验证System Prompt对输出分布的影响）：</span><br><span class="line"></span><br><span class="line">import openai</span><br><span class="line"></span><br><span class="line">client = openai.OpenAI(api_key=&quot;...&quot;)</span><br><span class="line"></span><br><span class="line"># 定义System Prompt：它被拼接在对话的最前端，是序列前缀的一部分</span><br><span class="line">system_prompt = &quot;你是一个只输出JSON的内核模块，任何回答必须是合法JSON，不得包含其他字符。&quot;</span><br><span class="line"></span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=&quot;gpt-4o-mini&quot;,</span><br><span class="line">    messages=[</span><br><span class="line">        &#123;&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system_prompt&#125;,  # 这一条会被tokenize后放在序列最前端，其hidden state通过自注意力影响后续所有位置</span><br><span class="line">        &#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;请描述网络协议栈的层次&quot;&#125;  # 后续输入，其attention会关注到system_prompt的语义约束</span><br><span class="line">    ],</span><br><span class="line">    temperature=0  # 温度设为0，使得解码确定性，便于验证System Prompt的因果效应</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(response.choices[0].message.content)  # 输出应为类似：&#123;&quot;message&quot;:&quot;...&quot;&#125;，证明系统指令改变了生成分布；若移除system_prompt，同样的用户输入会产生自由文本。</span><br><span class="line"></span><br><span class="line">文字化伪代码（深入机制）：</span><br><span class="line"></span><br><span class="line">def generate_with_system(system_prompt, user_prompt):</span><br><span class="line">    # 1. 将role信息也编码为分隔token（如&lt;|im_start|&gt;和&lt;|im_end|&gt;）</span><br><span class="line">    input_ids = tokenizer.encode(&quot;&lt;|im_start|&gt;system\n&quot; + system_prompt + &quot;&lt;|im_end|&gt;\n&lt;|im_start|&gt;user\n&quot; + user_prompt)</span><br><span class="line">    # 2. 模型前向传播：每个token的query会与所有前缀token的key做点积，因此system_prompt中的语义（如&#x27;只输出JSON&#x27;）会体现在注意力权重中</span><br><span class="line">    # 3. 输出logits，softmax后采样，系统角色约束通过logits的偏移体现</span><br><span class="line">    return model(input_ids)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为System Prompt只是‘人设包装’，删掉也不影响功能。实际上它改变了模型的概率分布，即便只是添加‘你是工程师’也会显著影响推理风格和内容准确性。专业工程师应将System Prompt视为与代码参数等价的调优对象，需要版本管理、A&#x2F;B测试和效果评估。<br>误区二：试图用System Prompt强制实现确定性规则（如‘必须返回合法JSON’），并在生产环境完全依赖它。由于LLM是概率模型，System Prompt的约束是软性的；错误场景下可能失败。底层本质是：约束必须通过解码后处理（如JSON解析、格式校验和重试机制）来硬化。正确认知是：System Prompt定义先验，后验行为仍需后置逻辑保证。<br>思考题：给定一个固定模型和固定用户输入，单独修改System Prompt中的某个限定词（例如将‘工程师’改为‘医生’），模型的输出变化是否仅发生在语义层面？请从注意力机制和hidden state空间的角度回答：为什么一个极小的System Prompt差异可能导致完全不同的token序列？提示：考虑attention weight的分布漂移和长距离依赖的指数放大效应。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/05/foundation/2026-09-05-foundation-system-prompt/">https://litongjin.github.io/2026/09/05/foundation/2026-09-05-foundation-system-prompt/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%88LLM-Agent%EF%BC%89/">AI 开发基础（LLM &amp; Agent）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/05/foundation/2026-09-05-foundation-python/" title="每日基础技术总结 · 2026-09-05 · Python 基础语法与数据结构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-05 · Python 基础语法与数据结构</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/05/foundation/2026-09-05-foundation-restful-api/" title="每日基础技术总结 · 2026-09-05 · RESTful API 设计规范"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-05 · RESTful API 设计规范</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</div></div></a></div><div><a href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-22</div><div class="title">每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响</div></div></a></div><div><a href="/2026/08/24/foundation/2026-08-24-foundation-transformer/" title="每日基础技术总结 · 2026-08-24 · Transformer 架构简述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-24</div><div class="title">每日基础技术总结 · 2026-08-24 · Transformer 架构简述</div></div></a></div><div><a href="/2026/08/25/foundation/2026-08-25-foundation-token/" title="每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制</div></div></a></div><div><a href="/2026/08/26/foundation/2026-08-26-foundation-json/" title="每日基础技术总结 · 2026-08-26 · JSON 结构化输出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-26</div><div class="title">每日基础技术总结 · 2026-08-26 · JSON 结构化输出</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">382</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-05-%C2%B7-System-Prompt-%E7%9A%84%E8%A7%92%E8%89%B2%E8%AE%BE%E5%AE%9A"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/05/daily/2026-09-05-workbench-daily/" title="工作台日报 · 2026-09-05">工作台日报 · 2026-09-05</a><time datetime="2026-09-04T23:14:02.000Z" title="发表于 2026-09-05 07:14:02">2026-09-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/05/foundation/2026-09-05-foundation-python/" title="每日基础技术总结 · 2026-09-05 · Python 基础语法与数据结构">每日基础技术总结 · 2026-09-05 · Python 基础语法与数据结构</a><time datetime="2026-09-04T23:14:02.000Z" title="发表于 2026-09-05 07:14:02">2026-09-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/05/foundation/2026-09-05-foundation-system-prompt/" title="每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定">每日基础技术总结 · 2026-09-05 · System Prompt 的角色设定</a><time datetime="2026-09-04T23:14:02.000Z" title="发表于 2026-09-05 07:14:02">2026-09-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/05/foundation/2026-09-05-foundation-restful-api/" title="每日基础技术总结 · 2026-09-05 · RESTful API 设计规范">每日基础技术总结 · 2026-09-05 · RESTful API 设计规范</a><time datetime="2026-09-04T23:14:02.000Z" title="发表于 2026-09-05 07:14:02">2026-09-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/04/daily/2026-09-04-workbench-daily/" title="工作台日报 · 2026-09-04">工作台日报 · 2026-09-04</a><time datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/04/foundation/2026-09-04-foundation-dns/" title="每日基础技术总结 · 2026-09-04 · DNS 解析流程">每日基础技术总结 · 2026-09-04 · DNS 解析流程</a><time datetime="2026-09-03T23:01:36.000Z" title="发表于 2026-09-04 07:01:36">2026-09-04</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
