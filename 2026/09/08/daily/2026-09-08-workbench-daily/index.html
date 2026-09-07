@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>工作台日报 · 2026-09-08 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="工作台日报 · 2026-09-08🔥 行业热点 Trusting-Trust Attack against an Entire Linux Distribution — Hacker News 📌 内容：讨论针对整个 Linux 发行版的“信任之信任”攻击，展示构建链后门如何不留痕迹地扩散恶意代码。 💡 学习：理解供应链攻击原理以及可信构建、重复构建与审计等防御手段。 🧭 拓展：可尝试复">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工作台日报 · 2026-09-08">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/08/daily/2026-09-08-workbench-daily/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="工作台日报 · 2026-09-08🔥 行业热点 Trusting-Trust Attack against an Entire Linux Distribution — Hacker News 📌 内容：讨论针对整个 Linux 发行版的“信任之信任”攻击，展示构建链后门如何不留痕迹地扩散恶意代码。 💡 学习：理解供应链攻击原理以及可信构建、重复构建与审计等防御手段。 🧭 拓展：可尝试复">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-07T23:13:39.000Z">
+<meta property="article:modified_time" content="2026-09-07T23:25:08.792Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="日报">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="供应链安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/08/daily/2026-09-08-workbench-daily/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '工作台日报 · 2026-09-08',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-08 07:25:08'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">400</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">45</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">工作台日报 · 2026-09-08</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-07T23:13:39.000Z" title="发表于 2026-09-08 07:13:39">2026-09-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-07T23:25:08.792Z" title="更新于 2026-09-08 07:25:08">2026-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/">工作日记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="工作台日报 · 2026-09-08"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="工作台日报-·-2026-09-08"><a href="#工作台日报-·-2026-09-08" class="headerlink" title="工作台日报 · 2026-09-08"></a>工作台日报 · 2026-09-08</h1><h2 id="🔥-行业热点"><a href="#🔥-行业热点" class="headerlink" title="🔥 行业热点"></a>🔥 行业热点</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2607.24888">Trusting-Trust Attack against an Entire Linux Distribution</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：讨论针对整个 Linux 发行版的“信任之信任”攻击，展示构建链后门如何不留痕迹地扩散恶意代码。</li>
+<li>💡 <strong>学习</strong>：理解供应链攻击原理以及可信构建、重复构建与审计等防御手段。</li>
+<li>🧭 <strong>拓展</strong>：可尝试复现最小化信任链攻击实验，研究发行版构建的可重复性。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://www.economist.com/finance-and-economics/2026/09/04/the-jobs-apocalypse-is-postponed-an-ai-jobs-boom-is-here">Initial effects of AI technology on employment look positive</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：报道 AI 技术对就业的初期影响，认为更多是改善而非替代。</li>
+<li>💡 <strong>学习</strong>：关注 AI 对开发者工作方式的改变，探索利用 AI 提升效率的新技能。</li>
+<li>🧭 <strong>拓展</strong>：结合自身岗位观察 AI 工具带来的效率变化，进行数据化复盘。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://tiiny.ai/">The smallest edge AI device for local LLMs</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：介绍体积最小的边缘 AI 设备，可实现本地运行大语言模型，强调端侧推理能力。</li>
+<li>💡 <strong>学习</strong>：了解边缘部署 LLM 的算力约束、量化方法和模型压缩技术。</li>
+<li>🧭 <strong>拓展</strong>：尝试在树莓派等低功耗设备上部署小模型来体验。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=6IFVTcM28KA">216M Spy TVs – The LG Smart TV Problem [video]</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：揭示 LG 智能电视存在隐私风险，可能被远程监控或数据收集，涉及大量设备。</li>
+<li>💡 <strong>学习</strong>：认识智能设备安全风险，学习如何评估固件与通信协议中的数据泄露。</li>
+<li>🧭 <strong>拓展</strong>：对智能设备进行网络流量抓包分析，验证隐私行为。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://austinhenley.com/blog/python1024.html">Making a Python interpreter in 1024 bytes</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：展示用极简代码实现 Python 解释器的技巧，挑战极小体积下的核心功能。</li>
+<li>💡 <strong>学习</strong>：通过极小实现理解解释器结构、词法分析和执行流程。</li>
+<li>🧭 <strong>拓展</strong>：阅读源码并尝试扩展支持更多语法，检验对解释器的理解。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://news.ycombinator.com/item?id=49589914">Ask HN: How do you manage skills files?</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：HN 上关于开发者如何管理技能&#x2F;知识文件的讨论，涉及个人知识管理工具与流程。</li>
+<li>💡 <strong>学习</strong>：学习用笔记、Git 仓库或数据库组织技能文档的方法，建立自己的知识系统。</li>
+<li>🧭 <strong>拓展</strong>：尝试用 Markdown + Git 搭建可版本化的技能清单。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://mathathonchallenge.com/index.html">Caltech Mathathon – first hackathon ever devoted to research level mathematics</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：介绍 Caltech 举办的首个面向研究级数学的黑客马拉松，融合数学与编程。</li>
+<li>💡 <strong>学习</strong>：了解如何用计算机辅助数学研究，包括定理证明和数值实验。</li>
+<li>🧭 <strong>拓展</strong>：参与类似活动，或用 Python&#x2F;Sage 进行数学探索。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://deepmind.google/science/weathernext/">WeatherNext 3</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：或为新一代 AI 天气预报模型相关消息，利用深度学习提升预报精度。</li>
+<li>💡 <strong>学习</strong>：学习 AI 在科学计算中的应用，如图神经网络和扩散模型在时序预测中的使用。</li>
+<li>🧭 <strong>拓展</strong>：查阅相关论文，尝试用公开气象数据训练小型模型。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://jyn.dev/simple-is-not-the-same-as-small/">Simple Is Not Small</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：探讨“简单”不等于代码量少，强调清晰设计比追求体积更重要的编程哲学。</li>
+<li>💡 <strong>学习</strong>：理解软件设计中抽象、模块化和可读性之间的平衡。</li>
+<li>🧭 <strong>拓展</strong>：重构一个小项目，对比简化逻辑与压缩代码的效果。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://ladybird.org/newsletter/2026-08-31/">This Month in Ladybird – August 2026</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：Ladybird 开源浏览器项目的月度进展报告，展示浏览器引擎开发动态。</li>
+<li>💡 <strong>学习</strong>：关注浏览器内核的渲染、网络、JS 实现细节，了解现代浏览器架构。</li>
+<li>🧭 <strong>拓展</strong>：编译 Ladybird 并参与 issue 讨论，实践开源协作。</li>
+</ul>
+</li>
+</ul>
+<h2 id="🚀-技能提升点（工作总结汇总）"><a href="#🚀-技能提升点（工作总结汇总）" class="headerlink" title="🚀 技能提升点（工作总结汇总）"></a>🚀 技能提升点（工作总结汇总）</h2><h3 id="1-Quill-Delta-与-HTML-同步"><a href="#1-Quill-Delta-与-HTML-同步" class="headerlink" title="1. Quill Delta 与 HTML 同步"></a>1. Quill Delta 与 HTML 同步</h3><ul>
+<li><strong>技能点</strong>：掌握 vue-quill 的 getContents()&#x2F;getHTML() API 差异：同步 v-model 或做文本处理前必须取得真实 HTML，而不是把 Delta 文档模型当 HTML 消费。</li>
+<li><strong>坑点</strong>：误用 getContents().trim() 后用 DOMParser 解析，modelValue 被 Delta JSON 文本（含转义的 &lt;）污染，导致后续替换&#x2F;校对路径全部失配。</li>
+<li><strong>解决方案</strong>：改为 quillRef.value?.getHTML?.() ?? ‘’，从 Quill 真实 innerHTML 取内容，并用 jsdom + 自定义 blot 端到端验证替换链路。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 错：getContents() 返回 Delta</span><br><span class="line">const html = quillRef.value?.getContents().trim()</span><br><span class="line">// 对：取真实 innerHTML</span><br><span class="line">const html = quillRef.value?.getHTML?.() ?? &#x27;&#x27;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：封装任何富文本编辑器都要先厘清文档模型与渲染 HTML 两层，内容同步、脏检查、导出应统一走 HTML 通道。</li>
+</ul>
+<h3 id="2-HTML-属性内-LaTeX-转义与解析"><a href="#2-HTML-属性内-LaTeX-转义与解析" class="headerlink" title="2. HTML 属性内 LaTeX 转义与解析"></a>2. HTML 属性内 LaTeX 转义与解析</h3><ul>
+<li><strong>技能点</strong>：把 LaTeX&#x2F;代码嵌进 HTML 属性前必须实体化 &lt; &gt;；解析 HTML 时用引号感知扫描定位标签结束，避免属性值内的原始字符截断标签。</li>
+<li><strong>坑点</strong>：raw latex 直接塞进 data-formula 属性，flattenToPlain 用 indexOf(‘&gt;’) 找标签尾被属性里的 &gt; 拦腰截断，公式内容丢失导致高亮失配；DOMParser 也会把裸 &lt; 当标签开始。</li>
+<li><strong>解决方案</strong>：存储侧一律转义为 &lt;&#x2F;&gt;；解析侧用 findTagEnd 跳过引号内的 &gt;，并用 [^”‘]* 提取属性值；替换回写时统一重编码实体。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">function findTagEnd(html, start) &#123;</span><br><span class="line">  let inQuote = false</span><br><span class="line">  for (let i = start + 1; i &lt; html.length; i++) &#123;</span><br><span class="line">    const code = html.charCodeAt(i)</span><br><span class="line">    if (code === 0x22 || code === 0x27) inQuote = !inQuote</span><br><span class="line">    if (html[i] === &#x27;&gt;&#x27; &amp;&amp; !inQuote) return i</span><br><span class="line">  &#125;</span><br><span class="line">  return -1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：适用于所有将代码&#x2F;公式&#x2F;模板串嵌入 HTML 属性的场景；更优做法是在公共序列化层统一转义，避免各业务解析侧各自兜底。</li>
+</ul>
+<h3 id="3-容空白匹配-AI-生成文本"><a href="#3-容空白匹配-AI-生成文本" class="headerlink" title="3. 容空白匹配 AI 生成文本"></a>3. 容空白匹配 AI 生成文本</h3><ul>
+<li><strong>技能点</strong>：建立’严格替换优先、容空白正则兜底’的匹配策略，解决原始文本与目标正文仅空白不一致导致的失配。</li>
+<li><strong>坑点</strong>：AI 生成的 original 与正文 latex 只差空格（一个无空格、一个有空格），escapeRegExp 严格字面匹配永远失败，表现为同批 typo 有的命中有的不命中。</li>
+<li><strong>解决方案</strong>：用 buildWhitespaceTolerantRegex 把每字符间允许 \s*，纯空白返回 null；mark&#x2F;replace 两层均先严格后宽容，collectRanges 剔除首尾空白防吞边界。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">function buildWhitespaceTolerantRegex(str) &#123;</span><br><span class="line">  if (!str.trim()) return null</span><br><span class="line">  const parts = [...str].map(escapeRegExp)</span><br><span class="line">  return new RegExp(parts.join(&#x27;\\s*&#x27;))</span><br><span class="line">&#125;</span><br><span class="line">// 用法：先严格，失败后宽容</span><br><span class="line">const result = strictReplace(source, original, corrected) ?? tolerantReplace(source, tolerant, corrected)</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：适用于错别字校对、关键词高亮、OCR 对齐、用户输入匹配等场景；正则只吞空白不吞非空白，避免跨标签误匹配。</li>
+</ul>
+<h3 id="4-Quill-工具栏配置-flatMap-展平"><a href="#4-Quill-工具栏配置-flatMap-展平" class="headerlink" title="4. Quill 工具栏配置 flatMap 展平"></a>4. Quill 工具栏配置 flatMap 展平</h3><ul>
+<li><strong>技能点</strong>：理解 Quill addControls 要求单个 control 是独立对象；在可编程配置组装层对所有可能返回数组的项做扁平化，避免数组被错误解析。</li>
+<li><strong>坑点</strong>：list&#x2F;indent 的默认配置返回数组，order.map 后数组项被 Quill 当作对象以 ‘0’ 为 format 名，生成 value&#x3D;[object Object] 的 ql-0 空按钮。</li>
+<li><strong>解决方案</strong>：将 order.map 改为 order.flatMap，数组项展开为独立 control；’formula&#x2F;image’ 等 handler 无条件注册，保证业务只传按钮名即可用。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">const controls = order.flatMap((name) =&gt; &#123;</span><br><span class="line">  const cfg = getDefaultButtonConfig(name)</span><br><span class="line">  return Array.isArray(cfg) ? cfg : [cfg]</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：动态表单、路由、菜单等配置同样存在’一项可对应多实例’的边界，统一在入口 flatten 是消除下游歧义的最稳做法。</li>
+<li><em>来源：admin-workspace-new 2026-08-12</em></li>
+</ul>
+<h3 id="5-Vue-watch-双向同步防循环"><a href="#5-Vue-watch-双向同步防循环" class="headerlink" title="5. Vue watch 双向同步防循环"></a>5. Vue watch 双向同步防循环</h3><ul>
+<li><strong>技能点</strong>：解决 Vue 中跨状态双向同步的无限递归：每次写回前比较值是否真正变化，数组引用变化不等于值变化。</li>
+<li><strong>坑点</strong>：折叠标志 → localPanelSizes（新数组引用）→ 深 watch 回写标志，即使最终值不变也因新引用持续互相触发，报 Maximum recursive updates exceeded。</li>
+<li><strong>解决方案</strong>：计算 next 后与当前面板尺寸逐项比较，相同则直接 return；deep watch 回写标志前也先判断 当前值 !&#x3D;&#x3D; 推导值 再赋值，只做必要写回。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">const syncSizesFromFlags = () =&gt; &#123;</span><br><span class="line">  const next = [leftWidth, &#x27;auto&#x27;, rightWidth]</span><br><span class="line">  if (next.every((v, i) =&gt; v === localPanelSizes.value[i])) return</span><br><span class="line">  localPanelSizes.value = next</span><br><span class="line">&#125;</span><br><span class="line">// deep watch 回写标志前同样先比较</span><br><span class="line">if (isFilePreviewFolded.value !== deriveFolded(localPanelSizes.value[0])) &#123;</span><br><span class="line">  isFilePreviewFolded.value = deriveFolded(localPanelSizes.value[0])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：受控组件、表单与 store 同步、面板状态联动等所有双向 watch 都可套用’比较后写回’守卫；如可去掉双向依赖链则更佳。</li>
+<li><em>来源：admin-workspace 2026-08-11</em></li>
+</ul>
+<h3 id="6-按需引入组件需显式加载-CSS"><a href="#6-按需引入组件需显式加载-CSS" class="headerlink" title="6. 按需引入组件需显式加载 CSS"></a>6. 按需引入组件需显式加载 CSS</h3><ul>
+<li><strong>技能点</strong>：排查按需注册组件（unplugin&#x2F;Resolver）导致的样式失效：注册组件不等于加载对应 CSS，复杂组件要逐一验证样式存在。</li>
+<li><strong>坑点</strong>：element-plus splitter 按需注册但 el-splitter.css 未引入，.el-splitter 退化为普通 block，方向错乱、拖拽&#x2F;折叠不可见；反复改外层 flex 均无效。</li>
+<li><strong>解决方案</strong>：在组件文件显式 import ‘element-plus&#x2F;theme-chalk&#x2F;el-splitter.css’ 与 el-splitter-panel.css；折叠图标&#x2F;伪元素需覆盖默认 display:none。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import &#x27;element-plus/theme-chalk/el-splitter.css&#x27;</span><br><span class="line">import &#x27;element-plus/theme-chalk/el-splitter-panel.css&#x27;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：更普适的检查顺序：先确认根容器方向是对的，再看组件 CSS 是否被真正加载，最后才动 flex&#x2F;高度，避免用样式打补丁掩盖资源缺失。</li>
+<li><em>来源：admin-workspace MEMORY.md</em></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/08/daily/2026-09-08-workbench-daily/">https://litongjin.github.io/2026/09/08/daily/2026-09-08-workbench-daily/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%97%A5%E6%8A%A5/">日报</a><a class="post-meta__tags" href="/tags/AI/">AI</a><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/%E4%BE%9B%E5%BA%94%E9%93%BE%E5%AE%89%E5%85%A8/">供应链安全</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/08/foundation/2026-09-08-foundation-javascript/" title="每日基础技术总结 · 2026-09-08 · JavaScript 垃圾回收机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-08 · JavaScript 垃圾回收机制</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/08/foundation/2026-09-08-foundation-sse-server-sent-events/" title="每日基础技术总结 · 2026-09-08 · SSE（Server-Sent Events）协议原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-08 · SSE（Server-Sent Events）协议原理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/daily/2026-08-19-workbench-daily/" title="工作台日报 · 2026-08-19"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">工作台日报 · 2026-08-19</div></div></a></div><div><a href="/2026/08/22/daily/2026-08-22-workbench-daily/" title="工作台日报 · 2026-08-22"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-22</div><div class="title">工作台日报 · 2026-08-22</div></div></a></div><div><a href="/2026/08/24/daily/2026-08-24-workbench-daily/" title="工作台日报 · 2026-08-24"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-24</div><div class="title">工作台日报 · 2026-08-24</div></div></a></div><div><a href="/2026/08/25/daily/2026-08-25-workbench-daily/" title="工作台日报 · 2026-08-25"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">工作台日报 · 2026-08-25</div></div></a></div><div><a href="/2026/08/26/daily/2026-08-26-workbench-daily/" title="工作台日报 · 2026-08-26"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-26</div><div class="title">工作台日报 · 2026-08-26</div></div></a></div><div><a href="/2026/08/27/daily/2026-08-27-workbench-daily/" title="工作台日报 · 2026-08-27"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-27</div><div class="title">工作台日报 · 2026-08-27</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">400</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">45</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8F%B0%E6%97%A5%E6%8A%A5-%C2%B7-2026-09-08"><span class="toc-number">1.</span> <span class="toc-text">工作台日报 · 2026-09-08</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%A5-%E8%A1%8C%E4%B8%9A%E7%83%AD%E7%82%B9"><span class="toc-number">1.1.</span> <span class="toc-text">🔥 行业热点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%9A%80-%E6%8A%80%E8%83%BD%E6%8F%90%E5%8D%87%E7%82%B9%EF%BC%88%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93%E6%B1%87%E6%80%BB%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">🚀 技能提升点（工作总结汇总）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Quill-Delta-%E4%B8%8E-HTML-%E5%90%8C%E6%AD%A5"><span class="toc-number">1.2.1.</span> <span class="toc-text">1. Quill Delta 与 HTML 同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-HTML-%E5%B1%9E%E6%80%A7%E5%86%85-LaTeX-%E8%BD%AC%E4%B9%89%E4%B8%8E%E8%A7%A3%E6%9E%90"><span class="toc-number">1.2.2.</span> <span class="toc-text">2. HTML 属性内 LaTeX 转义与解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%B9%E7%A9%BA%E7%99%BD%E5%8C%B9%E9%85%8D-AI-%E7%94%9F%E6%88%90%E6%96%87%E6%9C%AC"><span class="toc-number">1.2.3.</span> <span class="toc-text">3. 容空白匹配 AI 生成文本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Quill-%E5%B7%A5%E5%85%B7%E6%A0%8F%E9%85%8D%E7%BD%AE-flatMap-%E5%B1%95%E5%B9%B3"><span class="toc-number">1.2.4.</span> <span class="toc-text">4. Quill 工具栏配置 flatMap 展平</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-Vue-watch-%E5%8F%8C%E5%90%91%E5%90%8C%E6%AD%A5%E9%98%B2%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.5.</span> <span class="toc-text">5. Vue watch 双向同步防循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E7%BB%84%E4%BB%B6%E9%9C%80%E6%98%BE%E5%BC%8F%E5%8A%A0%E8%BD%BD-CSS"><span class="toc-number">1.2.6.</span> <span class="toc-text">6. 按需引入组件需显式加载 CSS</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/08/foundation/2026-09-08-foundation-javascript/" title="每日基础技术总结 · 2026-09-08 · JavaScript 垃圾回收机制">每日基础技术总结 · 2026-09-08 · JavaScript 垃圾回收机制</a><time datetime="2026-09-07T23:13:39.000Z" title="发表于 2026-09-08 07:13:39">2026-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/08/daily/2026-09-08-workbench-daily/" title="工作台日报 · 2026-09-08">工作台日报 · 2026-09-08</a><time datetime="2026-09-07T23:13:39.000Z" title="发表于 2026-09-08 07:13:39">2026-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/08/foundation/2026-09-08-foundation-sse-server-sent-events/" title="每日基础技术总结 · 2026-09-08 · SSE（Server-Sent Events）协议原理">每日基础技术总结 · 2026-09-08 · SSE（Server-Sent Events）协议原理</a><time datetime="2026-09-07T23:13:39.000Z" title="发表于 2026-09-08 07:13:39">2026-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/08/foundation/2026-09-08-foundation-tcp/" title="每日基础技术总结 · 2026-09-08 · TCP 三次握手 / 四次挥手">每日基础技术总结 · 2026-09-08 · TCP 三次握手 / 四次挥手</a><time datetime="2026-09-07T23:13:39.000Z" title="发表于 2026-09-08 07:13:39">2026-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/07/daily/2026-09-07-workbench-daily/" title="工作台日报 · 2026-09-07">工作台日报 · 2026-09-07</a><time datetime="2026-09-06T23:01:27.000Z" title="发表于 2026-09-07 07:01:27">2026-09-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/07/foundation/2026-09-07-foundation-typescript/" title="每日基础技术总结 · 2026-09-07 · TypeScript 类型推导原理">每日基础技术总结 · 2026-09-07 · TypeScript 类型推导原理</a><time datetime="2026-09-06T23:01:27.000Z" title="发表于 2026-09-07 07:01:27">2026-09-07</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
