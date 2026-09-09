@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-10 · Transformer 架构简述 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-10 · Transformer 架构简述📚 今日主题 Transformer 架构简述（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览Transformer 是一种基于纯注意力机制（Attention Mechanism）的序列到序列（Seq2Seq）架构，由 Vaswani 等人在 2017 年提出。其本质是用『全局依赖建模』替">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-10 · Transformer 架构简述">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/10/foundation/2026-09-10-foundation-transformer/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-10 · Transformer 架构简述📚 今日主题 Transformer 架构简述（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览Transformer 是一种基于纯注意力机制（Attention Mechanism）的序列到序列（Seq2Seq）架构，由 Vaswani 等人在 2017 年提出。其本质是用『全局依赖建模』替">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-09T23:01:19.000Z">
+<meta property="article:modified_time" content="2026-09-09T23:21:55.711Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础（LLM &amp; Agent）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/10/foundation/2026-09-10-foundation-transformer/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-10 · Transformer 架构简述',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-10 07:21:55'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">414</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-10 · Transformer 架构简述</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-09T23:01:19.000Z" title="发表于 2026-09-10 07:01:19">2026-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-09T23:21:55.711Z" title="更新于 2026-09-10 07:21:55">2026-09-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-10 · Transformer 架构简述"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-10-·-Transformer-架构简述"><a href="#每日基础技术总结-·-2026-09-10-·-Transformer-架构简述" class="headerlink" title="每日基础技术总结 · 2026-09-10 · Transformer 架构简述"></a>每日基础技术总结 · 2026-09-10 · Transformer 架构简述</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Transformer 架构简述</strong>（AI 开发基础（LLM &amp; Agent））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Transformer 是一种基于纯注意力机制（Attention Mechanism）的序列到序列（Seq2Seq）架构，由 Vaswani 等人在 2017 年提出。其本质是用『全局依赖建模』替代循环神经网络（RNN）的『逐步递推状态传递』，通过并行计算所有位置间的加权交互来捕获上下文关系。它解决的问题是：长距离依赖中的梯度消失&#x2F;爆炸、顺序计算的不可并行性，以及传统注意力机制无法直接作为独立层堆叠的问题。在整个计算机&#x2F;AI 体系中，Transformer 是当前大语言模型（LLM）、多模态模型（如 ViT）的骨干网络，也是 Agent 系统中感知、规划、推理模块的核心算子。专业工程师必须掌握它，因为现代 AI 应用的性能优化、服务部署、推理加速、Token 成本控制，其底层都直接受 Transformer 的注意力复杂度、KV Cache、上下文窗口等机制约束，理解架构才能从原理上理解显存占用、延迟瓶颈和模型行为。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>Transformer 的核心是可缩放的点积注意力（Scaled Dot-Product Attention）。给定查询矩阵 Q、键矩阵 K、值矩阵 V，注意力输出为 Attention(Q,K,V) &#x3D; softmax(QK^T &#x2F; sqrt(d_k)) V。其中 d_k 是键的维度，除以 sqrt(d_k) 是为了防止点积值过大导致 softmax 梯度消失。Q、K、V 均由输入序列 X 通过三个可学习的线性投影得到：Q &#x3D; XW_Q, K &#x3D; XW_K, V &#x3D; XW_V。多头注意力（Multi-Head Attention）将 Q、K、V 切分为 h 个维度为 d_k&#x2F;h 的子空间，分别计算注意力后拼接，再经线性投影，使得模型能在不同表示子空间捕获不同类型的依赖关系。Transformer 的每个编码器&#x2F;解码器层包含两个子层（解码器为三个）：多头注意力、前馈网络（FFN，即两层线性变换+ReLU 或 GELU），每个子层后添加残差连接（Residual Connection）和层归一化（Layer Normalization）。位置编码（Positional Encoding）是必须的，因为注意力是位置不变的（Permutation Invariant），不引入位置信息则序列顺序完全丢失；原始实现使用正弦&#x2F;余弦函数生成固定位置编码，后续研究使用可学习位置编码或旋转位置编码（RoPE）。与前端工程师熟悉的『接口』概念对比：Java 的接口是编译期约束类型行为的契约，TypeScript 的接口是结构类型系统的静态约定，而 Transformer 的『接口』实质是张量的形状约定——输入 [batch, seq_len, d_model]，经各层后输出相同形状，这种约定的执行发生在运行时，且由矩阵乘法的维度匹配强制，而非编译期类型检查。Transformer 的核心计算流程如下：输入 Token Embedding [B, T, d] → 加位置编码 → 重复 L 次：注意力（QKV 投影、点积、缩放、Softmax、加权求和、输出投影）→ 残差 → LayerNorm → FFN → 残差 → LayerNorm → 输出。自回归解码时需使用因果掩码（Causal Mask）保证位置 i 只能 attend 到 j ≤ i。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">以下为极简纯 Python + NumPy 实现单层单头 Transformer 编码器的核心部分，不依赖框架，用于验证注意力机制与残差归一化流程。</span><br><span class="line"></span><br><span class="line">import numpy as np</span><br><span class="line"></span><br><span class="line">def softmax(x):</span><br><span class="line">    # 沿最后一个维度做稳定 softmax，减去最大值防止 exp 溢出</span><br><span class="line">    e = np.exp(x - np.max(x, axis=-1, keepdims=True))</span><br><span class="line">    return e / np.sum(e, axis=-1, keepdims=True)</span><br><span class="line"></span><br><span class="line">def layer_norm(x, eps=1e-5):</span><br><span class="line">    # 对特征维度做标准化：均值为0，方差为1，再乘 gamma 加 beta（此处简化为恒等）</span><br><span class="line">    mean = np.mean(x, axis=-1, keepdims=True)</span><br><span class="line">    var = np.var(x, axis=-1, keepdims=True)</span><br><span class="line">    return (x - mean) / np.sqrt(var + eps)</span><br><span class="line"></span><br><span class="line">def attention(Q, K, V):</span><br><span class="line">    # Q, K, V shape: [seq_len, d_k] 或 [batch, seq_len, d_k]</span><br><span class="line">    d_k = Q.shape[-1]</span><br><span class="line">    # 点积：Q 与 K 的转置相乘，得到 [seq_len, seq_len] 的注意力分数矩阵</span><br><span class="line">    scores = np.matmul(Q, K.transpose(0, 2, 1) if K.ndim == 3 else K.T) / np.sqrt(d_k)</span><br><span class="line">    # 对最后一个维度（键的位置）做 softmax，得到权重</span><br><span class="line">    weights = softmax(scores)</span><br><span class="line">    # 加权求和：weights 与 V 相乘，得到新的表示</span><br><span class="line">    return np.matmul(weights, V)</span><br><span class="line"></span><br><span class="line">class TransformerLayer:</span><br><span class="line">    def __init__(self, d_model, d_ff):</span><br><span class="line">        self.d_model = d_model</span><br><span class="line">        # 线性投影矩阵，此处用随机初始化，实际训练需要学习</span><br><span class="line">        self.W_Q = np.random.randn(d_model, d_model) * 0.01</span><br><span class="line">        self.W_K = np.random.randn(d_model, d_model) * 0.01</span><br><span class="line">        self.W_V = np.random.randn(d_model, d_model) * 0.01</span><br><span class="line">        self.W_O = np.random.randn(d_model, d_model) * 0.01</span><br><span class="line">        self.W_1 = np.random.randn(d_model, d_ff) * 0.01</span><br><span class="line">        self.W_2 = np.random.randn(d_ff, d_model) * 0.01</span><br><span class="line"></span><br><span class="line">    def forward(self, x):</span><br><span class="line">        # x shape: [batch, seq_len, d_model]</span><br><span class="line">        # 1. 自注意力子层</span><br><span class="line">        Q = np.matmul(x, self.W_Q)</span><br><span class="line">        K = np.matmul(x, self.W_K)</span><br><span class="line">        V = np.matmul(x, self.W_V)</span><br><span class="line">        attn_out = attention(Q, K, V)</span><br><span class="line">        attn_out = np.matmul(attn_out, self.W_O)  # 输出投影</span><br><span class="line">        # 2. 残差连接 + 层归一化（Post-Norm 风格）</span><br><span class="line">        x = layer_norm(x + attn_out)</span><br><span class="line">        # 3. 前馈网络子层</span><br><span class="line">        ff_out = np.matmul(x, self.W_1)</span><br><span class="line">        ff_out = np.maximum(ff_out, 0)  # ReLU 激活</span><br><span class="line">        ff_out = np.matmul(ff_out, self.W_2)</span><br><span class="line">        # 4. 残差连接 + 层归一化</span><br><span class="line">        x = layer_norm(x + ff_out)</span><br><span class="line">        return x</span><br><span class="line"></span><br><span class="line"># 验证：输入 2 个样本，每个 3 个 token，特征维度 4</span><br><span class="line">np.random.seed(0)</span><br><span class="line">x = np.random.randn(2, 3, 4)</span><br><span class="line">layer = TransformerLayer(d_model=4, d_ff=8)</span><br><span class="line">out = layer.forward(x)</span><br><span class="line">print(out.shape)  # 输出 (2, 3, 4)，形状不变，验证残差连接保证了维度稳定</span><br><span class="line"></span><br><span class="line">关键说明：</span><br><span class="line">- 注意力分数的缩放因子 1/sqrt(d_k) 是保证训练稳定的核心，若 d_k 增大而不缩放，softmax 输入区域进入饱和区，梯度极小。</span><br><span class="line">- 层归一化在残差之后（Post-LN）是原始架构方式；现代实现多用 Pre-LN 以提升训练稳定性。</span><br><span class="line">- 未实现多头、位置编码、因果掩码，但上述单头逻辑是基础，多头即对多个子空间并行执行此过程后拼接。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区一：认为 Attention 能无条件捕捉任意长距离依赖。实际上，自注意力是全局的，但它的有效性受限于训练分布中的模式，且 Softmax 后权重往往集中于少数位置，过长的上下文会导致注意力分散或集中于局部；同时，QK^T 的计算复杂度为 O(n^2)（n 为序列长度），这在实际工程中导致长上下文必须依赖稀疏注意力、窗口注意力或 KV Cache 等技巧，并非简单堆层能解决。常见误区二：混淆『位置编码』的作用与『 Token Embedding』。位置编码必须与 Token Embedding 融合（加或拼接）后才进入注意力，但注意力本身并不感知顺序，位置编码只是打破置换不变性；若去掉位置编码，模型无法区分『我爱你』和『你爱我』，甚至等价于 Bag-of-Words 加全局池化。深度思考题：在自回归解码阶段，为什么需要因果掩码？如果去掉因果掩码，训练时每个位置都能看到未来 Token，模型可以轻易预测而无需理解因果关系，那么模型在推理时（只能看到过去）将严重失效；但请进一步解释：因果掩码具体在哪一步作用于注意力分数矩阵？它影响的是 softmax 的输入还是输出？请在数学层面上推导 mask 为 -inf 时，softmax 的输出如何保证位置 i 对 j&gt;i 的权重严格为 0，以及为什么不能直接将对应位置的 QK^T 置为 0（因为 softmax 分母仍会包含该位置，导致权重不为零）。这个问题的答案决定了你能否真正理解现代 LLM 推理引擎中的 KV Cache 优化边界。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/10/foundation/2026-09-10-foundation-transformer/">https://litongjin.github.io/2026/09/10/foundation/2026-09-10-foundation-transformer/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%88LLM-Agent%EF%BC%89/">AI 开发基础（LLM &amp; Agent）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/10/daily/2026-09-10-workbench-daily/" title="工作台日报 · 2026-09-10"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">工作台日报 · 2026-09-10</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/10/foundation/2026-09-10-foundation-v8/" title="每日基础技术总结 · 2026-09-10 · V8 引擎执行机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-10 · V8 引擎执行机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</div></div></a></div><div><a href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-22</div><div class="title">每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响</div></div></a></div><div><a href="/2026/08/24/foundation/2026-08-24-foundation-transformer/" title="每日基础技术总结 · 2026-08-24 · Transformer 架构简述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-24</div><div class="title">每日基础技术总结 · 2026-08-24 · Transformer 架构简述</div></div></a></div><div><a href="/2026/08/25/foundation/2026-08-25-foundation-token/" title="每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制</div></div></a></div><div><a href="/2026/08/26/foundation/2026-08-26-foundation-json/" title="每日基础技术总结 · 2026-08-26 · JSON 结构化输出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-26</div><div class="title">每日基础技术总结 · 2026-08-26 · JSON 结构化输出</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">414</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-10-%C2%B7-Transformer-%E6%9E%B6%E6%9E%84%E7%AE%80%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-10 · Transformer 架构简述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/10/daily/2026-09-10-workbench-daily/" title="工作台日报 · 2026-09-10">工作台日报 · 2026-09-10</a><time datetime="2026-09-09T23:01:19.000Z" title="发表于 2026-09-10 07:01:19">2026-09-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/10/foundation/2026-09-10-foundation-transformer/" title="每日基础技术总结 · 2026-09-10 · Transformer 架构简述">每日基础技术总结 · 2026-09-10 · Transformer 架构简述</a><time datetime="2026-09-09T23:01:19.000Z" title="发表于 2026-09-10 07:01:19">2026-09-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/10/foundation/2026-09-10-foundation-v8/" title="每日基础技术总结 · 2026-09-10 · V8 引擎执行机制">每日基础技术总结 · 2026-09-10 · V8 引擎执行机制</a><time datetime="2026-09-09T23:01:19.000Z" title="发表于 2026-09-10 07:01:19">2026-09-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/10/foundation/2026-09-10-foundation-chain-of-thought/" title="每日基础技术总结 · 2026-09-10 · Chain-of-Thought（思维链）基础">每日基础技术总结 · 2026-09-10 · Chain-of-Thought（思维链）基础</a><time datetime="2026-09-09T23:01:19.000Z" title="发表于 2026-09-10 07:01:19">2026-09-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/09/foundation/2026-09-09-foundation-jvm/" title="每日基础技术总结 · 2026-09-09 · JVM 对象头与锁升级">每日基础技术总结 · 2026-09-09 · JVM 对象头与锁升级</a><time datetime="2026-09-09T00:00:00.000Z" title="发表于 2026-09-09 08:00:00">2026-09-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/09/foundation/2026-09-09-foundation-aes-gcm-nonce-ghash/" title="每日基础技术总结 · 2026-09-09 · AES-GCM 的 nonce 复用与 GHASH 碰撞">每日基础技术总结 · 2026-09-09 · AES-GCM 的 nonce 复用与 GHASH 碰撞</a><time datetime="2026-09-09T00:00:00.000Z" title="发表于 2026-09-09 08:00:00">2026-09-09</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
