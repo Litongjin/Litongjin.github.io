@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理📚 今日主题 TypeScript 类型推导原理（前端底层与计算机基础）  1. 核心概念速览1. 核心概念速览定义：TypeScript 的类型推导（type inference）是 tsc 前端在 Checker 阶段对缺少显式类型标注的语法节点赋予类型的静态语义分析过程。它不是独立算法模块，而是一套双向（bi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/15/foundation/2026-09-15-foundation-typescript/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理📚 今日主题 TypeScript 类型推导原理（前端底层与计算机基础）  1. 核心概念速览1. 核心概念速览定义：TypeScript 的类型推导（type inference）是 tsc 前端在 Checker 阶段对缺少显式类型标注的语法节点赋予类型的静态语义分析过程。它不是独立算法模块，而是一套双向（bi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-14T23:03:10.000Z">
+<meta property="article:modified_time" content="2026-09-14T23:09:11.789Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/15/foundation/2026-09-15-foundation-typescript/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-15 07:09:11'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">448</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">52</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-14T23:03:10.000Z" title="发表于 2026-09-15 07:03:10">2026-09-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-14T23:09:11.789Z" title="更新于 2026-09-15 07:09:11">2026-09-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-15-·-TypeScript-类型推导原理"><a href="#每日基础技术总结-·-2026-09-15-·-TypeScript-类型推导原理" class="headerlink" title="每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理"></a>每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>TypeScript 类型推导原理</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><h3 id="1-核心概念速览-1"><a href="#1-核心概念速览-1" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p><strong>定义</strong>：TypeScript 的类型推导（type inference）是 tsc 前端在 Checker 阶段对缺少显式类型标注的语法节点赋予类型的静态语义分析过程。它不是独立算法模块，而是一套<strong>双向（bidirectional）的局部约束求解</strong>：自底向上的 synthesis（<code>getTypeOfExpression</code>：由子节点类型合成父表达式类型）与自顶向下的 contextual typing（<code>getContextualType</code>：把期望类型下推给函数表达式参数、return 表达式、数组&#x2F;对象字面量元素、泛型实参）交替执行；泛型调用另有一遍『候选收集 → 选择 → 实例化 → 用实例化签名复查实参』的两遍式推断。</p>
+<p><strong>本质特征</strong>：</p>
+<ul>
+<li>静态且擦除：推导结果只存在于编译期，Emitter 阶段全部消失（type erasure），运行时零表示；</li>
+<li>结构化（structural）：相容性由成员结构与签名决定，而非声明名；</li>
+<li>局部：作用域限于表达式树与当前签名实例化，不做全程序不动点求解；不是 Hindley–Milner 的全量 unification，也没有泛化（无 let-polymorphism）；</li>
+<li>与流分析耦合：Binder 构造的 flow graph 使同一引用在不同程序点拥有不同 flow type。</li>
+</ul>
+<p><strong>在体系中的位置</strong>：编译管线 <code>Scanner → Parser(AST) → Binder(符号表 + 流图) → Checker(类型/推导/收窄) → Emitter(擦除)</code> 中的静态语义阶段，对应编译原理的 semantic analysis + type checking。</p>
+<p><strong>为什么必须掌握</strong>：</p>
+<ol>
+<li>API 设计权：泛型能否从实参推出，决定调用端是否被迫写显式类型参数（<code>pair(1, &#39;x&#39;)</code> 可推导，而 <code>f&lt;T&gt;(cb: () =&gt; T)</code> 在没有上下文返回类型时推不出 T）；</li>
+<li>错误定位：推导失败报在声明点还是调用点，取决于候选来自哪一侧；</li>
+<li>编译性能：类型实例化有硬上限（<code>instantiationDepth = 100</code>、<code>instantiationCount = 5_000_000</code>），深层递归条件类型会触发 <code>Type instantiation is excessively deep</code>；</li>
+<li>运行时设计约束：类型被擦除、不可反射，DI &#x2F; 序列化 &#x2F; 校验不能依赖类型本身，必须有独立运行时信息源（metadata、schema 对象或手写 type guard）。</li>
+</ol>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><h3 id="2-底层原理剖析-1"><a href="#2-底层原理剖析-1" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p><strong>2.1 两类类型：declared type 与 flow type</strong><br>Binder 为每个声明建立 Symbol 时记录 declared type，同时按控制流构造 flow node。Checker 的 <code>getFlowTypeOfReference</code> 沿流图回溯，遇到 <code>typeof x === &#39;string&#39;</code>、<code>x.kind === &#39;a&#39;</code>、<code>in</code>、<code>instanceof</code>、<code>is</code> 谓词、赋值等节点时施加过滤，得到某程序点的 flow type；多条流在汇合点重新 join。declared type 永不被改写。</p>
+<p><strong>2.2 双向推导的方向语义</strong></p>
+<ul>
+<li>Synthesis（自底向上）：<code>1 + 1 → number</code>；<code>{ k: 1 } → { k: number }</code>；空数组字面量在无上下文时 → <code>never[]</code>。</li>
+<li>Contextual typing（自顶向下）：上下文类型来源包括变量&#x2F;属性标注、函数调用形参类型（含泛型实例化后的形参）、return 对应的签名返回类型、类型断言目标、数组字面量元素位置。</li>
+</ul>
+<p><strong>2.3 泛型调用的推断算法（简化伪码）</strong></p>
+<ol>
+<li>解析调用表达式，取得签名类型参数 T1..Tn；</li>
+<li>第一遍 inference：对每个实参&#x2F;形参类型对执行 inferTypes(source, target)，仅当 T 以 naked type parameter 形式出现在形参类型中才产生候选，候选按来源位置分优先级（直接形参 &gt; 嵌套 &gt; 返回类型位置）；</li>
+<li>候选选择：若存在所有候选的公共父类型则取之，否则取候选的 union；无候选则退到类型参数的 constraint（<code>extends</code> 上界），仍无则 <code>unknown</code>（strict 下报 implicit any）；</li>
+<li>instantiate：以选定类型实参替换 T 得到具体签名；</li>
+<li>第二遍：用具体签名重新检查实参，并对函数表达式参数施加 contextual typing；只出现在返回类型位置的参数，只能在这一遍从回调返回类型获得候选；</li>
+<li>之后才做 assignability 检查。3–5 一次完成，不做跨参数的反向修正迭代。</li>
+</ol>
+<p><strong>2.4 literal widening 与 freshness</strong><br>字面量表达式先得到 fresh literal type（<code>&#39;a&#39;</code>、<code>1</code>），赋给可变位置（let 绑定、可变属性）时拓宽为 <code>string</code> &#x2F; <code>number</code>；<code>const</code> 绑定、<code>readonly</code> 属性、<code>as const</code> 阻止拓宽。fresh 标记另在可赋值性检查中触发 excess property check——这是附加规则，不属于结构类型系统本身。</p>
+<p><strong>2.5 条件类型与 <code>infer</code> 的延迟求值</strong><br><code>T extends (infer U)[] ? U : never</code> 中，若被检查类型 T 是未实例化的类型参数，conditional type 保持 deferred，随 T 实例化再求值；<code>infer</code> 本质是引入一个在该 conditional type true 分支可见的局部类型变量。</p>
+<p><strong>2.6 与既有前端&#x2F;后端概念对比</strong></p>
+<ul>
+<li><strong>TS interface vs Java interface</strong>：Java 是 nominal typing，子类型关系由 <code>implements</code> 显式声明，运行时保留 Class 对象可反射；TS 是 structural typing，只比较成员集合与签名，类型在运行时不存在，<code>instanceof Interface</code> 不可行（必须写 type guard）。</li>
+<li><strong>TS 泛型 vs Java 泛型</strong>：都擦除，但 Java 在使用处依赖 <code>Class&lt;T&gt;</code> 令牌传递运行时信息（<code>new T()</code> 不可行）；TS 无类型令牌，泛型信息零运行时表达。Java 8 的 poly expression target typing 与 contextual typing 形似，但不做表达式树的双向推断。</li>
+<li><strong>与 HM&#x2F;ML 对比</strong>：HM 用 unification 求最一般类型并支持泛化（<code>let id = fun x -&gt; x</code> 得 <code>∀a. a→a</code>）；TS 不泛化，<code>const id = (x) =&gt; x</code> 在 strict 下直接报 implicit any，必须显式写 <code>&lt;T&gt;(x: T) =&gt; x</code>——这是 TS 需要大量注解的根本原因。</li>
+<li><strong>与 V8&#x2F;JIT 对比</strong>：TS 静态类型与 V8 的 hidden class（Map）+ inline cache 类型反馈完全正交，前者擦除后不进入运行时，后者由实际执行路径生成。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">### 3. 基础代码与实战验证</span><br><span class="line"></span><br><span class="line">编译期断言工具（纯类型，运行时零开销）：</span><br><span class="line"></span><br><span class="line">type Equal&lt;A, B&gt; = (&lt;T&gt;() =&gt; T extends A ? 1 : 2) extends (&lt;T&gt;() =&gt; T extends B ? 1 : 2) ? true : false;</span><br><span class="line">type Assert&lt;T extends true&gt; = T;</span><br><span class="line"></span><br><span class="line">// ---- (1) widening：绑定可变性决定字面量是否被拓宽 ----</span><br><span class="line">let a = &#x27;foo&#x27;;                  // 无上下文类型：字面量先取 fresh literal type，赋给可变绑定 → 拓宽为 string</span><br><span class="line">type _1 = Assert&lt;Equal&lt;typeof a, string&gt;&gt;;</span><br><span class="line">const b = &#x27;foo&#x27;;                // const 绑定不可变 → 不拓宽，保留字面量类型</span><br><span class="line">type _2 = Assert&lt;Equal&lt;typeof b, &#x27;foo&#x27;&gt;&gt;;</span><br><span class="line">const o = &#123; k: 1 &#125;;             // 对象字面量属性位置默认可变 → 属性类型拓宽为 number</span><br><span class="line">type _3 = Assert&lt;Equal&lt;typeof o, &#123; k: number &#125;&gt;&gt;;</span><br><span class="line"></span><br><span class="line">// ---- (2) contextual typing：类型自顶向下注入，参数无需注解 ----</span><br><span class="line">const inc: (x: number) =&gt; number = (x) =&gt; x + 1;   // x 的 contextual type = number，来自左侧标注</span><br><span class="line"></span><br><span class="line">// ---- (3) 泛型调用：多候选合并 ----</span><br><span class="line">declare function pair&lt;T&gt;(a: T, b: T): [T, T];</span><br><span class="line">const p = pair(1, &#x27;x&#x27;);          // 候选 &#123;number, string&#125;，无公共父类型 → 取 union</span><br><span class="line">type _4 = Assert&lt;Equal&lt;typeof p, [string | number, string | number]&gt;&gt;;</span><br><span class="line"></span><br><span class="line">// ---- (4) 两遍式推断：第二遍才拿得到回调返回值 ----</span><br><span class="line">declare function apply&lt;T, R&gt;(x: T, f: (v: T) =&gt; R): R;</span><br><span class="line">const r = apply(&#123; k: 1 &#125;, (v) =&gt; v.k + 1);</span><br><span class="line">// 第一遍：T 从实参 &#123; k: 1 &#125; 推得 &#123; k: number &#125;（属性 widening），R 无候选</span><br><span class="line">// 第二遍：以 T = &#123; k: number &#125; 实例化签名，v 经 contextual typing 得 &#123; k: number &#125;，回调返回 number → R = number</span><br><span class="line">type _5 = Assert&lt;Equal&lt;typeof r, number&gt;&gt;;</span><br><span class="line"></span><br><span class="line">// ---- (5) 控制流分析：declared type 与 flow type 分离 ----</span><br><span class="line">function narrow(x: string | number) &#123;</span><br><span class="line">  // 此处 flow type = declared type = string | number</span><br><span class="line">  if (typeof x === &#x27;string&#x27;) &#123;</span><br><span class="line">    x.toUpperCase();             // type guard 过滤流图 → 该点 flow type 收窄为 string</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    x.toFixed();                 // 另一分支 flow type 收窄为 number</span><br><span class="line">  &#125;</span><br><span class="line">  // 汇合点：两条流重新 join 为 string | number</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// ---- (6) 条件类型 + infer 的延迟求值 ----</span><br><span class="line">type ElementOf&lt;T&gt; = T extends readonly (infer U)[] ? U : never;</span><br><span class="line">type _6 = Assert&lt;Equal&lt;ElementOf&lt;number[]&gt;, number&gt;&gt;;   // 具体类型可立即求值</span><br><span class="line">declare function first&lt;T&gt;(xs: T): ElementOf&lt;T&gt;;         // T 未实例化 → conditional type 保持 deferred，不报错</span><br><span class="line">const firstNum = first([1, 2]);                         // 实例化 T = number[] → ElementOf&lt;number[]&gt; → number</span><br><span class="line">type _7 = Assert&lt;Equal&lt;typeof firstNum, number&gt;&gt;;</span><br><span class="line"></span><br><span class="line">// ---- (7) freshness：多余属性检查只作用于 fresh 字面量 ----</span><br><span class="line">interface Point &#123; x: number &#125;</span><br><span class="line">// @ts-expect-error 新鲜对象字面量触发 excess property check</span><br><span class="line">const bad: Point = &#123; x: 1, y: 2 &#125;;</span><br><span class="line">const raw = &#123; x: 1, y: 2 &#125;;</span><br><span class="line">const ok: Point = raw;           // 非 fresh：只按结构做 width subtyping 检查，合法</span><br><span class="line"></span><br><span class="line">// ---- (8) 擦除验证：两条语句 emit 后仅剩值层代码 ----</span><br><span class="line">const typed: number = 1;</span><br><span class="line">const plain = 1;</span><br><span class="line"></span><br><span class="line">验证命令：</span><br><span class="line">- `npx tsc --strict --noEmit index.ts`：任一 `Assert&lt;Equal&lt;...&gt;&gt;` 不成立会直接抛类型错误，等价于编译期单元测试；</span><br><span class="line">- `npx tsc index.ts --outDir dist` 后查看产物，可见 interface、类型标注、类型参数全部被擦除。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><h3 id="4-常见误区与进阶思考-1"><a href="#4-常见误区与进阶思考-1" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p><strong>误区一：把类型推导等同于 HM 的 unification，认为它会从返回值反推参数并迭代收敛。</strong><br>实际流程是一次性的『收集候选 → 选择（公共父类型优先，否则 union）→ 实例化 → 用实例化签名复查一遍』，不存在跨参数反向修正，也不做泛化。直接后果：<code>const id = (x) =&gt; x</code> 在 <code>--strict</code> 下报 <code>Parameter &#39;x&#39; implicitly has an &#39;any&#39; type</code>（HM 会得 <code>∀a. a→a</code>）；<code>fold([], (acc, x: number) =&gt; acc.concat(x))</code> 会因为 <code>[]</code> 在第一遍就把 A 钉死为 <code>never[]</code> 而报 <code>number</code> 不可赋给 <code>never</code>，只能靠显式类型实参或 <code>as number[]</code> 修正，而不能指望推断回头变聪明。</p>
+<p><strong>误区二：混淆三种机制的作用时机——widening（fresh literal 规范化）、contextual typing（自顶向下）、CFA（流敏感收窄）。</strong><br>典型误判：以为 <code>const o = { a: 1 }</code> 的 <code>o.a</code> 是 <code>1</code>（实际是 <code>number</code>，除非 <code>as const</code> 或 <code>readonly</code> 属性）；以为多余属性检查是结构类型系统的固有规则（它只对 fresh 字面量生效，<code>const raw = {x:1,y:2}</code> 赋给 <code>{x: number}</code> 完全合法）；以为收窄会写回 declared type（实际只是叠加 flow type，闭包内对 <code>let</code> 变量的收窄会在函数被调用时被重置）。</p>
+<p><strong>进阶思考题</strong>：</p>
+<p>declare function fold&lt;A, B&gt;(init: A, f: (acc: A, x: B) &#x3D;&gt; A): (xs: B[]) &#x3D;&gt; A;<br>const g &#x3D; fold([], (acc, x: number) &#x3D;&gt; acc.concat(x));</p>
+<p>问：这行代码能否通过编译？A、B 分别被推为什么？改成 <code>fold&lt;number[], number&gt;([], (acc, x) =&gt; acc.concat(x))</code> 之后为什么就能通过？请从『候选收集顺序 + 是否存在第二遍反向修正』的机制角度解释，而不是停留在『类型不匹配』的表层结论。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/15/foundation/2026-09-15-foundation-typescript/">https://litongjin.github.io/2026/09/15/foundation/2026-09-15-foundation-typescript/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/15/foundation/2026-09-15-foundation-nosql-redis/" title="每日基础技术总结 · 2026-09-15 · NoSQL 与 Redis 基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-15 · NoSQL 与 Redis 基础</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/14/foundation/2026-09-14-foundation-rsa-oaep-bleichenbacher/" title="每日基础技术总结 · 2026-09-14 · RSA 的 OAEP 填充与 Bleichenbacher 攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-14 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-scavenger-mark-compact/" title="每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 新生代 Scavenger 与老生代 Mark-Compact 回收</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8/" title="每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 隐藏类与内联缓存</div></div></a></div><div><a href="/2026/02/21/foundation/2026-02-21-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-21</div><div class="title">每日基础技术总结 · 2026-02-21 · V8 中 Smi 与 HeapNumber 的指针标记</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-v8-jit-ignition-turbofan/" title="每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · V8 JIT：从 Ignition 到 TurboFan</div></div></a></div><div><a href="/2026/02/22/foundation/2026-02-22-foundation-context/" title="每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-22</div><div class="title">每日基础技术总结 · 2026-02-22 · 词法环境、作用域链与闭包 Context</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">448</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">52</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-15-%C2%B7-TypeScript-%E7%B1%BB%E5%9E%8B%E6%8E%A8%E5%AF%BC%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88-1"><span class="toc-number">1.1.2.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.3.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90-1"><span class="toc-number">1.1.4.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.5.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.6.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83-1"><span class="toc-number">1.1.7.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/15/daily/2026-09-15-workbench-daily/" title="工作台日报 · 2026-09-15">工作台日报 · 2026-09-15</a><time datetime="2026-09-14T23:03:10.000Z" title="发表于 2026-09-15 07:03:10">2026-09-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/15/foundation/2026-09-15-foundation-1545b125/" title="每日基础技术总结 · 2026-09-15 · 原型链与闭包">每日基础技术总结 · 2026-09-15 · 原型链与闭包</a><time datetime="2026-09-14T23:03:10.000Z" title="发表于 2026-09-15 07:03:10">2026-09-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/15/foundation/2026-09-15-foundation-nosql-redis/" title="每日基础技术总结 · 2026-09-15 · NoSQL 与 Redis 基础">每日基础技术总结 · 2026-09-15 · NoSQL 与 Redis 基础</a><time datetime="2026-09-14T23:03:10.000Z" title="发表于 2026-09-15 07:03:10">2026-09-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/15/foundation/2026-09-15-foundation-typescript/" title="每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理">每日基础技术总结 · 2026-09-15 · TypeScript 类型推导原理</a><time datetime="2026-09-14T23:03:10.000Z" title="发表于 2026-09-15 07:03:10">2026-09-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/14/foundation/2026-09-14-foundation-rsa-oaep-bleichenbacher/" title="每日基础技术总结 · 2026-09-14 · RSA 的 OAEP 填充与 Bleichenbacher 攻击">每日基础技术总结 · 2026-09-14 · RSA 的 OAEP 填充与 Bleichenbacher 攻击</a><time datetime="2026-09-14T00:00:00.000Z" title="发表于 2026-09-14 08:00:00">2026-09-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/14/foundation/2026-09-14-foundation-74d8cf7d/" title="每日基础技术总结 · 2026-09-14 · 跳跃表的层数随机化与查找/插入路径">每日基础技术总结 · 2026-09-14 · 跳跃表的层数随机化与查找/插入路径</a><time datetime="2026-09-14T00:00:00.000Z" title="发表于 2026-09-14 08:00:00">2026-09-14</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
