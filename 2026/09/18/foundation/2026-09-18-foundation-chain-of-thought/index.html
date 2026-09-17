@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础📚 今日主题 Chain-of-Thought（思维链）基础（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览定义：Chain-of-Thought（CoT）指在自回归解码过程中，令模型在输出最终答案 y 之前，先生成一段中间 token 序列 z &#x3D; (z₁, z₂,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/18/foundation/2026-09-18-foundation-chain-of-thought/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础📚 今日主题 Chain-of-Thought（思维链）基础（AI 开发基础（LLM &amp; Agent））  1. 核心概念速览定义：Chain-of-Thought（CoT）指在自回归解码过程中，令模型在输出最终答案 y 之前，先生成一段中间 token 序列 z &#x3D; (z₁, z₂,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-17T23:02:44.000Z">
+<meta property="article:modified_time" content="2026-09-17T23:08:59.903Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI 开发基础（LLM &amp; Agent）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/18/foundation/2026-09-18-foundation-chain-of-thought/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-18 07:08:59'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">469</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">56</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-17T23:02:44.000Z" title="发表于 2026-09-18 07:02:44">2026-09-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-17T23:08:59.903Z" title="更新于 2026-09-18 07:08:59">2026-09-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-18-·-Chain-of-Thought（思维链）基础"><a href="#每日基础技术总结-·-2026-09-18-·-Chain-of-Thought（思维链）基础" class="headerlink" title="每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础"></a>每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Chain-of-Thought（思维链）基础</strong>（AI 开发基础（LLM &amp; Agent））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p><strong>定义</strong>：Chain-of-Thought（CoT）指在自回归解码过程中，令模型在输出最终答案 y 之前，先生成一段中间 token 序列 z &#x3D; (z₁, z₂, …, z_k)，并将 z 拼回上下文参与后续条件概率计算，即以采样近似实现</p>
+<p>p(y | x) &#x3D; Σ_z p(z | x) · p(y | x, z)</p>
+<p><strong>本质</strong>：Transformer 的单次前向传播是一个固定深度、无循环的电路——L 层串行算子依次作用，前向图深度恒为常数 L，宽度随上下文长度增长（attention），但不存在跨 token 的迭代状态。对于串行依赖深度随输入规模 n 增长的函数（多位进制运算、动态规划、图可达性、长程约束满足），固定深度电路无法在单次前向内完成。CoT 通过把中间状态外化为 token 并回灌上下文，将「深度受限的单次电路」转变为「长度可变、以离散 token 为载体的循环计算」，有效串行深度由 O(L) 变为 O(L · (k + |y|))。</p>
+<p><strong>它在体系中的位置</strong>：CoT 不属于模型结构，也不属于训练目标，而是<strong>推理&#x2F;解码层的调度策略</strong>——它改变的是解码器每一步的输入构造方式与生成长度分配，而非权重。它是 ReAct（中间 token 插入外部动作与观测）、Self-Consistency（对同一链多次采样做边缘化）、Tree-of-Thought（把链变成带价值函数的搜索树）、以及 o1&#x2F;R1 式长 CoT 强化学习的共同基元。</p>
+<p><strong>为什么专业工程师必须掌握</strong>：它把「推理算力」从训练期的一次性投入，变成推理期可按题分配的连续变量（test-time compute scaling）。这是当前 LLM 系统成本—精度曲线上最核心的杠杆：链长、采样数、验证器数量直接决定延迟、显存与准确率。不理解其机制，就无法判断何时该用、该用多长、以及何时它反而有害——这是把 LLM 当作可工程化组件而非黑箱调用的前提。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><h3 id="1-自回归分解与固定深度约束"><a href="#1-自回归分解与固定深度约束" class="headerlink" title="1. 自回归分解与固定深度约束"></a>1. 自回归分解与固定深度约束</h3><p>自回归建模给出 p(x) &#x3D; Π_t p(x_t | x_&lt;t)。第 t 个 token 的分布由一次完整前向算出，其计算图深度恒为 L（层数），与 t 无关。因此单次前向可计算的函数类被限制在常数深度电路（宽度受 d 与 attention 精度约束）。任何需要 Ω(n) 层串行依赖的任务，都无法在单次前向中完成——这不是模型「不够聪明」，而是计算图深度不满秩。</p>
+<h3 id="2-CoT-是一次程序变换：循环展开-状态外化"><a href="#2-CoT-是一次程序变换：循环展开-状态外化" class="headerlink" title="2. CoT 是一次程序变换：循环展开 + 状态外化"></a>2. CoT 是一次程序变换：循环展开 + 状态外化</h3><p>生成 z₁…z_k 的过程等价于把迭代算法展开为直线代码，每一步的中间值被写入外部存储（token 序列），下一步以前一步的输出为条件：</p>
+<p>z_i ~ p(· | x, z_&lt;i)，  y ~ p(· | x, z)</p>
+<p>有效串行深度 &#x3D; L · (k + |y|)；有效算力 ≈ 生成长度 × 每步 FLOPs。代价随之出现：KV cache 随序列长度线性增长（每层每 token 缓存 2·d 个值），解码期每步 attention 成本 O(t)，总成本对长度超线性。</p>
+<h3 id="3-离散瓶颈：每步只有-≤-log₂-V-bit-跨边界"><a href="#3-离散瓶颈：每步只有-≤-log₂-V-bit-跨边界" class="headerlink" title="3. 离散瓶颈：每步只有 ≤ log₂|V| bit 跨边界"></a>3. 离散瓶颈：每步只有 ≤ log₂|V| bit 跨边界</h3><p>跨步传递的唯一载体是被采样出的 token id，理论上限为 log₂|V|（GPT-2 词表 50257 时约 15.6 bit；常见 128k 词表约 17 bit）。残差流中 d≈4096 维、bf16 精度的模拟状态在每步结束时被打包为 KV cache 被动保留，但<strong>不可写回</strong>为下一步新的可微状态。这构成两个直接推论：</p>
+<ul>
+<li>链的信息承载是低带宽、离散的，与 RNN 的隐状态（连续、高带宽、可微、不可验证）形成精确对偶；</li>
+<li>正因为离散，token 才可被外部程序解析、校验、分支、检索——可验证性是以带宽为代价换来的。</li>
+</ul>
+<h3 id="4-与前端的同构对照"><a href="#4-与前端的同构对照" class="headerlink" title="4. 与前端的同构对照"></a>4. 与前端的同构对照</h3><ul>
+<li><strong>单次前向 ≈ 同步纯函数调用</strong>：原子、无让出点、调用栈深度固定。前向内部的中间量类似闭包环境，运行结束即消失，外部不可观测、不可干预。</li>
+<li><strong>CoT ≈ 把同步计算改写成 generator&#x2F;async 迭代</strong>：每个 yield 必须把状态序列化到外部（token 流），恢复时再反序列化（读回上下文）。这与 SSR 必须把状态序列化为 HTML 字符串再 hydrate 完全同构——<strong>非可序列化状态必然丢失</strong>。这也是为什么长链会丢细节：残差流的高维状态无法全部塞进一个离散 token。</li>
+<li><strong>KV cache ≈ memoization &#x2F; 闭包保留环境</strong>：避免重复计算历史 K&#x2F;V，但它是只读缓存，不是可写回的可变状态。</li>
+<li><strong>采样 + Self-Consistency ≈ 对含随机性的函数做 N 次独立运行后聚合</strong>，是对 p(y|x) 边缘化的 Monte Carlo 近似。</li>
+<li><strong>Java 接口 vs TS 接口的对照</strong>：Java 接口在运行期以 vtable&#x2F;动态分派实体存在——可观测、可反射、有运行时代价；TS 接口在编译期被完全擦除——不可观测、零运行时代价。单次前向中的「推理」就是 TS 接口：只存在于潜在表示中，无法被外部观测或干预；CoT 把它变成 Java 接口式的运行时实体——可观测、可校验，但必须承担序列化与调度开销。</li>
+</ul>
+<h3 id="5-涌现与形态族谱"><a href="#5-涌现与形态族谱" class="headerlink" title="5. 涌现与形态族谱"></a>5. 涌现与形态族谱</h3><p>CoT 是规模涌现能力：低于阈值时，模型生成的中间步骤本身不可靠，链式输出会使准确率<strong>低于</strong>直答。形式族谱沿四个正交维度扩展：长度（few-shot &#x2F; zero-shot CoT）、外部性（ReAct 插入 action+observation，把真实世界状态引入链中）、分支（ToT：链→树 + 显式价值函数 + 回溯）、随机性（Self-Consistency）。它们共享同一基元：用 token 购买串行深度。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"># 环境：纯 Python 3，无第三方依赖</span><br><span class="line"># 验证目标：(1) CoT 用 token 换串行深度；(2) 离散瓶颈量级；(3) 链式误差传播</span><br><span class="line"></span><br><span class="line">import random, math</span><br><span class="line">from collections import Counter</span><br><span class="line"></span><br><span class="line"># ---------- 0. 任务：对 n 个数字做串行累加 acc_i = (acc_&#123;i-1&#125; + d_i) % 10 ----------</span><br><span class="line"></span><br><span class="line"># ---------- 1. 模型抽象 ----------</span><br><span class="line"># forward() 一次调用 == 一次完整前向传播（L 层串行算子）。</span><br><span class="line"># 真实 LLM 中它是 Transformer 堆叠；此处用局部规则表保持语义等价。</span><br><span class="line">TRANS = &#123;(a, d): (a + d) % 10 for a in range(10) for d in range(10)&#125;  # 表大小 |V|^2=100，与 n 无关</span><br><span class="line"></span><br><span class="line">def forward(acc, d, noise=0.0):</span><br><span class="line">    nxt = TRANS[(acc, d)]</span><br><span class="line">    if random.random() &lt; noise:</span><br><span class="line">        nxt = random.randrange(10)     # 模拟中间步出错（幻觉的微观来源）</span><br><span class="line">    return &#123;nxt: 1.0&#125;                  # 返回 one-hot；真实实现是 |V| 维 logits 经 softmax</span><br><span class="line"></span><br><span class="line"># ---------- 2. 直答式：一次前向直接输出答案 ----------</span><br><span class="line">def direct_cost(n):</span><br><span class="line">    return 10 ** n                     # 需要与 n 指数相关的决策表：</span><br><span class="line">                                       # 等价于用固定深度电路承载 O(n) 串行依赖，不可行</span><br><span class="line"></span><br><span class="line"># ---------- 3. CoT 解码循环：串行依赖被展开到 token 维度 ----------</span><br><span class="line">def cot(digits, noise=0.0, L=32):</span><br><span class="line">    acc, trace, steps = 0, [], 0</span><br><span class="line">    for d in digits:</span><br><span class="line">        dist = forward(acc, d, noise)  # ← 一次完整前向，计算图深度 = L</span><br><span class="line">        steps += 1                     # ← 串行深度 += 1</span><br><span class="line">        acc = max(dist, key=dist.get)  # ← argmax 采样：仅此离散 token 跨步传递（≤ log2|V| bit）</span><br><span class="line">        trace.append(acc)              # ← 中间结果写回上下文，成为下一步的输入条件</span><br><span class="line">    return acc, trace, steps * L       # 有效串行深度 = L * 生成长度</span><br><span class="line"></span><br><span class="line"># ---------- 4. 自洽性：kh 次独立解码 + 终态多数投票 ----------</span><br><span class="line">def self_consistency(digits, k=9, noise=0.0):</span><br><span class="line">    votes = Counter(cot(digits, noise)[0] for _ in range(k))</span><br><span class="line">    return votes.most_common(1)[0]</span><br><span class="line"></span><br><span class="line"># ---------- 5. 量化验证 ----------</span><br><span class="line">n = 8</span><br><span class="line">print(&#x27;direct_cost(8)  =&#x27;, direct_cost(n))              # 1e8：指数爆炸</span><br><span class="line">print(&#x27;CoT depth       =&#x27;, cot(list(range(n)))[2])      # 32*8 = 256：线性</span><br><span class="line">print(&#x27;bits per step   =&#x27;, round(math.log2(10), 2))     # 3.32；真实词表 5e4 约 15.6</span><br><span class="line"></span><br><span class="line">def chain_acc(n, noise, trials=5000):  # 链式结构成功率</span><br><span class="line">    ok = 0</span><br><span class="line">    for _ in range(trials):</span><br><span class="line">        acc = 0</span><br><span class="line">        for d in range(n):</span><br><span class="line">            acc = max(forward(acc, d, noise), key=lambda k: 1.0)  # 每步贪心采样</span><br><span class="line">        ok += (acc == sum(range(n)) % 10)</span><br><span class="line">    return ok / trials</span><br><span class="line"></span><br><span class="line">for noise in (0.0, 0.01, 0.05):</span><br><span class="line">    print(noise, round(chain_acc(n, noise), 4), round((1 - 0.9 * noise) ** n, 4))</span><br><span class="line">    # 实测值 ≈ 解析解：逐步正确率 p = 1 - 0.9*noise，链成功率 = p^n</span><br><span class="line"></span><br><span class="line"># 结论：直答成本 10^n（指数），CoT 成本 256 步（线性）——串行深度被 token 买回来了；</span><br><span class="line"># 但同时，误差也沿链乘积化放大：noise=0.05、n=8 时成功率已降至约 66%。</span><br><span class="line"># 因此 Self-Consistency 只在「错误独立于输出层」时有效；对严格串行链，</span><br><span class="line"># 多数链分享同一个早期错误，投票无法修复——这正是需要逐步验证器或 RL 训练长链的原因。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><h3 id="误区-1：把-CoT-输出当作模型内部计算的忠实记录（faithfulness-幻觉）"><a href="#误区-1：把-CoT-输出当作模型内部计算的忠实记录（faithfulness-幻觉）" class="headerlink" title="误区 1：把 CoT 输出当作模型内部计算的忠实记录（faithfulness 幻觉）"></a>误区 1：把 CoT 输出当作模型内部计算的忠实记录（faithfulness 幻觉）</h3><p>机制上，z 是被<strong>采样出来的新 token</strong>，它作为条件参与后续分布计算，而不是对隐藏状态的转储。模型完全可以在 token 层面生成一套与真实决策依据无关的「理由」——后续分布只受 z 的语义影响，不受「z 是否真实反映了前一步的决策过程」约束。因此：</p>
+<ul>
+<li>禁止把 CoT 自然语言文本当结构化数据解析、做审计日志或直接作为奖励信号；需要机器消费时必须走结构化输出（JSON Schema &#x2F; tool call），把「推理」与「结果」解耦；</li>
+<li>高准确率不蕴含高可解释性。可解释性必须来自外部验证器（单元测试、符号求解器、约束检查），而非模型自述。</li>
+</ul>
+<h3 id="误区-2：认为-CoT-是无条件正收益，且与-ReAct-ToT-是同一种东西"><a href="#误区-2：认为-CoT-是无条件正收益，且与-ReAct-ToT-是同一种东西" class="headerlink" title="误区 2：认为 CoT 是无条件正收益，且与 ReAct &#x2F; ToT 是同一种东西"></a>误区 2：认为 CoT 是无条件正收益，且与 ReAct &#x2F; ToT 是同一种东西</h3><ul>
+<li>CoT 是<strong>规模涌现</strong>能力：小模型上生成的中间步骤不可靠，链式输出会让准确率低于直答；</li>
+<li>对单步模式匹配类任务（简单检索、分类、格式转换），CoT 只增加延迟与噪声；</li>
+<li>链越长，逐步错误率按乘积放大（见上文实测 p^n），KV cache 与 attention 开销使成本对长度超线性，存在明确的成本—精度拐点；</li>
+<li>概念边界：CoT 规定的是<strong>中间 token 的形态</strong>；ReAct 在中间 token 中插入 action 与 observation，引入上下文之外的真实世界状态；ToT 把链变成树，引入显式价值函数与搜索回溯；Self-Consistency 在链上做多次采样求边缘化。四者是同一基元（用 token 买串行深度）在<strong>长度、外部性、分支、随机性</strong>四个正交维度上的扩展，不能互相替代。</li>
+</ul>
+<h3 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h3><p>每步跨边界只有 ≤ log₂|V| ≈ 17 bit 的离散带宽，而残差流每步持有约 d×16 ≈ 6.5×10⁴ bit 的连续状态被丢弃（仅以只读 KV cache 形式残留、不可写回）。那么「连续思维链」（直接把 hidden state 回灌作为下一步输入）在理论上能获得什么、又必然失去什么？请从三个维度论证：(a) 可验证性与可分支性（外部程序能否解析、校验、回溯）；(b) 每步信息带宽与状态压缩率对长链保真度的影响；(c) 与外部世界（工具调用、编译器、检索、人工干预点）的接口能力。并进一步回答：为什么在带宽如此受限的情况下，当前工业界仍然选择离散 token 而非连续隐状态作为推理载体？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/18/foundation/2026-09-18-foundation-chain-of-thought/">https://litongjin.github.io/2026/09/18/foundation/2026-09-18-foundation-chain-of-thought/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%88LLM-Agent%EF%BC%89/">AI 开发基础（LLM &amp; Agent）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/18/foundation/2026-09-18-foundation-28d8be0b/" title="每日基础技术总结 · 2026-09-18 · 关系型数据库范式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-18 · 关系型数据库范式</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/18/foundation/2026-09-18-foundation-http-https/" title="每日基础技术总结 · 2026-09-18 · HTTP/HTTPS 握手与加密过程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-18 · HTTP/HTTPS 握手与加密过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-sseserver-sent-events/" title="每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · SSE（Server-Sent Events）协议原理</div></div></a></div><div><a href="/2026/08/22/foundation/2026-08-22-foundation-temperature-top-p/" title="每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-22</div><div class="title">每日基础技术总结 · 2026-08-22 · Temperature &#x2F; Top-P 等参数对输出的影响</div></div></a></div><div><a href="/2026/08/24/foundation/2026-08-24-foundation-transformer/" title="每日基础技术总结 · 2026-08-24 · Transformer 架构简述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-24</div><div class="title">每日基础技术总结 · 2026-08-24 · Transformer 架构简述</div></div></a></div><div><a href="/2026/08/25/foundation/2026-08-25-foundation-token/" title="每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">每日基础技术总结 · 2026-08-25 · Token 的本质与分词机制</div></div></a></div><div><a href="/2026/08/26/foundation/2026-08-26-foundation-json/" title="每日基础技术总结 · 2026-08-26 · JSON 结构化输出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-26</div><div class="title">每日基础技术总结 · 2026-08-26 · JSON 结构化输出</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">469</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">56</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-18-%C2%B7-Chain-of-Thought%EF%BC%88%E6%80%9D%E7%BB%B4%E9%93%BE%EF%BC%89%E5%9F%BA%E7%A1%80"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%87%AA%E5%9B%9E%E5%BD%92%E5%88%86%E8%A7%A3%E4%B8%8E%E5%9B%BA%E5%AE%9A%E6%B7%B1%E5%BA%A6%E7%BA%A6%E6%9D%9F"><span class="toc-number">1.1.3.</span> <span class="toc-text">1. 自回归分解与固定深度约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-CoT-%E6%98%AF%E4%B8%80%E6%AC%A1%E7%A8%8B%E5%BA%8F%E5%8F%98%E6%8D%A2%EF%BC%9A%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80-%E7%8A%B6%E6%80%81%E5%A4%96%E5%8C%96"><span class="toc-number">1.1.4.</span> <span class="toc-text">2. CoT 是一次程序变换：循环展开 + 状态外化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%A6%BB%E6%95%A3%E7%93%B6%E9%A2%88%EF%BC%9A%E6%AF%8F%E6%AD%A5%E5%8F%AA%E6%9C%89-%E2%89%A4-log%E2%82%82-V-bit-%E8%B7%A8%E8%BE%B9%E7%95%8C"><span class="toc-number">1.1.5.</span> <span class="toc-text">3. 离散瓶颈：每步只有 ≤ log₂|V| bit 跨边界</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%8E%E5%89%8D%E7%AB%AF%E7%9A%84%E5%90%8C%E6%9E%84%E5%AF%B9%E7%85%A7"><span class="toc-number">1.1.6.</span> <span class="toc-text">4. 与前端的同构对照</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E6%B6%8C%E7%8E%B0%E4%B8%8E%E5%BD%A2%E6%80%81%E6%97%8F%E8%B0%B1"><span class="toc-number">1.1.7.</span> <span class="toc-text">5. 涌现与形态族谱</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.8.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.9.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA-1%EF%BC%9A%E6%8A%8A-CoT-%E8%BE%93%E5%87%BA%E5%BD%93%E4%BD%9C%E6%A8%A1%E5%9E%8B%E5%86%85%E9%83%A8%E8%AE%A1%E7%AE%97%E7%9A%84%E5%BF%A0%E5%AE%9E%E8%AE%B0%E5%BD%95%EF%BC%88faithfulness-%E5%B9%BB%E8%A7%89%EF%BC%89"><span class="toc-number">1.1.10.</span> <span class="toc-text">误区 1：把 CoT 输出当作模型内部计算的忠实记录（faithfulness 幻觉）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA-2%EF%BC%9A%E8%AE%A4%E4%B8%BA-CoT-%E6%98%AF%E6%97%A0%E6%9D%A1%E4%BB%B6%E6%AD%A3%E6%94%B6%E7%9B%8A%EF%BC%8C%E4%B8%94%E4%B8%8E-ReAct-ToT-%E6%98%AF%E5%90%8C%E4%B8%80%E7%A7%8D%E4%B8%9C%E8%A5%BF"><span class="toc-number">1.1.11.</span> <span class="toc-text">误区 2：认为 CoT 是无条件正收益，且与 ReAct &#x2F; ToT 是同一种东西</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E9%A2%98"><span class="toc-number">1.1.12.</span> <span class="toc-text">思考题</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/18/daily/2026-09-18-workbench-daily/" title="工作台日报 · 2026-09-18">工作台日报 · 2026-09-18</a><time datetime="2026-09-17T23:02:44.000Z" title="发表于 2026-09-18 07:02:44">2026-09-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/18/foundation/2026-09-18-foundation-28d8be0b/" title="每日基础技术总结 · 2026-09-18 · 关系型数据库范式">每日基础技术总结 · 2026-09-18 · 关系型数据库范式</a><time datetime="2026-09-17T23:02:44.000Z" title="发表于 2026-09-18 07:02:44">2026-09-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/18/foundation/2026-09-18-foundation-chain-of-thought/" title="每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础">每日基础技术总结 · 2026-09-18 · Chain-of-Thought（思维链）基础</a><time datetime="2026-09-17T23:02:44.000Z" title="发表于 2026-09-18 07:02:44">2026-09-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/18/foundation/2026-09-18-foundation-http-https/" title="每日基础技术总结 · 2026-09-18 · HTTP/HTTPS 握手与加密过程">每日基础技术总结 · 2026-09-18 · HTTP/HTTPS 握手与加密过程</a><time datetime="2026-09-17T23:02:44.000Z" title="发表于 2026-09-18 07:02:44">2026-09-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/17/foundation/2026-09-17-foundation-tcp-syn-cookie/" title="每日基础技术总结 · 2026-09-17 · TCP 三次握手与 SYN Cookie">每日基础技术总结 · 2026-09-17 · TCP 三次握手与 SYN Cookie</a><time datetime="2026-09-17T00:00:00.000Z" title="发表于 2026-09-17 08:00:00">2026-09-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/17/foundation/2026-09-17-foundation-v8-smi-heapnumber/" title="每日基础技术总结 · 2026-09-17 · V8 中 Smi 与 HeapNumber 的指针标记">每日基础技术总结 · 2026-09-17 · V8 中 Smi 与 HeapNumber 的指针标记</a><time datetime="2026-09-17T00:00:00.000Z" title="发表于 2026-09-17 08:00:00">2026-09-17</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
