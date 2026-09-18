@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性📚 今日主题 事务的 ACID 特性（后端基础（Node.js &#x2F; Java &#x2F; Python））  1. 核心概念速览定义：事务（Transaction）是 DBMS 对一组读&#x2F;写操作施加的执行单元语义，使其满足 ACID 四条可判定性质。它解决的是两个正交维度下的状态可推理性问题：并发（多个执">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/19/foundation/2026-09-19-foundation-acid/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性📚 今日主题 事务的 ACID 特性（后端基础（Node.js &#x2F; Java &#x2F; Python））  1. 核心概念速览定义：事务（Transaction）是 DBMS 对一组读&#x2F;写操作施加的执行单元语义，使其满足 ACID 四条可判定性质。它解决的是两个正交维度下的状态可推理性问题：并发（多个执">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-18T23:02:03.000Z">
+<meta property="article:modified_time" content="2026-09-18T23:09:14.017Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础（Node.js &#x2F; Java &#x2F; Python）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/19/foundation/2026-09-19-foundation-acid/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-19 07:09:14'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">476</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">56</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-18T23:02:03.000Z" title="发表于 2026-09-19 07:02:03">2026-09-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-18T23:09:14.017Z" title="更新于 2026-09-19 07:09:14">2026-09-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-19-·-事务的-ACID-特性"><a href="#每日基础技术总结-·-2026-09-19-·-事务的-ACID-特性" class="headerlink" title="每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性"></a>每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>事务的 ACID 特性</strong>（后端基础（Node.js &#x2F; Java &#x2F; Python））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>定义：事务（Transaction）是 DBMS 对一组读&#x2F;写操作施加的执行单元语义，使其满足 ACID 四条可判定性质。它解决的是两个正交维度下的状态可推理性问题：并发（多个执行流的交错执行）与故障（进程崩溃、掉电、介质损坏）。</p>
+<p>四条性质的本质：</p>
+<ul>
+<li>Atomicity（原子性）：事务的状态转移不可分割。机制上不是「不执行一半」，而是「执行一半后能精确撤销」——由 undo log（before image，前像）实现，回滚 &#x3D; 对未提交事务的所有修改反向 apply 前像。</li>
+<li>Consistency（一致性）：事务把数据库从一个满足全部完整性约束与业务不变量的状态带到另一个满足约束的状态。它不是独立机制，而是 A + I + D 叠加约束检查（PK &#x2F; FK &#x2F; UNIQUE &#x2F; CHECK &#x2F; 触发器 &#x2F; 隔离级别）后合成的结果性质——数据库只能保证被显式声明的那部分不变量。</li>
+<li>Isolation（隔离性）：并发执行的事务集合，其交错执行的结果等价于这些事务按某个全序串行执行（serializability）。实现分为悲观（Strict 2PL + 死锁检测）与乐观（MVCC 版本链 + Read View 可见性判定 + 写冲突检测）两条路径。</li>
+<li>Durability（持久性）：COMMIT 返回之后，事务效果在任意后续故障下不可撤销。机制：WAL（write-ahead logging）+ fsync；数据页可延迟落盘，但 redo log 必须先于数据页落盘；崩溃恢复时按 redo 重放、按 undo 回滚。</li>
+</ul>
+<p>体系位置（自下而上）：存储引擎事务管理器（undo&#x2F;redo 段、buffer pool、锁管理器、MVCC 版本链、purge 线程）→ 恢复子系统（crash recovery、checkpoint、LSN）→ SQL&#x2F;协议层（BEGIN &#x2F; COMMIT &#x2F; ROLLBACK、autocommit、隔离级别）→ 应用层（Java @Transactional、Node 的 connection.beginTransaction&#x2F;pg client、Python DB-API 的 connection.commit）→ 分布式层（2PC&#x2F;XA、TCC、Saga、本地消息表 + Outbox）。</p>
+<p>与前端知识体系的映射：前端长期不存在事务语义。JS 的 run-to-completion 只保证单个宏任务&#x2F;微任务不被打断，跨 await 之后状态可被其他异步流任意修改，等价于无隔离级别；localStorage 多 key 写入无原子性。真正具备类事务语义的前端基础设施只有两类：IndexedDB 的 transaction（scope 限定 + 自动 commit&#x2F;abort）与 React Fiber 的渲染提交模型（render 阶段可中断可丢弃 &#x3D; undo；commit 阶段不可中断、副作用一次性 flush &#x3D; 原子提交点；current&#x2F;workInProgress 双树指针切换 &#x3D; 提交点的持久化切换）。</p>
+<p>为何必须掌握：所有涉及读-改-写（库存扣减、余额、幂等、状态机流转、抢占式分配）的逻辑，其正确性边界均由 ACID 与隔离级别决定。不理解 undo&#x2F;redo 与 MVCC 的实际语义，就无法判断一段代码在并发与崩溃下的真实行为，也无法在锁、版本号、乐观重试、分布式事务之间做出正确取舍。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>一、一次 UPDATE 在存储引擎内部的完整路径（InnoDB 风格）</p>
+<p>BEGIN:<br>  txn_id &#x3D; alloc_txn_id()<br>  read_view &#x3D; build_read_view()        # 快照读的可见性集合：当前活跃事务集合 + 上界</p>
+<p>UPDATE acct SET balance &#x3D; balance - 30 WHERE id &#x3D; 1:</p>
+<ol>
+<li>定位与加锁：在聚簇索引上定位记录；当前读加 X 锁（RR 下为 next-key lock），快照读不加锁</li>
+<li>写 undo：把旧行镜像（before image）追加到 undo 段，并记下反向操作类型（INSERT 的反向是 DELETE，UPDATE 的反向是用前像覆盖）。注意：undo 页本身的修改同样要写 redo——否则崩溃后 undo 丢失，未提交事务无法回滚，A 立即失效</li>
+<li>改内存页：在 buffer pool 中就地修改并把数据页标记为脏页，此时内存与数据文件不一致</li>
+<li>写 redo：把后像&#x2F;delta 顺序追加到 redo log buffer；提交时 fsync 到 redo 文件</li>
+</ol>
+<p>COMMIT:<br>  5. 向 redo 写入 commit 记录——这就是逻辑上的原子提交点。单条日志的原子性由「顺序追加 + 尾记录 checksum&#x2F;LSN 校验」保证<br>  6. redo.fsync() 返回即意味着 D 成立；数据页可在之后任意时刻刷盘<br>  7. 释放锁（Strict 2PL 在提交后才释放）、标记该事务的 undo 可被 purge</p>
+<p>ROLLBACK 或崩溃恢复:<br>  8. 沿 undo 版本链反向 apply 前像恢复旧值；回滚动作本身也产生 redo</p>
+<p>二、崩溃恢复的两遍扫描</p>
+<p>recovery():</p>
+<h1 id="redo-遍：幂等重放，把已落盘日志的效果全部作用到数据页（含未提交事务的修改）"><a href="#redo-遍：幂等重放，把已落盘日志的效果全部作用到数据页（含未提交事务的修改）" class="headerlink" title="redo 遍：幂等重放，把已落盘日志的效果全部作用到数据页（含未提交事务的修改）"></a>redo 遍：幂等重放，把已落盘日志的效果全部作用到数据页（含未提交事务的修改）</h1><p>  for rec in redo_log_since_last_checkpoint:<br>      page.apply(rec)</p>
+<h1 id="undo-遍：只回滚崩溃时仍-active（无-commit-标记）的事务"><a href="#undo-遍：只回滚崩溃时仍-active（无-commit-标记）的事务" class="headerlink" title="undo 遍：只回滚崩溃时仍 active（无 commit 标记）的事务"></a>undo 遍：只回滚崩溃时仍 active（无 commit 标记）的事务</h1><p>  for txn in txns_without_commit_marker:<br>      for rec in reverse(txn.undo_chain):<br>          page.apply(rec.before_image)</p>
+<p>  正确性依赖三点：LSN 单调递增、日志顺序追加、单条记录可校验（无法写入半条日志）。</p>
+<p>三、隔离性的两条实现路径</p>
+<p>A. 悲观：两阶段锁（2PL）<br>  growing phase 只加锁不解锁 → shrinking phase 只解锁不加锁；若所有 X 锁持到事务结束即 Strict 2PL，可避免级联回滚。串行化由「冲突操作必须被同一把锁排序」直接推出。代价：并发度下降、死锁（需 wait-for graph 检测并选择 victim 回滚）、RR 下 next-key lock 带来更多锁冲突。</p>
+<p>B. 乐观：MVCC + 可见性判定<br>  每行通过隐藏列（trx_id + roll_pointer 指向 undo）构成版本链，读操作不加锁，只判断版本可见性：</p>
+<p>  visible(version, rv):<br>      if version.trx_id &#x3D;&#x3D; rv.self:      return True    # 自己未提交的修改自己可见<br>      if version.trx_id in rv.active_set: return False  # 该版本来自未提交事务，沿链找更旧版本<br>      if version.trx_id &gt;&#x3D; rv.up_limit:   return False  # 快照之后才开始的事务，不可见<br>      return True                                        # 已提交且早于快照，可见</p>
+<p>  READ COMMITTED：每条语句重建 Read View（能看到最新提交）；REPEATABLE READ：整个事务复用同一 Read View（快照固定）。MVCC 只解决读-写冲突，写-写冲突仍需锁或带版本条件的更新（UPDATE … WHERE version &#x3D; n）兜底，否则出现丢失更新。</p>
+<p>四、隔离级别与其禁止的异常</p>
+<p>  级别                   脏读    不可重复读   幻读            写偏斜<br>  READ UNCOMMITTED       可能    可能        可能            可能<br>  READ COMMITTED         禁止    可能        可能            可能<br>  REPEATABLE READ(InnoDB)禁止    禁止        快照读禁止&#x2F;当前读可能  可能<br>  SERIALIZABLE           禁止    禁止        禁止            禁止</p>
+<p>  关键点：REPEATABLE READ 只约束「读到的版本集合」，不蕴含串行化。PostgreSQL 的 REPEATABLE READ 实为 Snapshot Isolation，允许写偏斜（经典例：两名医生各自查询值班人数均 ≥ 2 后同时请假）；只有 SI + 冲突图检测（SSI）或纯 2PL 的 SERIALIZABLE 才排除全部串行化异常。</p>
+<p>五、与前端已有概念的精确对照</p>
+<ul>
+<li>TS 的 interface 是编译期结构约束、运行时被完全擦除；ACID 中的 C 是运行时不变量，必须在每次状态转移时被真实求值——静态可验证与动态可验证的根本差异。</li>
+<li>JS 的 run-to-completion 提供的是指令级原子性，不是事务级原子性：每个 await 边界、每个 I&#x2F;O 回调边界都是天然的并发交错点，此处完全没有隔离。前端做乐观更新时手写的「缓存旧值 → 修改 → 失败还原」，本质就是在应用层手工实现单记录的 undo log，且通常缺少 D（刷新即丢失）。</li>
+<li>Redux 的 reducer 纯函数只保证可预测性；dispatch 多次仍可被中间件与异步逻辑打断，store 的最终状态并非原子提交。React 的 commit 阶段（不可中断地 flush effect 链、一次性切换 Fiber 树指针）才是真正贴近「原子提交点 + redo 落盘」的模型。</li>
+<li>IndexedDB 的 transaction 生命周期绑定在事件循环任务上：一个 tick 内没有继续排队新请求就自动 commit。这是「事务边界由执行上下文决定」这一数据库语义在浏览器侧的翻版——也解释了为什么在 await 之后继续使用同一个 transaction 会抛出 TransactionInactiveError。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">import sqlite3, os</span><br><span class="line"></span><br><span class="line">db = &#x27;acid_demo.db&#x27;</span><br><span class="line">for p in (db, db + &#x27;-wal&#x27;, db + &#x27;-shm&#x27;):</span><br><span class="line">    if os.path.exists(p):</span><br><span class="line">        os.remove(p)</span><br><span class="line"></span><br><span class="line"># isolation_level=None：关闭 sqlite3 模块的隐式事务包装，由代码手写 BEGIN/COMMIT。</span><br><span class="line"># 这样才能观察到事务边界在协议层的真实位置（等价于 JDBC 的 setAutoCommit(false)）。</span><br><span class="line">conn = sqlite3.connect(db, isolation_level=None)</span><br><span class="line">conn.execute(&#x27;PRAGMA journal_mode=WAL&#x27;)   # WAL：修改先顺序追加到 -wal 文件并 fsync，之后异步 checkpoint 回主库</span><br><span class="line"></span><br><span class="line">conn.execute(&#x27;CREATE TABLE acct(id INTEGER PRIMARY KEY, balance INTEGER NOT NULL CHECK(balance &gt;= 0))&#x27;)</span><br><span class="line">conn.execute(&#x27;INSERT INTO acct(id,balance) VALUES (1,100)&#x27;)</span><br><span class="line">conn.execute(&#x27;INSERT INTO acct(id,balance) VALUES (2,100)&#x27;)</span><br><span class="line"></span><br><span class="line"># ---------- 验证 A / C：约束违反触发回滚，undo 前像把已修改的页逐条还原 ----------</span><br><span class="line">conn.execute(&#x27;BEGIN&#x27;)   # 分配 txn_id、建立 Read View；此后每条修改都产生 undo 前像与 redo 后像</span><br><span class="line">try:</span><br><span class="line">    # 写 undo(前像 100) → 脏页进 buffer pool → redo 顺序追加，三步顺序不可交换</span><br><span class="line">    conn.execute(&#x27;UPDATE acct SET balance = balance - 30 WHERE id = 1&#x27;)</span><br><span class="line">    conn.execute(&#x27;UPDATE acct SET balance = balance + 30 WHERE id = 2&#x27;)</span><br><span class="line">    # Consistency 由 CHECK 约束在语句层拦截，而非由隔离级别保证</span><br><span class="line">    conn.execute(&#x27;INSERT INTO acct(id,balance) VALUES (3,-1)&#x27;)</span><br><span class="line">    # 写 commit 标记并 fsync redo：此处才是不可逆的原子提交点</span><br><span class="line">    conn.execute(&#x27;COMMIT&#x27;)</span><br><span class="line">except sqlite3.IntegrityError:</span><br><span class="line">    # 反向 apply 第一条 UPDATE 的前像，balance 回到 100；A 因此成立</span><br><span class="line">    conn.execute(&#x27;ROLLBACK&#x27;)</span><br><span class="line">print(&#x27;A/C:&#x27;, conn.execute(&#x27;SELECT * FROM acct ORDER BY id&#x27;).fetchall())   # [(1, 100), (2, 100)]</span><br><span class="line"></span><br><span class="line"># ---------- 验证 I：未提交版本对其它连接不可见，且事务内快照固定 ----------</span><br><span class="line">conn2 = sqlite3.connect(db, isolation_level=None)</span><br><span class="line">conn2.execute(&#x27;BEGIN&#x27;)   # SQLite 为延迟事务：第一条读语句才真正建立读快照</span><br><span class="line">conn.execute(&#x27;BEGIN&#x27;)</span><br><span class="line">conn.execute(&#x27;UPDATE acct SET balance = balance - 50 WHERE id = 1&#x27;)</span><br><span class="line"># MVCC 快照读：沿版本链做可见性判定，跳过 trx_id 属于活跃集合的版本</span><br><span class="line">print(&#x27;I(未提交):&#x27;, conn2.execute(&#x27;SELECT balance FROM acct WHERE id = 1&#x27;).fetchone())  # (100,)</span><br><span class="line">conn.execute(&#x27;COMMIT&#x27;)   # 写 commit 标记 + fsync，新版本对后续新建的 Read View 才可见</span><br><span class="line"># 同一事务复用同一 Read View，因此仍读到旧快照——这正是 REPEATABLE READ 而非 READ COMMITTED</span><br><span class="line">print(&#x27;I(事务内再读):&#x27;, conn2.execute(&#x27;SELECT balance FROM acct WHERE id = 1&#x27;).fetchone())  # (100,)</span><br><span class="line">conn2.execute(&#x27;COMMIT&#x27;)</span><br><span class="line"></span><br><span class="line">conn3 = sqlite3.connect(db, isolation_level=None)</span><br><span class="line">print(&#x27;I(新事务):&#x27;, conn3.execute(&#x27;SELECT balance FROM acct WHERE id = 1&#x27;).fetchone())  # (50,)</span><br><span class="line"></span><br><span class="line"># ---------- 验证 D：连接全部关闭（含 checkpoint）后重开，已提交效果仍在 ----------</span><br><span class="line">conn.close(); conn2.close(); conn3.close()</span><br><span class="line">c = sqlite3.connect(db)</span><br><span class="line">print(&#x27;D(重开库):&#x27;, c.execute(&#x27;SELECT * FROM acct ORDER BY id&#x27;).fetchall())  # [(1, 50), (2, 100)]</span><br><span class="line">c.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：把 ACID 当成四条并列、由数据库独立实现的机制，认为 C 也由数据库全权保证。实际上 A&#x2F;I&#x2F;D 是机制，C 是目的性质：数据库只能保证被显式声明的不变量（PK &#x2F; FK &#x2F; UNIQUE &#x2F; CHECK &#x2F; 触发器 &#x2F; 分区约束），而业务不变量（账户总额守恒、库存不为负、状态机合法转移）在模式定义里根本不可见。反例：若表中没有 CHECK(balance &gt;&#x3D; 0)，两个并发事务在各自视角下都合法，A&#x2F;I&#x2F;D 全部满足，余额却可能为负。只有当所有业务不变量都被编码为约束时，「满足约束」才与「业务一致」等价。更进一步的限制是：C 的语义是「事务前后两个状态各自满足约束」，它无法表达「执行期间不变量允许暂时被破坏」，因此很多强不变量必须靠唯一索引 + 捕获冲突，而不是先 SELECT 再 INSERT 的两步判断（后者在 RC 下必然存在竞态窗口）。</p>
+<p>误区二：认为隔离级别越高越安全，REPEATABLE READ 等价于可串行化。REPEATABLE READ 只固定读到的版本集合，不约束写-写与读-写之间的冲突图：InnoDB 的 RR 用 MVCC 快照消除了脏读与不可重复读，用 next-key lock 消除了快照读下的幻读，但快照读不加锁，因此仍可能出现丢失更新与写偏斜；PostgreSQL 的 REPEATABLE READ 是纯 Snapshot Isolation，写偏斜必现。只有 SERIALIZABLE（SSI 冲突图检测或纯 2PL）才禁止全部串行化异常。反向的误区同样致命：隔离级别不是越高越好。RR 的间隙锁显著抬高死锁概率与锁等待时间；长事务会让 undo 版本链无法被 purge，history list length 膨胀，后续快照读需要遍历更长的版本链。工程上的正确姿势是：默认 RC，需要一致性快照的只读分析用 RR，强不变量用唯一索引 + 显式 SELECT … FOR UPDATE 或 SERIALIZABLE 兜底，冲突路径统一走乐观重试。</p>
+<p>思考题：undo log 本身是否受 redo 保护，为什么？把 innodb_flush_log_at_trx_commit 设为 2（提交时不 fsync redo，仅每秒批量刷盘），D 被削弱到什么程度、A 是否仍然成立？请从「原子性的物理前提是崩溃后仍能读到完整可用的 undo 前像」这一前提出发推导两件事：(1) undo 页的修改为什么必须写 redo，否则崩溃瞬间会出现什么不可恢复的状态；(2) 为什么 redo 日志必须是顺序追加 + 单条记录可校验（LSN 单调 + checksum），而不能像数据页那样原地覆盖写。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/19/foundation/2026-09-19-foundation-acid/">https://litongjin.github.io/2026/09/19/foundation/2026-09-19-foundation-acid/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80%EF%BC%88Node-js-Java-Python%EF%BC%89/">后端基础（Node.js / Java / Python）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/09/19/foundation/2026-09-19-foundation-transformer/" title="每日基础技术总结 · 2026-09-19 · Transformer 架构简述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-19 · Transformer 架构简述</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-nodejs-io/" title="每日基础技术总结 · 2026-08-21 · Node.js 事件驱动与非阻塞 I&#x2F;O"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · Node.js 事件驱动与非阻塞 I&#x2F;O</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-docker/" title="每日基础技术总结 · 2026-08-21 · Docker 基础概念与镜像原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · Docker 基础概念与镜像原理</div></div></a></div><div><a href="/2026/08/21/foundation/2026-08-21-foundation-acid/" title="每日基础技术总结 · 2026-08-21 · 事务的 ACID 特性"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">每日基础技术总结 · 2026-08-21 · 事务的 ACID 特性</div></div></a></div><div><a href="/2026/08/23/foundation/2026-08-23-foundation-nosql-redis/" title="每日基础技术总结 · 2026-08-23 · NoSQL 与 Redis 基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-23</div><div class="title">每日基础技术总结 · 2026-08-23 · NoSQL 与 Redis 基础</div></div></a></div><div><a href="/2026/08/25/foundation/2026-08-25-foundation-java/" title="每日基础技术总结 · 2026-08-25 · Java 面向对象与接口"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">每日基础技术总结 · 2026-08-25 · Java 面向对象与接口</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">476</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">56</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-19-%C2%B7-%E4%BA%8B%E5%8A%A1%E7%9A%84-ACID-%E7%89%B9%E6%80%A7"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redo-%E9%81%8D%EF%BC%9A%E5%B9%82%E7%AD%89%E9%87%8D%E6%94%BE%EF%BC%8C%E6%8A%8A%E5%B7%B2%E8%90%BD%E7%9B%98%E6%97%A5%E5%BF%97%E7%9A%84%E6%95%88%E6%9E%9C%E5%85%A8%E9%83%A8%E4%BD%9C%E7%94%A8%E5%88%B0%E6%95%B0%E6%8D%AE%E9%A1%B5%EF%BC%88%E5%90%AB%E6%9C%AA%E6%8F%90%E4%BA%A4%E4%BA%8B%E5%8A%A1%E7%9A%84%E4%BF%AE%E6%94%B9%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">redo 遍：幂等重放，把已落盘日志的效果全部作用到数据页（含未提交事务的修改）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#undo-%E9%81%8D%EF%BC%9A%E5%8F%AA%E5%9B%9E%E6%BB%9A%E5%B4%A9%E6%BA%83%E6%97%B6%E4%BB%8D-active%EF%BC%88%E6%97%A0-commit-%E6%A0%87%E8%AE%B0%EF%BC%89%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">undo 遍：只回滚崩溃时仍 active（无 commit 标记）的事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">3.0.1.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">3.0.2.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/19/foundation/2026-09-19-foundation-acid/" title="每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性">每日基础技术总结 · 2026-09-19 · 事务的 ACID 特性</a><time datetime="2026-09-18T23:02:03.000Z" title="发表于 2026-09-19 07:02:03">2026-09-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/19/foundation/2026-09-19-foundation-transformer/" title="每日基础技术总结 · 2026-09-19 · Transformer 架构简述">每日基础技术总结 · 2026-09-19 · Transformer 架构简述</a><time datetime="2026-09-18T23:02:03.000Z" title="发表于 2026-09-19 07:02:03">2026-09-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/19/daily/2026-09-19-workbench-daily/" title="工作台日报 · 2026-09-19">工作台日报 · 2026-09-19</a><time datetime="2026-09-18T23:02:03.000Z" title="发表于 2026-09-19 07:02:03">2026-09-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/19/foundation/2026-09-19-foundation-v8/" title="每日基础技术总结 · 2026-09-19 · V8 引擎执行机制">每日基础技术总结 · 2026-09-19 · V8 引擎执行机制</a><time datetime="2026-09-18T23:02:03.000Z" title="发表于 2026-09-19 07:02:03">2026-09-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/18/foundation/2026-09-18-foundation-7eab5709/" title="每日基础技术总结 · 2026-09-18 · 红黑树插入修复的三种情况与旋转">每日基础技术总结 · 2026-09-18 · 红黑树插入修复的三种情况与旋转</a><time datetime="2026-09-18T00:00:00.000Z" title="发表于 2026-09-18 08:00:00">2026-09-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/18/foundation/2026-09-18-foundation-mmap-aslr/" title="每日基础技术总结 · 2026-09-18 · 进程地址空间布局：栈、堆、mmap 与 ASLR">每日基础技术总结 · 2026-09-18 · 进程地址空间布局：栈、堆、mmap 与 ASLR</a><time datetime="2026-09-18T00:00:00.000Z" title="发表于 2026-09-18 08:00:00">2026-09-18</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
