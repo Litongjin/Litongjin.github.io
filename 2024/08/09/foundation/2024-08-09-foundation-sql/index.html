@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御📚 今日主题 SQL 注入原理与预编译参数化防御（安全进阶（Web &#x2F; 认证授权 &#x2F; 密码学））  1. 核心概念速览SQL注入的本质是数据（Data）与指令（Instruction）边界的混淆。在关系型数据库执行过程中，若输入数据被解析引擎直接拼接至SQL语句文本流中，攻击者可通过构造特定语法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御">
+<meta property="og:url" content="https://litongjin.github.io/2024/08/09/foundation/2024-08-09-foundation-sql/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御📚 今日主题 SQL 注入原理与预编译参数化防御（安全进阶（Web &#x2F; 认证授权 &#x2F; 密码学））  1. 核心概念速览SQL注入的本质是数据（Data）与指令（Instruction）边界的混淆。在关系型数据库执行过程中，若输入数据被解析引擎直接拼接至SQL语句文本流中，攻击者可通过构造特定语法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-08-09T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-21T08:26:06.306Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="安全进阶（Web &#x2F; 认证授权 &#x2F; 密码学）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2024/08/09/foundation/2024-08-09-foundation-sql/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-21 16:26:06'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">651</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-09T12:00:00.000Z" title="发表于 2024-08-09 20:00:00">2024-08-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-21T08:26:06.306Z" title="更新于 2026-09-21 16:26:06">2026-09-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2024-08-09-·-SQL-注入原理与预编译参数化防御"><a href="#每日基础技术总结-·-2024-08-09-·-SQL-注入原理与预编译参数化防御" class="headerlink" title="每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御"></a>每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>SQL 注入原理与预编译参数化防御</strong>（安全进阶（Web &#x2F; 认证授权 &#x2F; 密码学））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>SQL注入的本质是数据（Data）与指令（Instruction）边界的混淆。在关系型数据库执行过程中，若输入数据被解析引擎直接拼接至SQL语句文本流中，攻击者可通过构造特定语法结构，使原本作为操作数的数据被解释为控制程序流程的DML&#x2F;DDL指令，从而突破授权边界、篡改状态或窃取敏感信息。该知识点处于Web应用安全防御体系的核心层，连接了网络请求处理与持久化存储机制。对于全栈工程师而言，掌握此概念是从‘业务逻辑实现’转向‘系统可靠性与安全架构设计’的分水岭，因为它是破坏ACID特性中最易触发且后果最严重的非预期行为源头。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>机制剖析：</p>
+<ol>
+<li><p>传统字符串拼接（不安全）：应用层构建SQL模板 -&gt; 注入用户输入 -&gt; 组合成完整字符串 -&gt; 发送给DBMS -&gt; DBMS词法分析器将整个字符串视为同一语法的代码片段 -&gt; SQLParser解析执行。<br>缺陷：DBMS无法区分字符串中的普通字符与SQL关键字，导致指令重入。</p>
+</li>
+<li><p>预编译参数化查询（Secure）：应用层发送SQL骨架（含占位符?或:var）-&gt; DBMS进行预编译生成执行计划（Execution Plan）并缓存 -&gt; 应用层随后单独发送参数值 -&gt; DBMS将参数绑定至预编译节点，不进行词法重写，直接作为原子数据插入执行上下文。<br>核心差异：预编译切断了‘解析阶段’对输入数据的二次解释，实现了指令与数据的物理隔离。</p>
+</li>
+</ol>
+<p>与前端的对比：<br>类比前端JS中的模板引擎 vs React JSX&#x2F;Vue Template。</p>
+<ul>
+<li>传统SQL拼接类似 JS <code>eval(userInput)</code>：直接将变量内容放入可执行上下文中，任何特殊字符都可能改变执行逻辑。</li>
+<li>预编译类似 JSX <code>&lt;div&gt;{userInput}&lt;/div&gt;</code>：框架先在编译&#x2F;渲染阶段确定DOM树结构（执行计划），然后将<code>userInput</code>仅作为文本节点（Text Node）插入。即使<code>userInput</code>包含<code>&lt;script&gt;</code>标签，它也只是显示为文本，不会被当作DOM元素解析执行。<br>区别在于：前端浏览器有明确的DOM树结构解析管线，而传统SQL没有这种强制的二元对立解析模式，必须依靠协议层面的参数化来模拟这种隔离。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">// PHP PDO 示例：展示预编译底层运作</span><br><span class="line">try &#123;</span><br><span class="line">    // 1. 定义带占位符的SQL骨架，此时不涉及具体数据</span><br><span class="line">    $sql = &quot;SELECT * FROM users WHERE username = :username AND status = :status&quot;;</span><br><span class="line">    </span><br><span class="line">    // 2. prepare 阶段：DBMS 解析骨架，生成执行计划，识别出两个参数锚点</span><br><span class="line">    // 此时尚未发生任何IO读取users表的操作</span><br><span class="line">    $stmt = $pdo-&gt;prepare($sql); </span><br><span class="line">    </span><br><span class="line">    // 3. bindParam 与 execute 阶段：参数作为独立的数据包发送</span><br><span class="line">    // DBMS 将 &#x27;:username&#x27; 替换为 &#x27;admin\&#x27; OR 1=1 --&#x27; 时，</span><br><span class="line">    // 仅作字符串字面量匹配，不会将其中的 OR 1=1 解析为逻辑运算符</span><br><span class="line">    $stmt-&gt;execute([</span><br><span class="line">        &#x27;:username&#x27; =&gt; $_POST[&#x27;username&#x27;],</span><br><span class="line">        &#x27;:status&#x27;   =&gt; &#x27;active&#x27;</span><br><span class="line">    ]);</span><br><span class="line">    </span><br><span class="line">    // 4. 获取结果</span><br><span class="line">    $user = $stmt-&gt;fetch();</span><br><span class="line">&#125; catch (PDOException $e) &#123;</span><br><span class="line">    // 记录错误但不泄露堆栈信息给前端</span><br><span class="line">    error_log($e-&gt;getMessage());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 危险代码对比（仅作原理演示，严禁在生产环境使用）</span><br><span class="line">// $sql = &quot;SELECT * FROM users WHERE username = &#x27;&quot; . $_POST[&#x27;username&#x27;] . &quot;&#x27;&quot;;</span><br><span class="line">// $pdo-&gt;query($sql); // DBMS 会将引号闭合后的后续字符视为新指令</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区：</p>
+<ol>
+<li>‘过滤与转义即可防御’：认为通过htmlspecialchars或自定义黑名单可以彻底防御。事实上，编码转换（如GBK双字节高位截断）、不同数据库方言（MySQL&#x2F;PostgreSQL&#x2F;Snowflake语料差异）以及二次注入场景下，正则&#x2F;转义极易绕过。唯一通用的数学证明级防御是参数化。</li>
+<li>‘ORM自动安全论’：盲目信任高层ORM框架生成的SQL一定是安全的。部分ORM在动态Order By、Group By或原生表达式拼接（Raw Query）时，若开发者未正确使用参数化而是拼接列名，依然会导致注入。</li>
+</ol>
+<p>深度思考题：<br>在某些NoSQL数据库（如MongoDB）或特定ORM操作中，虽然没有传统的SQL Parser，但存在类似的‘逻辑注入’风险。请结合JavaScript对象原型链污染或JSON解析器的递归特性，推导为何在处理嵌套字典&#x2F;Map类型的用户输入时，即使不经过SQL层，也可能导致后端业务逻辑被劫持？这与SQL注入在‘数据即指令’这一本质上有何异同？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2024/08/09/foundation/2024-08-09-foundation-sql/">https://litongjin.github.io/2024/08/09/foundation/2024-08-09-foundation-sql/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%EF%BC%88Web-%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83-%E5%AF%86%E7%A0%81%E5%AD%A6%EF%BC%89/">安全进阶（Web / 认证授权 / 密码学）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/08/10/foundation/2024-08-10-foundation-will-change-transform/" title="每日基础技术总结 · 2024-08-10 · will-change 与 transform 合成层的触发条件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2024-08-10 · will-change 与 transform 合成层的触发条件</div></div></a></div><div class="next-post pull-right"><a href="/2024/08/02/foundation/2024-08-02-foundation-api/" title="每日基础技术总结 · 2024-08-02 · API 网关的职责与限流鉴权"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2024-08-02 · API 网关的职责与限流鉴权</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/18/foundation/2024-01-18-foundation-csrf-cookie-samesite/" title="每日基础技术总结 · 2024-01-18 · CSRF 攻击与同源 Cookie&#x2F;Samesite 防护"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-18</div><div class="title">每日基础技术总结 · 2024-01-18 · CSRF 攻击与同源 Cookie&#x2F;Samesite 防护</div></div></a></div><div><a href="/2024/02/25/foundation/2024-02-25-foundation-sha/" title="每日基础技术总结 · 2024-02-25 · 哈希函数：SHA 族与抗碰撞性"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-25</div><div class="title">每日基础技术总结 · 2024-02-25 · 哈希函数：SHA 族与抗碰撞性</div></div></a></div><div><a href="/2024/05/15/foundation/2024-05-15-foundation-vs-session-cookie-token/" title="每日基础技术总结 · 2024-05-15 · 认证 vs 授权：Session&#x2F;Cookie 与 Token"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-15</div><div class="title">每日基础技术总结 · 2024-05-15 · 认证 vs 授权：Session&#x2F;Cookie 与 Token</div></div></a></div><div><a href="/2026/08/19/foundation/2026-08-19-foundation/" title="每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · 跨域的本质与解决方案</div></div></a></div><div><a href="/2026/08/19/foundation/2026-08-19-foundation-zero-shot-few-shot/" title="每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Zero-shot &#x2F; Few-shot 原理</div></div></a></div><div><a href="/2026/08/19/foundation/2026-08-19-foundation-java/" title="每日基础技术总结 · 2026-08-19 · Java 面向对象与接口"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-19</div><div class="title">每日基础技术总结 · 2026-08-19 · Java 面向对象与接口</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">651</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2024-08-09-%C2%B7-SQL-%E6%B3%A8%E5%85%A5%E5%8E%9F%E7%90%86%E4%B8%8E%E9%A2%84%E7%BC%96%E8%AF%91%E5%8F%82%E6%95%B0%E5%8C%96%E9%98%B2%E5%BE%A1"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2024-08-09 · SQL 注入原理与预编译参数化防御</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/daily/2026-09-21-workbench-daily/" title="工作台日报 · 2026-09-21">工作台日报 · 2026-09-21</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-this/" title="每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外">每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-flexbox-grid/" title="每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异">每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-sql-join/" title="每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN">每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/daily/2026-09-20-workbench-daily/" title="工作台日报 · 2026-09-20">工作台日报 · 2026-09-20</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/foundation/2026-09-20-foundation-hash-history/" title="每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍">每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
