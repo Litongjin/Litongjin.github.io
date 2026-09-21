@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制📚 今日主题 事件冒泡、捕获与事件委托机制（前端底层与计算机基础（扩展））  1. 核心概念速览事件模型是浏览器 DOM API 中用于处理用户交互与系统通知的核心机制，基于 W3C DOM Level 2 Events 规范定义。其本质是将 DOM 树结构的父子层级关系映射为时间序列上的事件传播路径。该机制解决的核心问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制">
+<meta property="og:url" content="https://litongjin.github.io/2024/02/02/foundation/2024-02-02-foundation-c2074426/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制📚 今日主题 事件冒泡、捕获与事件委托机制（前端底层与计算机基础（扩展））  1. 核心概念速览事件模型是浏览器 DOM API 中用于处理用户交互与系统通知的核心机制，基于 W3C DOM Level 2 Events 规范定义。其本质是将 DOM 树结构的父子层级关系映射为时间序列上的事件传播路径。该机制解决的核心问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-02-02T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-21T06:54:19.192Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础（扩展）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2024/02/02/foundation/2024-02-02-foundation-c2074426/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-21 14:54:19'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">597</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-02-02T12:00:00.000Z" title="发表于 2024-02-02 20:00:00">2024-02-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-21T06:54:19.192Z" title="更新于 2026-09-21 14:54:19">2026-09-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2024-02-02-·-事件冒泡、捕获与事件委托机制"><a href="#每日基础技术总结-·-2024-02-02-·-事件冒泡、捕获与事件委托机制" class="headerlink" title="每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制"></a>每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>事件冒泡、捕获与事件委托机制</strong>（前端底层与计算机基础（扩展））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>事件模型是浏览器 DOM API 中用于处理用户交互与系统通知的核心机制，基于 W3C DOM Level 2 Events 规范定义。其本质是将 DOM 树结构的父子层级关系映射为时间序列上的事件传播路径。该机制解决的核心问题包括：1. 事件传播的顺序控制（自上而下的捕获阶段 vs 自下而上的冒泡阶段）；2. 事件监听器的注册时机与执行上下文隔离；3. 通过事件委托优化内存占用与动态节点处理能力。在计算机体系结构中，它是硬件中断信号经过 OS 调度后，最终转化为应用层回调函数的桥梁；对于 AI 前端架构师而言，理解此机制是构建高性能、可维护的 UI 状态响应层的基础，也是实现复杂交互逻辑（如拖拽、表单验证链）的理论基石。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>DOM 事件流分为三个阶段：</p>
+<ol>
+<li>捕获阶段 (Capturing Phase)：事件从 Window 对象开始，沿 DOM 树根节点向下传播，直至目标节点之前的父节点。此时触发具有 {capture: true} 选项的监听器。</li>
+<li>目标阶段 (Target Phase)：事件到达目标节点。若在该节点上注册了非捕获型监听器，则在此阶段执行。</li>
+<li>冒泡阶段 (Bubbling Phase)：事件从目标节点沿 DOM 树向上回溯至 Window 对象。这是默认行为，大部分交互逻辑发生于此。</li>
+</ol>
+<p>底层运行机制伪逻辑如下：<br>function dispatchEvent(event, targetNode) {<br>    &#x2F;&#x2F; Phase 1: Capturing<br>    for (let ancestor &#x3D; targetNode.parent; ancestor; ancestor &#x3D; ancestor.parent) {<br>        callListeners(ancestor, event, ‘capture’);<br>        if (event._propagationStopped) return;<br>    }</p>
+<pre><code>// Phase 2: Target
+callListeners(targetNode, event, &#39;bubble&#39;); // Note: W3C standard executes non-capture listeners at target in bubbling phase logic for simplicity, though technically target phase is distinct.
+
+// Phase 3: Bubbling
+for (let descendant = targetNode.parent; descendant; descendant = descendant.parent) {
+    callListeners(descendant, event, &#39;bubble&#39;);
+    if (event._propagationStopped) return;
+}
+</code></pre>
+<p>}</p>
+<p>与前端已有知识对比：</p>
+<ul>
+<li>类似 Java&#x2F;Spring 中的 AOP（面向切面编程），但更偏向于消息总线的路由分发。TS&#x2F;Java 接口定义静态契约，而 DOM 事件机制定义了动态运行时调用栈的执行顺序。</li>
+<li>不同于 Vue&#x2F;React 的合成事件系统（Synthetic Event），原生 DOM 事件直接挂载在浏览器引擎内部（如 Blink&#x2F;Webkit 的 RenderWidget），性能更高但缺乏跨版本兼容性抽象层。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">const container = document.getElementById(&#x27;container&#x27;);</span><br><span class="line">const item = document.getElementById(&#x27;item&#x27;);</span><br><span class="line"></span><br><span class="line">// 注册捕获阶段监听器：在事件到达目标前触发</span><br><span class="line">container.addEventListener(&#x27;click&#x27;, (e) =&gt; &#123;</span><br><span class="line">    console.log(&#x27;Container Capturing&#x27;); // 先输出</span><br><span class="line">&#125;, &#123; capture: true &#125;);</span><br><span class="line"></span><br><span class="line">// 注册目标节点冒泡阶段监听器：默认行为</span><br><span class="line">item.addEventListener(&#x27;click&#x27;, (e) =&gt; &#123;</span><br><span class="line">    console.log(&#x27;Item Target&#x27;); // 次之输出</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 注册容器冒泡阶段监听器：最后触发</span><br><span class="line">container.addEventListener(&#x27;click&#x27;, (e) =&gt; &#123;</span><br><span class="line">    console.log(&#x27;Container Bubbling&#x27;); // 最后输出</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 关键底层运作：当点击 Item 时，浏览器引擎遍历 DOM 树引用链。</span><br><span class="line">// 1. 识别目标节点 (item)。</span><br><span class="line">// 2. 逆序遍历祖先节点（Document -&gt; html -&gt; body -&gt; ... -&gt; container），检查并调用带有 capture: true 的 listener。</span><br><span class="line">// 3. 在目标节点 (item) 调用其 bubble/capture=false 的 listener。</span><br><span class="line">// 4. 正序遍历祖先节点（... -&gt; container -&gt; body -&gt; ... -&gt; Document），调用 bubble listener。</span><br><span class="line">// e.stopPropagation() 会设置 internal flag，立即终止后续遍历。</span><br><span class="line">e.preventDefault() 仅阻止浏览器默认行为（如链接跳转），不影响事件流传播。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区：认为 stopPropagation() 能同时阻止捕获和冒泡的后续执行。事实是：stopPropagation() 只能阻止后续阶段的传播，若在捕获阶段停止，则目标及冒泡阶段不再执行；反之亦然。许多开发者误以为在冒泡阶段阻止会影响已经发生的捕获阶段。<br>进阶思考题：在 Shadow DOM 组件化架构中，宿主元素（Host Element）与被封装的内部元素之间的“事件穿透”边界是如何定义的？原生 DOM 事件传播到 Shadow Boundary 时会发生什么变化（composed 属性的作用机制）？请结合 V8 引擎对 ShadowRoot 的内部结构描述这一过程。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2024/02/02/foundation/2024-02-02-foundation-c2074426/">https://litongjin.github.io/2024/02/02/foundation/2024-02-02-foundation-c2074426/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89/">前端底层与计算机基础（扩展）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/02/05/foundation/2024-02-05-foundation-725d4b38/" title="每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点</div></div></a></div><div class="next-post pull-right"><a href="/2024/01/29/foundation/2024-01-29-foundation-52847292/" title="每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/09/21/foundation/2026-09-21-foundation-this/" title="每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-21</div><div class="title">每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外</div></div></a></div><div><a href="/2026/09/21/foundation/2026-09-21-foundation-flexbox-grid/" title="每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-21</div><div class="title">每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异</div></div></a></div><div><a href="/2025/07/16/foundation/2025-07-16-foundation-cors/" title="每日基础技术总结 · 2025-07-16 · 跨域 CORS：预检请求、凭证与同源策略本质"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-16</div><div class="title">每日基础技术总结 · 2025-07-16 · 跨域 CORS：预检请求、凭证与同源策略本质</div></div></a></div><div><a href="/2025/08/11/foundation/2025-08-11-foundation-http-3-quic-udp/" title="每日基础技术总结 · 2025-08-11 · HTTP&#x2F;3 与 QUIC：基于 UDP 的可靠传输"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-11</div><div class="title">每日基础技术总结 · 2025-08-11 · HTTP&#x2F;3 与 QUIC：基于 UDP 的可靠传输</div></div></a></div><div><a href="/2025/10/20/foundation/2025-10-20-foundation-http-2/" title="每日基础技术总结 · 2025-10-20 · HTTP&#x2F;2 多路复用、头部压缩与队头阻塞的缓解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-20</div><div class="title">每日基础技术总结 · 2025-10-20 · HTTP&#x2F;2 多路复用、头部压缩与队头阻塞的缓解</div></div></a></div><div><a href="/2025/11/19/foundation/2025-11-19-foundation-http-cache-control-expires-etag-last-modified/" title="每日基础技术总结 · 2025-11-19 · HTTP 缓存：强缓存（Cache-Control&#x2F;Expires）与协商缓存（ETag&#x2F;Last-Modified）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-19</div><div class="title">每日基础技术总结 · 2025-11-19 · HTTP 缓存：强缓存（Cache-Control&#x2F;Expires）与协商缓存（ETag&#x2F;Last-Modified）</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">597</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2024-02-02-%C2%B7-%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1%E3%80%81%E6%8D%95%E8%8E%B7%E4%B8%8E%E4%BA%8B%E4%BB%B6%E5%A7%94%E6%89%98%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2024-02-02 · 事件冒泡、捕获与事件委托机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/daily/2026-09-21-workbench-daily/" title="工作台日报 · 2026-09-21">工作台日报 · 2026-09-21</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-this/" title="每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外">每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-flexbox-grid/" title="每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异">每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-sql-join/" title="每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN">每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/daily/2026-09-20-workbench-daily/" title="工作台日报 · 2026-09-20">工作台日报 · 2026-09-20</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/foundation/2026-09-20-foundation-hash-history/" title="每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍">每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
