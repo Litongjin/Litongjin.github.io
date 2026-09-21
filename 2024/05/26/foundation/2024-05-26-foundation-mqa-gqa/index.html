@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2024-05-26 · 注意力变体：MQA/GQA 与长上下文 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2024-05-26 · 注意力变体：MQA&#x2F;GQA 与长上下文📚 今日主题 注意力变体：MQA&#x2F;GQA 与长上下文（AI &#x2F; LLM 工程实战）  1. 核心概念速览MQA (Multi-Query Attention) 和 GQA (Grouped-Query Attention) 是针对 Transformer 解码阶段生成效率的量化压缩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2024-05-26 · 注意力变体：MQA&#x2F;GQA 与长上下文">
+<meta property="og:url" content="https://litongjin.github.io/2024/05/26/foundation/2024-05-26-foundation-mqa-gqa/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2024-05-26 · 注意力变体：MQA&#x2F;GQA 与长上下文📚 今日主题 注意力变体：MQA&#x2F;GQA 与长上下文（AI &#x2F; LLM 工程实战）  1. 核心概念速览MQA (Multi-Query Attention) 和 GQA (Grouped-Query Attention) 是针对 Transformer 解码阶段生成效率的量化压缩">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-05-26T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-21T07:37:55.859Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="AI &#x2F; LLM 工程实战">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2024/05/26/foundation/2024-05-26-foundation-mqa-gqa/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2024-05-26 · 注意力变体：MQA/GQA 与长上下文',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-21 15:37:55'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">624</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2024-05-26 · 注意力变体：MQA/GQA 与长上下文</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-05-26T12:00:00.000Z" title="发表于 2024-05-26 20:00:00">2024-05-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-21T07:37:55.859Z" title="更新于 2026-09-21 15:37:55">2026-09-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2024-05-26 · 注意力变体：MQA/GQA 与长上下文"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2024-05-26-·-注意力变体：MQA-GQA-与长上下文"><a href="#每日基础技术总结-·-2024-05-26-·-注意力变体：MQA-GQA-与长上下文" class="headerlink" title="每日基础技术总结 · 2024-05-26 · 注意力变体：MQA&#x2F;GQA 与长上下文"></a>每日基础技术总结 · 2024-05-26 · 注意力变体：MQA&#x2F;GQA 与长上下文</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>注意力变体：MQA&#x2F;GQA 与长上下文</strong>（AI &#x2F; LLM 工程实战）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>MQA (Multi-Query Attention) 和 GQA (Grouped-Query Attention) 是针对 Transformer 解码阶段生成效率的量化压缩变体。传统 MHA 中，每个查询头拥有独立的键(K)和值(V)向量组，导致 KV Cache 体积随头数线性增长，形成显存带宽瓶颈。MQA 将所有查询头共享同一组 K&#x2F;V，GQA 则将查询头划分为若干组，每组共享 K&#x2F;V。本质是通过牺牲少量表示能力的并行性冗余，换取巨大的 IO 吞吐增益。长上下文 (Long Context) 则是上述优化得以在超长序列上落地的基础，涉及从 O(N^2) 到 O(N) 或更低复杂度的算法重构（如 RoPE, Streaming&#x2F;Sliding Window），旨在突破标准注意力机制在处理海量 Token 时的内存与计算双重限制。专业工程师需掌握其以理解 LLM 推理引擎的内存布局优化、KV Cache 管理及分布式通信瓶颈。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><ol>
+<li>机制解构：</li>
+</ol>
+<ul>
+<li>MHA: Q_i &#x3D; W_q * x, K_i &#x3D; W_k * x, V_i &#x3D; W_v * x。Softmax(QK^T)V。每个 Head i 有独立参数。</li>
+<li>MQA: Q_i 独立，但 K_all 共享一个投影矩阵 W_K^global，V_all 共享 W_V^global。注意：Q 仍保持维度分离以维持多路并发，但 K&#x2F;V 的访存量降至 1&#x2F;N head。</li>
+<li>GQA: H 个 Query Heads 分为 G 组 (G &lt; H, G &gt; 1)。每组内的 Q 独立，但该组内所有 Q 共享该组的单一 K&#x2F;V 对。平衡了带宽压力与模型精度。</li>
+</ul>
+<ol start="2">
+<li>前端对比映射：</li>
+</ol>
+<ul>
+<li>MHA 类似 React 中多个组件各自维护完整的 State 对象，虽然逻辑隔离但数据副本冗余。</li>
+<li>MQA&#x2F;GQA 类似引入了 ‘Shared Store’ 或 ‘Context API’。多个组件（Heads）读取同一个不可变的 Store（Global KV），写入时通过不同的 projection (Q weights) 转换后只读消费。这减少了内存拷贝（Memory Copy）和总线传输量，类似于前端中避免将大对象深拷贝传递，而是通过引用指针传递，配合 Immutable 结构保证安全的同时提升性能。</li>
+</ul>
+<ol start="3">
+<li>长上下文核心：</li>
+</ol>
+<ul>
+<li>位置编码：RoPE (Rotary Positional Embeddings) 将绝对位置信息融入旋转矩阵，允许模型外推至训练窗口外的长度，无需重新训练整个 embedding 层。</li>
+<li>注意力稀疏化：FlashAttention 等算子利用 Tiling 技术，只在 SRAM 中计算部分 Block 的 Softmax，再反传梯度或激活值，彻底打破 HBM (High Bandwidth Memory) 的读写墙。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">// 伪代码展示 GQA 的内存布局与计算差异</span><br><span class="line">// 假设: num_heads = 32, head_dim = 64, kv_head_groups = 4 (GQA)</span><br><span class="line"></span><br><span class="line">def compute_attention_gqa(query_states, key_states_proj, value_states_proj):</span><br><span class="line">    # query_states shape: [batch, seq_len, 32, 64]</span><br><span class="line">    # 注意：key_states 和 value_states 在此处已聚合为每组分一份</span><br><span class="line">    # key_states_merged shape: [batch, seq_len, 4, 64] </span><br><span class="line">    # value_states_merged shape: [batch, seq_len, 4, 64]</span><br><span class="line">    </span><br><span class="line">    # 1. 展开 Keys 和 Values 以匹配 Query Heads</span><br><span class="line">    # 将 4 份 Key 复制 8 次 (32 / 4)，模拟广播效应，但实际硬件通过 Pointer 跳转实现而非物理复制</span><br><span class="line">    keys_broadcasted = expand_to_match(query_states.shape[2], key_states_merged) </span><br><span class="line">    values_broadcasted = expand_to_match(query_states.shape[2], value_states_merged)</span><br><span class="line">    </span><br><span class="line">    # 2. 标准点积注意力 (利用 FlashAttention/Tiling 底层优化)</span><br><span class="line">    # attn_weights = softmax(Q @ K.T / sqrt(d))</span><br><span class="line">    scores = einsum(&#x27;bqhd,bkhd-&gt;bhqk&#x27;, query_states, keys_broadcasted)</span><br><span class="line">    attn_probs = softmax(scores, dim=-1)</span><br><span class="line">    </span><br><span class="line">    # 3. 加权求和</span><br><span class="line">    # output = attn_probs @ V</span><br><span class="line">    context = einsum(&#x27;bhqk,bkhd-&gt;bqhd&#x27;, attn_probs, values_broadcasted)</span><br><span class="line">    </span><br><span class="line">    return context</span><br><span class="line"></span><br><span class="line"># 关键差异点：</span><br><span class="line"># MHA: keys_broadcasted 是 [batch, seq_len, 32, 64]，占用大量 HBM 带宽</span><br><span class="line"># GQA: 物理存储仅 4 份 K/V，expand 操作多为零拷贝视图(view)或寄存器复用，显著降低 IO</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>[‘误区一：认为 MQA&#x2F;GQA 会严重损害模型能力。实际上，现代预训练表明，只要 Group 数量合理（如 GQA 的 8-16 组），精度损失微乎其微，甚至因正则化效应略有提升，主要瓶颈在于推理侧的显存带宽而非训练侧的参数容量。’, “误区二：混淆 ‘长上下文’ 与 ‘简单的 Sequence Extension’。增加训练长度不等于支持长推理。若无 RoPE 缩放因子调整、无 FlashAttention 2+ 的算子支持、无 KV Cache 的滑动窗口策略，单纯增加 Layer 会导致 OOM (Out of Memory) 或注意力权重坍缩。”]</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2024/05/26/foundation/2024-05-26-foundation-mqa-gqa/">https://litongjin.github.io/2024/05/26/foundation/2024-05-26-foundation-mqa-gqa/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/AI-LLM-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E6%88%98/">AI / LLM 工程实战</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/05/28/foundation/2024-05-28-foundation-mybatis-sql/" title="每日基础技术总结 · 2024-05-28 · MyBatis：#{} 与 ${} 区别及 SQL 注入防护"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2024-05-28 · MyBatis：#{} 与 ${} 区别及 SQL 注入防护</div></div></a></div><div class="next-post pull-right"><a href="/2024/05/20/foundation/2024-05-20-foundation-next-key-lock/" title="每日基础技术总结 · 2024-05-20 · 行锁、间隙锁与临键锁（Next-Key Lock）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2024-05-20 · 行锁、间隙锁与临键锁（Next-Key Lock）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2025/08/26/foundation/2025-08-26-foundation-b1460b7b/" title="每日基础技术总结 · 2025-08-26 · 模型评测：基准集与人工对齐"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-26</div><div class="title">每日基础技术总结 · 2025-08-26 · 模型评测：基准集与人工对齐</div></div></a></div><div><a href="/2025/11/03/foundation/2025-11-03-foundation-speculative-decoding/" title="每日基础技术总结 · 2025-11-03 · 投机解码（Speculative Decoding）加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-03</div><div class="title">每日基础技术总结 · 2025-11-03 · 投机解码（Speculative Decoding）加速</div></div></a></div><div><a href="/2024/01/22/foundation/2024-01-22-foundation-embedding/" title="每日基础技术总结 · 2024-01-22 · Embedding 模型与向量相似度度量"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-22</div><div class="title">每日基础技术总结 · 2024-01-22 · Embedding 模型与向量相似度度量</div></div></a></div><div><a href="/2024/02/20/foundation/2024-02-20-foundation-2b89949d/" title="每日基础技术总结 · 2024-02-20 · 多模态：视觉编码器与跨模态对齐"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-20</div><div class="title">每日基础技术总结 · 2024-02-20 · 多模态：视觉编码器与跨模态对齐</div></div></a></div><div><a href="/2026/03/12/foundation/2026-03-12-foundation-lora-qlora-peft/" title="每日基础技术总结 · 2026-03-12 · 大模型微调：LoRA&#x2F;QLoRA 与 PEFT"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="title">每日基础技术总结 · 2026-03-12 · 大模型微调：LoRA&#x2F;QLoRA 与 PEFT</div></div></a></div><div><a href="/2026/03/29/foundation/2026-03-29-foundation-kv-cache/" title="每日基础技术总结 · 2026-03-29 · KV Cache 原理与显存优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-29</div><div class="title">每日基础技术总结 · 2026-03-29 · KV Cache 原理与显存优化</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">624</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2024-05-26-%C2%B7-%E6%B3%A8%E6%84%8F%E5%8A%9B%E5%8F%98%E4%BD%93%EF%BC%9AMQA-GQA-%E4%B8%8E%E9%95%BF%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2024-05-26 · 注意力变体：MQA&#x2F;GQA 与长上下文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/daily/2026-09-21-workbench-daily/" title="工作台日报 · 2026-09-21">工作台日报 · 2026-09-21</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-this/" title="每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外">每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-flexbox-grid/" title="每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异">每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-sql-join/" title="每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN">每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/daily/2026-09-20-workbench-daily/" title="工作台日报 · 2026-09-20">工作台日报 · 2026-09-20</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/foundation/2026-09-20-foundation-hash-history/" title="每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍">每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

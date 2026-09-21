@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景📚 今日主题 @Transactional 失效的七种典型场景（Java 后端与 Spring 生态）  1. 核心概念速览事务管理是数据库持久层确保数据一致性的核心机制，基于 ACID 特性（原子性、一致性、隔离性、持久性）。在 Spring 框架中，@Transactional 是通过 AOP（面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景">
+<meta property="og:url" content="https://litongjin.github.io/2024/07/04/foundation/2024-07-04-foundation-transactional/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景📚 今日主题 @Transactional 失效的七种典型场景（Java 后端与 Spring 生态）  1. 核心概念速览事务管理是数据库持久层确保数据一致性的核心机制，基于 ACID 特性（原子性、一致性、隔离性、持久性）。在 Spring 框架中，@Transactional 是通过 AOP（面">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-07-04T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-21T07:37:55.876Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="Java 后端与 Spring 生态">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2024/07/04/foundation/2024-07-04-foundation-transactional/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-21 15:37:55'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">624</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-04T12:00:00.000Z" title="发表于 2024-07-04 20:00:00">2024-07-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-21T07:37:55.876Z" title="更新于 2026-09-21 15:37:55">2026-09-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2024-07-04-·-Transactional-失效的七种典型场景"><a href="#每日基础技术总结-·-2024-07-04-·-Transactional-失效的七种典型场景" class="headerlink" title="每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景"></a>每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>@Transactional 失效的七种典型场景</strong>（Java 后端与 Spring 生态）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>事务管理是数据库持久层确保数据一致性的核心机制，基于 ACID 特性（原子性、一致性、隔离性、持久性）。在 Spring 框架中，@Transactional 是通过 AOP（面向切面编程）动态代理实现的声明式事务管理。其本质是在方法执行前开启事务上下文（获取 Connection），执行后根据是否抛出受查异常（Checked Exception）或运行时异常（RuntimeException）来决定提交或回滚。</p>
+<p>作为前端工程师出身的全栈开发者，必须理解它与前端状态管理的本质区别：前端状态通常依赖浏览器内存与 HTTP 请求的单向流动，而后端事务依赖数据库锁机制与网络往返的原子操作。Spring 的事务失效意味着 AOP 代理链断裂，导致代码虽然被调用，但未进入由 Proxy 包装的事务增强逻辑，从而失去 ACID 保障。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>Spring 的 @Transactional 依赖于 CGLIB 或 JDK Dynamic Proxy 创建的代理对象。当 Bean 被注入时，实际运行的是代理对象。代理对象拦截目标方法，检查是否存在事务属性。</p>
+<p>失效的根本原因通常是：调用者获取的不是代理对象，而是原始对象（Target Object），因此绕过了 AOP 拦截器链。</p>
+<p>七种典型场景的底层逻辑如下：</p>
+<ol>
+<li>方法非 public：JDK Proxy 仅代理 public 方法；CGLIB 虽能代理 non-public，但默认配置下可能跳过或安全策略限制，且不符合通用规范。</li>
+<li>自调用（Self-Invocation）：类内部 this.methodA() 调用 this.methodB()。由于 this 引用指向当前实例而非代理对象，methodB 上的 @Transactional 注解未被代理逻辑感知。</li>
+<li>异常类型不匹配：@Transactional 默认仅在 RuntimeException 和 Error 发生时回滚。若捕获并吞掉了 Checked Exception（如 SQLException 未包装），事务管理器视为成功，执行 Commit。</li>
+<li>异常被 catch 处理：若业务代码中 try-catch 了异常且未重新抛出（throw），事务通知中的 AfterAdvice 无法感知错误，默认执行 Commit。</li>
+<li>数据源不一致：在同一事务中切换不同的 DataSource（例如先操作主库再操作从库，或未配置多数据源事务协调器 JTA），因为每个 DataSource 对应独立的 Connection 和 TransactionManager。</li>
+<li>并发冲突超时&#x2F;锁等待：高并发下若发生 Deadlock 或 Lock Wait Timeout，底层驱动会抛出特定异常。若未正确配置 propagation 行为或异常类型，可能导致事务中断但未按预期回滚其他资源。</li>
+<li>多线程调用：Spring 事务绑定在当前线程的 ThreadLocal（TransactionSynchronizationManager）中。子线程无法直接继承父线程的事务上下文，除非使用 Propagation.REQUIRES_NEW 显式创建新事务或使用异步工具类传递上下文。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">// 演示自调用失效（Self-Invocation Failure）的底层原理</span><br><span class="line">@Component</span><br><span class="line">public class OrderService &#123;</span><br><span class="line"></span><br><span class="line">    // 这是一个普通的 Bean 实例，不是代理对象</span><br><span class="line">    private OrderService self; </span><br><span class="line"></span><br><span class="line">    @Autowired</span><br><span class="line">    public void setSelf(OrderService orderService) &#123;</span><br><span class="line">        this.self = orderService;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void executeOrder() &#123;</span><br><span class="line">        // 【关键点1】通过 this 调用，直接访问 Target Method，绕过 Proxy</span><br><span class="line">        updateInventory(); </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Transactional(rollbackFor = Exception.class)</span><br><span class="line">    public void updateInventory() &#123;</span><br><span class="line">        // 此处虽有注解，但因是自调用，Spring AOP 未介入</span><br><span class="line">        // 即使抛出 RuntimeException，也不会触发 Rollback</span><br><span class="line">        throw new RuntimeException(&quot;Rollback Expected but Failed&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 对比：修复后的标准写法，通过注入的代理对象调用</span><br><span class="line">// @Autowired private OrderService orderServiceProxy;</span><br><span class="line">// orderServiceProxy.updateInventory(); // 此时触发 AOP Proxy，生效</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为 @Transactional 可以应用于任何类或方法。事实上，它仅对同一容器内、通过接口或代理调用的 public 方法有效。私有方法 protected 方法即使有注解也无效，因为反射层面无法轻易代理且语义不明。</p>
+<p>误区二：认为 try-catch 包裹异常不影响事务。实际上，如果在 catch 块中没有手动设置 Status.setRollbackOnly() 或再次抛出异常，Spring 的事务完成回调（CommitProcessor）会正常判断为 Success 并 Commit。</p>
+<p>深度思考题：在使用 MySQL InnoDB 引擎时，假设一个 @Transactional 方法内执行了多条 UPDATE 语句，中间发生了 InterruptedException 导致线程终止，但 JVM 进程尚未退出。请问数据库层面的事务状态是什么？如果随后启动一个新的客户端连接查询刚才更新的数据，是否能看到部分更新的结果？为什么这涉及到分布式事务中 Saga 模式的基础考量？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2024/07/04/foundation/2024-07-04-foundation-transactional/">https://litongjin.github.io/2024/07/04/foundation/2024-07-04-foundation-transactional/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/Java-%E5%90%8E%E7%AB%AF%E4%B8%8E-Spring-%E7%94%9F%E6%80%81/">Java 后端与 Spring 生态</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/07/01/foundation/2025-07-01-foundation-412c97a1/" title="每日基础技术总结 · 2025-07-01 · 两阶段提交与三阶段提交协议"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2025-07-01 · 两阶段提交与三阶段提交协议</div></div></a></div><div class="next-post pull-right"><a href="/2024/07/03/foundation/2024-07-03-foundation-tcp-cubic-bbr/" title="每日基础技术总结 · 2024-07-03 · TCP 的 CUBIC 与 BBR 拥塞控制对比"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2024-07-03 · TCP 的 CUBIC 与 BBR 拥塞控制对比</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2025/08/03/foundation/2025-08-03-foundation-api-spring-cloud-gateway/" title="每日基础技术总结 · 2025-08-03 · API 网关：Spring Cloud Gateway 过滤器链"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-03</div><div class="title">每日基础技术总结 · 2025-08-03 · API 网关：Spring Cloud Gateway 过滤器链</div></div></a></div><div><a href="/2025/08/21/foundation/2025-08-21-foundation-spring-aop-jdk-cglib/" title="每日基础技术总结 · 2025-08-21 · Spring AOP：JDK 动态代理与 CGLIB 字节码增强"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-21</div><div class="title">每日基础技术总结 · 2025-08-21 · Spring AOP：JDK 动态代理与 CGLIB 字节码增强</div></div></a></div><div><a href="/2025/09/27/foundation/2025-09-27-foundation-hikaricp/" title="每日基础技术总结 · 2025-09-27 · HikariCP 连接池：池化参数与连接泄漏"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-27</div><div class="title">每日基础技术总结 · 2025-09-27 · HikariCP 连接池：池化参数与连接泄漏</div></div></a></div><div><a href="/2025/09/29/foundation/2025-09-29-foundation-spring-required-requires-new/" title="每日基础技术总结 · 2025-09-29 · Spring 事务传播行为（REQUIRED&#x2F;REQUIRES_NEW 等）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-29</div><div class="title">每日基础技术总结 · 2025-09-29 · Spring 事务传播行为（REQUIRED&#x2F;REQUIRES_NEW 等）</div></div></a></div><div><a href="/2025/11/05/foundation/2025-11-05-foundation-spring-mvc-dispatcherservlet/" title="每日基础技术总结 · 2025-11-05 · Spring MVC：DispatcherServlet 请求处理流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-05</div><div class="title">每日基础技术总结 · 2025-11-05 · Spring MVC：DispatcherServlet 请求处理流程</div></div></a></div><div><a href="/2025/12/10/foundation/2025-12-10-foundation-mybatis-sql/" title="每日基础技术总结 · 2025-12-10 · MyBatis：SQL 执行流程与一级&#x2F;二级缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-10</div><div class="title">每日基础技术总结 · 2025-12-10 · MyBatis：SQL 执行流程与一级&#x2F;二级缓存</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">624</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2024-07-04-%C2%B7-Transactional-%E5%A4%B1%E6%95%88%E7%9A%84%E4%B8%83%E7%A7%8D%E5%85%B8%E5%9E%8B%E5%9C%BA%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2024-07-04 · @Transactional 失效的七种典型场景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/daily/2026-09-21-workbench-daily/" title="工作台日报 · 2026-09-21">工作台日报 · 2026-09-21</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-this/" title="每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外">每日基础技术总结 · 2026-09-21 · this 绑定的四条规则与箭头函数例外</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-flexbox-grid/" title="每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异">每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-sql-join/" title="每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN">每日基础技术总结 · 2026-09-21 · SQL 基础查询与 JOIN</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/daily/2026-09-20-workbench-daily/" title="工作台日报 · 2026-09-20">工作台日报 · 2026-09-20</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/20/foundation/2026-09-20-foundation-hash-history/" title="每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍">每日基础技术总结 · 2026-09-20 · 前端路由：hash 与 history 模式的原理与取舍</a><time datetime="2026-09-20T11:22:23.000Z" title="发表于 2026-09-20 19:22:23">2026-09-20</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
