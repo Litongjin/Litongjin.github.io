@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态） | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）📚 今日主题 服务降级与熔断（熔断器的半开状态）（分布式与架构设计）  1. 核心概念速览服务熔断（Circuit Breaker）是分布式系统中的防御性编程机制，旨在防止级联故障（Cascading Failure）。其核心本质是通过状态机管理远程依赖调用的生命周期：闭合（正常）、打开（阻断重试以保护后端）、半开">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）">
+<meta property="og:url" content="https://litongjin.github.io/2024/09/02/foundation/2024-09-02-foundation-circuit-breaker-half-open-state/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）📚 今日主题 服务降级与熔断（熔断器的半开状态）（分布式与架构设计）  1. 核心概念速览服务熔断（Circuit Breaker）是分布式系统中的防御性编程机制，旨在防止级联故障（Cascading Failure）。其核心本质是通过状态机管理远程依赖调用的生命周期：闭合（正常）、打开（阻断重试以保护后端）、半开">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-09-02T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-21T08:26:06.315Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="分布式与架构设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2024/09/02/foundation/2024-09-02-foundation-circuit-breaker-half-open-state/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-21 16:26:06'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">724</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">71</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-02T12:00:00.000Z" title="发表于 2024-09-02 20:00:00">2024-09-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-21T08:26:06.315Z" title="更新于 2026-09-21 16:26:06">2026-09-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2024-09-02-·-服务降级与熔断（熔断器的半开状态）"><a href="#每日基础技术总结-·-2024-09-02-·-服务降级与熔断（熔断器的半开状态）" class="headerlink" title="每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）"></a>每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>服务降级与熔断（熔断器的半开状态）</strong>（分布式与架构设计）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>服务熔断（Circuit Breaker）是分布式系统中的防御性编程机制，旨在防止级联故障（Cascading Failure）。其核心本质是通过状态机管理远程依赖调用的生命周期：闭合（正常）、打开（阻断重试以保护后端）、半开（试探性恢复）。半开状态（Half-Open）是容错恢复的关键阶段，当打开定时器超时后，系统允许极少量请求通过以探测后端服务是否恢复。若探测成功，则转为闭合；若失败，则重新进入打开状态。此机制解决了在高并发场景下，因单个微服务不可用导致整个调用链雪崩的问题，确保系统的可用性和资源隔离。</p>
+<p>在计算机体系中的位置：属于分布式一致性协议之外的可用性保障层（Availability over Consistency），常配合限流（Rate Limiting）和舱壁隔离（Bulkhead Pattern）使用。专业工程师必须掌握它，因为现代云原生架构中，网络延迟、节点宕机和服务过载是常态，缺乏熔断机制的系统在生产环境中极其脆弱。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>熔断器是一个有状态的状态机，主要包含三个状态及转换逻辑：</p>
+<ol>
+<li>Closed (闭合): 初始状态或恢复正常后的状态。所有请求正常放行，同时统计失败率或慢调用比例。当失败阈值超过设定值时，触发熔断，状态变为 Open。</li>
+<li>Open (打开): 熔断状态。所有请求直接拒绝（通常抛出异常或返回默认值），不进行底层 I&#x2F;O 操作。此时系统进入冷却期（Sleep Window），等待固定时长。</li>
+<li>Half-Open (半开): 冷却期结束后，状态转为 Half-Open。此时只允许极少数（如 1 个）探针请求通过下游服务。<ul>
+<li>若探针请求成功：认为服务恢复，状态切换回 Closed，并重置计数器。</li>
+<li>若探针请求失败：认为服务未恢复，状态再次切换回 Open，并重置冷却计时器。</li>
+</ul>
+</li>
+</ol>
+<p>与前端&#x2F;TypeScript 接口概念的对比：<br>前端 TS 中的 Interface 定义的是静态的契约结构（Structural Subtyping），编译时检查；而熔断器的 State Machine 定义的是动态的运行时空行为（Temporal Behavior）。TS Interface 保证代码类型安全，熔断器保证运行时韧性。TS 无法表达‘当前时刻是否允许执行’这一运行时上下文约束，这是语言层面的静态分析局限，需要运行时的策略模式来实现。</p>
+<p>伪代码逻辑：<br>class CircuitBreaker {<br>    state &#x3D; CLOSED;<br>    failureCount &#x3D; 0;<br>    lastFailureTime &#x3D; 0;</p>
+<pre><code>method call() {
+    if (state == OPEN) {
+        if (now - lastFailureTime &gt; threshold) { // 冷却时间到
+            state = HALF_OPEN;
+        } else {
+            throw ServiceUnavailable();
+        }
+    }
+
+    if (state == HALF_OPEN) {
+        try {
+            result = executeRemoteCall();
+            state = CLOSED; // 探测成功，恢复
+            resetStats();
+            return result;
+        } catch (e) {
+            state = OPEN; // 探测失败，继续熔断
+            lastFailureTime = now();
+            throw e;
+        }
+    }
+
+    // state == CLOSED
+    try {
+        result = executeRemoteCall();
+        recordSuccess();
+        return result;
+    } catch (e) {
+        recordFailure();
+        if (failureRate &gt; threshold) {
+            state = OPEN;
+            lastFailureTime = now();
+        }
+        throw e;
+    }
+}
+</code></pre>
+<p>}</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line">// 极简实现：验证半开状态的探测机制</span><br><span class="line">// 不依赖 Spring/CircleBreaker 等框架，仅展示核心状态机逻辑</span><br><span class="line"></span><br><span class="line">class SimpleCircuitBreaker &#123;</span><br><span class="line">    constructor(failureThreshold = 5, recoveryTimeoutMs = 5000) &#123;</span><br><span class="line">        this.failureThreshold = failureThreshold;</span><br><span class="line">        this.recoveryTimeoutMs = recoveryTimeoutMs;</span><br><span class="line">        this.state = &#x27;CLOSED&#x27;; // CLOSED | OPEN | HALF_OPEN</span><br><span class="line">        this.failureCount = 0;</span><br><span class="line">        this.lastFailTime = 0;</span><br><span class="line">        this.successCountForRecovery = 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 模拟一次远程调用</span><br><span class="line">    async call(targetServiceFn) &#123;</span><br><span class="line">        if (this.state === &#x27;OPEN&#x27;) &#123;</span><br><span class="line">            // 判断是否经过冷却时间</span><br><span class="line">            const timePassed = Date.now() - this.lastFailTime;</span><br><span class="line">            if (timePassed &gt;= this.recoveryTimeoutMs) &#123;</span><br><span class="line">                this.state = &#x27;HALF_OPEN&#x27;;</span><br><span class="line">                console.log(&#x27;State transition: OPEN -&gt; HALF_OPEN&#x27;);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                console.warn(&#x27;Circuit is OPEN. Request rejected.&#x27;);</span><br><span class="line">                throw new Error(&#x27;Service Unavailable (Circuit Open)&#x27;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            // 尝试执行实际逻辑</span><br><span class="line">            const result = await targetServiceFn();</span><br><span class="line">            </span><br><span class="line">            if (this.state === &#x27;HALF_OPEN&#x27;) &#123;</span><br><span class="line">                // 在半开状态下，只要有一次成功，即视为服务完全恢复</span><br><span class="line">                this.state = &#x27;CLOSED&#x27;;</span><br><span class="line">                this.failureCount = 0;</span><br><span class="line">                console.log(&#x27;Probe succeeded in HALF_OPEN. Transition to CLOSED.&#x27;);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            return result;</span><br><span class="line">        &#125; catch (error) &#123;</span><br><span class="line">            this.failureCount++;</span><br><span class="line">            this.lastFailTime = Date.now();</span><br><span class="line"></span><br><span class="line">            if (this.state === &#x27;HALF_OPEN&#x27;) &#123;</span><br><span class="line">                // 半开状态下失败，立即重新熔断，避免无效流量冲击</span><br><span class="line">                this.state = &#x27;OPEN&#x27;;</span><br><span class="line">                console.log(&#x27;Probe failed in HALF_OPEN. Transition back to OPEN.&#x27;);</span><br><span class="line">            &#125; else if (this.failureCount &gt;= this.failureThreshold &amp;&amp; this.state === &#x27;CLOSED&#x27;) &#123;</span><br><span class="line">                // 闭合状态下连续失败达到阈值，开启熔断</span><br><span class="line">                this.state = &#x27;OPEN&#x27;;</span><br><span class="line">                console.log(&#x27;Threshold reached in CLOSED. Transition to OPEN.&#x27;);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            throw error;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 测试用例：验证半开态度的‘试错’行为</span><br><span class="line">async function testHalfOpenBehavior() &#123;</span><br><span class="line">    const breaker = new SimpleCircuitBreaker(2, 1000); // 2次失败即熔断，1秒后恢复</span><br><span class="line">    let callCount = 0;</span><br><span class="line"></span><br><span class="line">    // 模拟一个最终会恢复的服务</span><br><span class="line">    const mockService = () =&gt; &#123;</span><br><span class="line">        callCount++;</span><br><span class="line">        // 前2次调用失败，第3次成功</span><br><span class="line">        if (callCount &lt;= 2) throw new Error(&#x27;Network Timeout&#x27;);</span><br><span class="line">        return &#x27;Data Received&#x27;;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        // 第一次：CLOSED，失败，count=1</span><br><span class="line">        await breaker.call(mockService);</span><br><span class="line">    &#125; catch &#123;&#125;</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        // 第二次：CLOSED，失败，count=2 -&gt; 触发 OPEN</span><br><span class="line">        await breaker.call(mockService);</span><br><span class="line">    &#125; catch &#123;&#125;</span><br><span class="line"></span><br><span class="line">    console.log(`Current State: $&#123;breaker.state&#125;`); // Expected: OPEN</span><br><span class="line">    </span><br><span class="line">    // 等待冷却时间结束</span><br><span class="line">    await new Promise(r =&gt; setTimeout(r, 1100));</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        // 第三次：OPEN -&gt; 超时 -&gt; 变为 HALF_OPEN -&gt; 执行 -&gt; 成功 -&gt; 变为 CLOSED</span><br><span class="line">        const res = await breaker.call(mockService);</span><br><span class="line">        console.log(`Result: $&#123;res&#125;, Final State: $&#123;breaker.state&#125;`);</span><br><span class="line">    &#125; catch (e) &#123;</span><br><span class="line">        console.error(&#x27;Failed even in half-open&#x27;, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><ol>
+<li><p>误区：认为半开状态可以并发多个探针请求。<br>真相：半开状态通常只允许极少量的探针（理想情况下为1个）通过，以避免在系统未完全稳定时瞬间打垮刚恢复的后端服务。如果允许多个并发探针，可能会掩盖真实的负载能力，导致再次快速熔断。</p>
+</li>
+<li><p>误区：将熔断参数配置为静态常数，忽视业务潮汐特性。<br>真相：不同接口的 SLA 差异巨大。对于写操作和非核心读操作，失败阈值和冷却时间应截然不同。静态统一配置会导致核心链路因非核心依赖抖动而频繁熔断，影响用户体验。</p>
+</li>
+</ol>
+<p>思考题：<br>在一个涉及三级依赖调用链的微服务架构中（Gateway -&gt; Order Service -&gt; Inventory Service -&gt; DB），如果在 Inventory Service 对 DB 的数据库连接池耗尽导致熔断，Order Service 应当采取什么样的降级策略？是直接抛错给 Gateway，还是读取本地缓存库存？请结合‘熔断边界’与‘数据一致性’谈谈你的设计权衡。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2024/09/02/foundation/2024-09-02-foundation-circuit-breaker-half-open-state/">https://litongjin.github.io/2024/09/02/foundation/2024-09-02-foundation-circuit-breaker-half-open-state/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%8E%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">分布式与架构设计</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/09/05/foundation/2024-09-05-foundation-caffeine-w-tinylfu/" title="每日基础技术总结 · 2024-09-05 · Caffeine 的 W-TinyLFU 淘汰算法与窗口布隆过滤器机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2024-09-05 · Caffeine 的 W-TinyLFU 淘汰算法与窗口布隆过滤器机制</div></div></a></div><div class="next-post pull-right"><a href="/2024/09/01/foundation/2024-09-01-foundation-webpack-module-federation/" title="每日基础技术总结 · 2024-09-01 · Webpack 模块联邦（Module Federation）跨应用共享"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2024-09-01 · Webpack 模块联邦（Module Federation）跨应用共享</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/13/foundation/2024-02-13-foundation-service-registration-discovery-health-check/" title="每日基础技术总结 · 2024-02-13 · 服务注册发现与健康检查"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-13</div><div class="title">每日基础技术总结 · 2024-02-13 · 服务注册发现与健康检查</div></div></a></div><div><a href="/2024/05/11/foundation/2024-05-11-foundation-vs-vs-serverless/" title="每日基础技术总结 · 2024-05-11 · 架构取舍：单体 vs 微服务 vs Serverless"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-11</div><div class="title">每日基础技术总结 · 2024-05-11 · 架构取舍：单体 vs 微服务 vs Serverless</div></div></a></div><div><a href="/2024/07/22/foundation/2024-07-22-foundation-event-sourcing/" title="每日基础技术总结 · 2024-07-22 · 事件溯源（Event Sourcing）与最终一致"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-22</div><div class="title">每日基础技术总结 · 2024-07-22 · 事件溯源（Event Sourcing）与最终一致</div></div></a></div><div><a href="/2024/10/18/foundation/2024-10-18-foundation-token/" title="每日基础技术总结 · 2024-10-18 · 接口幂等设计：Token&#x2F;去重表&#x2F;状态机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-18</div><div class="title">每日基础技术总结 · 2024-10-18 · 接口幂等设计：Token&#x2F;去重表&#x2F;状态机</div></div></a></div><div><a href="/2024/10/22/foundation/2024-10-22-foundation-cqrs/" title="每日基础技术总结 · 2024-10-22 · CQRS 命令查询职责分离"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-22</div><div class="title">每日基础技术总结 · 2024-10-22 · CQRS 命令查询职责分离</div></div></a></div><div><a href="/2024/10/30/foundation/2024-10-30-foundation-api/" title="每日基础技术总结 · 2024-10-30 · API 网关的职责与限流鉴权"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-30</div><div class="title">每日基础技术总结 · 2024-10-30 · API 网关的职责与限流鉴权</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">724</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">71</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2024-09-02-%C2%B7-%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7%E4%B8%8E%E7%86%94%E6%96%AD%EF%BC%88%E7%86%94%E6%96%AD%E5%99%A8%E7%9A%84%E5%8D%8A%E5%BC%80%E7%8A%B6%E6%80%81%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/22/daily/2026-09-22-workbench-daily/" title="工作台日报 · 2026-09-22">工作台日报 · 2026-09-22</a><time datetime="2026-09-21T23:01:27.000Z" title="发表于 2026-09-22 07:01:27">2026-09-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/22/foundation/2026-09-22-foundation-localstorage-sessionstorage-indexeddb/" title="每日基础技术总结 · 2026-09-22 · localStorage / sessionStorage / IndexedDB 存储选型">每日基础技术总结 · 2026-09-22 · localStorage / sessionStorage / IndexedDB 存储选型</a><time datetime="2026-09-21T23:01:27.000Z" title="发表于 2026-09-22 07:01:27">2026-09-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/22/foundation/2026-09-22-foundation-system-prompt/" title="每日基础技术总结 · 2026-09-22 · System Prompt 的角色设定">每日基础技术总结 · 2026-09-22 · System Prompt 的角色设定</a><time datetime="2026-09-21T23:01:27.000Z" title="发表于 2026-09-22 07:01:27">2026-09-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/22/foundation/2026-09-22-foundation-python/" title="每日基础技术总结 · 2026-09-22 · Python 基础语法与数据结构">每日基础技术总结 · 2026-09-22 · Python 基础语法与数据结构</a><time datetime="2026-09-21T23:01:27.000Z" title="发表于 2026-09-22 07:01:27">2026-09-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/daily/2026-09-21-workbench-daily/" title="工作台日报 · 2026-09-21">工作台日报 · 2026-09-21</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/21/foundation/2026-09-21-foundation-flexbox-grid/" title="每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异">每日基础技术总结 · 2026-09-21 · Flexbox 与 Grid 布局模型的核心差异</a><time datetime="2026-09-20T23:02:57.000Z" title="发表于 2026-09-21 07:02:57">2026-09-21</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
