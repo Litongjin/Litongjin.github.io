@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子📚 今日主题 哈希表开放寻址的线性探测与负载因子（算法与数据结构）  1. 核心概念速览开放寻址（Open Addressing）是解决哈希冲突的原子机制之一，其核心在于所有键值对均直接存储于哈希数组槽位中，而非外部链。线性探测（Linear Probing）作为最基础的冲突解决策略，遵循 f(i) &#x3D;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/24/foundation/2026-09-24-foundation-hash-open-addressing-linear-probing/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子📚 今日主题 哈希表开放寻址的线性探测与负载因子（算法与数据结构）  1. 核心概念速览开放寻址（Open Addressing）是解决哈希冲突的原子机制之一，其核心在于所有键值对均直接存储于哈希数组槽位中，而非外部链。线性探测（Linear Probing）作为最基础的冲突解决策略，遵循 f(i) &#x3D;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-23T23:04:19.000Z">
+<meta property="article:modified_time" content="2026-09-23T23:24:08.524Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="算法与数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/24/foundation/2026-09-24-foundation-hash-open-addressing-linear-probing/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-24 07:24:08'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">599</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">72</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-23T23:04:19.000Z" title="发表于 2026-09-24 07:04:19">2026-09-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-23T23:24:08.524Z" title="更新于 2026-09-24 07:24:08">2026-09-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-24-·-哈希表开放寻址的线性探测与负载因子"><a href="#每日基础技术总结-·-2026-09-24-·-哈希表开放寻址的线性探测与负载因子" class="headerlink" title="每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子"></a>每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>哈希表开放寻址的线性探测与负载因子</strong>（算法与数据结构）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>开放寻址（Open Addressing）是解决哈希冲突的原子机制之一，其核心在于所有键值对均直接存储于哈希数组槽位中，而非外部链。线性探测（Linear Probing）作为最基础的冲突解决策略，遵循 f(i) &#x3D; (H(key) + i) mod M 的探测序列，依次检查下一个槽位。负载因子（Load Factor, α &#x3D; N&#x2F;M）决定表满阈值，α 过高将导致簇聚（Clustering），使探查序列退化为 O(N)，破坏 O(1) 访问承诺。掌握此机制是理解 Python dict、Go map 底层实现及构建高性能无锁哈希表的前提，尤其在 AI 向量数据库与缓存中间件的性能调优中具有决定性意义。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>线性探测的本质是利用数据局部性优化空间复用，通过伪随机序列的退化换取缓存友好性。其运行逻辑严格依赖三个要素：哈希函数 H(k)、模数 M（通常为 2 的幂以支持位移操作）、以及一致性探测步长 1。</p>
+<p>对比前端 TS&#x2F;JS 对象：JS 对象的属性存储虽在 V8 中可能使用 HashTable，但其键类型混合了字符串与 Symbol，且支持动态扩展而无需显式触发 Rehash（引擎内部处理）。而开放寻址线性探测要求开发者或底层实现明确管理 Rehash 时机（通常当 α &gt; threshold 时）。TS 接口定义静态契约，而线性探测的冲突处理是运行时动态行为，前者编译期确定，后者运行时计算。</p>
+<p>关键差异点：</p>
+<ol>
+<li>冲突语义：链表法将冲突元素链接在桶尾；线性探测将冲突元素‘推’入后续空槽，导致物理位置离散。</li>
+<li>删除操作：链表法仅修改指针；线性探测标记 ‘Deleted’  tombstone 以避免切断已形成的探测链。</li>
+<li>复杂度预期：理想下 O(1)，但在高负载因子上，线性探测的平均查找长度近似为 0.5 * (1 + 1&#x2F;(1-α))，显著劣于链表法的均匀分布特性。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">// 极简 C 风格结构体定义，展示内存布局本质</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    int key;</span><br><span class="line">    int value;</span><br><span class="line">    int state; // 0: Empty, 1: Occupied, 2: Deleted (Tombstone)</span><br><span class="line">&#125; Slot;</span><br><span class="line"></span><br><span class="line">Slot table[MAX_SIZE];</span><br><span class="line"></span><br><span class="line">// 插入操作：线性探测寻找目标位置</span><br><span class="line">void insert(int k, int v) &#123;</span><br><span class="line">    int idx = hash(k) % MAX_SIZE;</span><br><span class="line">    // 循环探测直到找到空槽或匹配键</span><br><span class="line">    while (table[idx].state != EMPTY) &#123;</span><br><span class="line">        if (table[idx].state == OCCUPIED &amp;&amp; table[idx].key == k) &#123;</span><br><span class="line">            table[idx].value = v; // Key exists, update value</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        if (table[idx].state == DELETED) &#123;</span><br><span class="line">            // 优化：可在此记录第一个 Tombstone 位置以便提前插入</span><br><span class="line">            // 但标准线性探测通常继续寻找以维持簇完整性</span><br><span class="line">        &#125;</span><br><span class="line">        idx = (idx + 1) % MAX_SIZE; // 关键：线性递进</span><br><span class="line">    &#125;</span><br><span class="line">    // 找到空位，填入并更新负载因子</span><br><span class="line">    table[idx].key = k;</span><br><span class="line">    table[idx].value = v;</span><br><span class="line">    table[idx].state = OCCUPIED;</span><br><span class="line">    count++;</span><br><span class="line">    if ((double)count / MAX_SIZE &gt; 0.75) resize(); // 负载因子触发扩容</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 查询操作：遵循相同探测路径</span><br><span class="line">int get(int k) &#123;</span><br><span class="line">    int idx = hash(k) % MAX_SIZE;</span><br><span class="line">    while (table[idx].state != EMPTY) &#123;</span><br><span class="line">        if (table[idx].state == OCCUPIED &amp;&amp; table[idx].key == k) &#123;</span><br><span class="line">            return table[idx].value;</span><br><span class="line">        &#125;</span><br><span class="line">        // 必须遍历完整个簇才能确定不存在，不能遇 Deleted 就停止</span><br><span class="line">        idx = (idx + 1) % MAX_SIZE;</span><br><span class="line">    &#125;</span><br><span class="line">    return NOT_FOUND;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为线性探测比链表法慢。实际上，在现代 CPU 架构下，由于线性探测极好的缓存命中率（Cache Locality），其实际性能往往优于需要频繁内存跳转（Pointer Chasing）的链表法，尤其是在负载因子低于 0.7 时。</p>
+<p>误区二：忽略 Tombstone 的影响。若删除操作直接置为空槽（Empty），会断裂当前正在进行的探测链，导致后续插入的元素无法被正确检索到。因此，必须保留 Tombstone 标记以维持探测路径的连续性。</p>
+<p>思考题：在负载因子 α 趋近于 1 时，为什么简单的线性探测会导致二次聚集（Quadratic Clustering）现象？如果改用双重哈希（Double Hashing）或 Robin Hood 哈希，如何从数学概率上缓解这一问题？请推导平均查找次数随 α 变化的渐近行为。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/24/foundation/2026-09-24-foundation-hash-open-addressing-linear-probing/">https://litongjin.github.io/2026/09/24/foundation/2026-09-24-foundation-hash-open-addressing-linear-probing/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">算法与数据结构</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/24/foundation/2026-09-24-foundation-deadlock-conditions-cycle-detection/" title="每日基础技术总结 · 2026-09-24 · 死锁的四个必要条件与循环等待检测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-24 · 死锁的四个必要条件与循环等待检测</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/24/foundation/2026-09-24-foundation-tcp-syn-flood-attack-defense/" title="每日基础技术总结 · 2026-09-24 · TCP 的 SYN 洪水攻击与防御"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-24 · TCP 的 SYN 洪水攻击与防御</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/07/16/foundation/2024-07-16-foundation-consistent-hashing-virtual-nodes-data-migration/" title="每日基础技术总结 · 2024-07-16 · 一致性哈希的虚拟节点与环上数据迁移"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-16</div><div class="title">每日基础技术总结 · 2024-07-16 · 一致性哈希的虚拟节点与环上数据迁移</div></div></a></div><div><a href="/2025/05/11/foundation/2025-05-11-foundation-sliding-window-maximum-monotonic-queue/" title="每日基础技术总结 · 2025-05-11 · 滑动窗口最大值与单调队列"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-11</div><div class="title">每日基础技术总结 · 2025-05-11 · 滑动窗口最大值与单调队列</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation-bellman-ford/" title="每日基础技术总结 · 2026-06-22 · Bellman-Ford 算法的松弛轮数与负环检测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · Bellman-Ford 算法的松弛轮数与负环检测</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation/" title="每日基础技术总结 · 2026-06-22 · 并查集的按秩合并与路径压缩复杂度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · 并查集的按秩合并与路径压缩复杂度</div></div></a></div><div><a href="/2026/06/23/foundation/2026-06-23-foundation-floyd-warshall/" title="每日基础技术总结 · 2026-06-23 · Floyd-Warshall 算法的中间点枚举与传递闭包"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-23</div><div class="title">每日基础技术总结 · 2026-06-23 · Floyd-Warshall 算法的中间点枚举与传递闭包</div></div></a></div><div><a href="/2026/06/22/foundation/2026-06-22-foundation-dijkstra/" title="每日基础技术总结 · 2026-06-22 · Dijkstra 算法的优先队列优化与负权陷阱"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="title">每日基础技术总结 · 2026-06-22 · Dijkstra 算法的优先队列优化与负权陷阱</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">599</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">72</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-24-%C2%B7-%E5%93%88%E5%B8%8C%E8%A1%A8%E5%BC%80%E6%94%BE%E5%AF%BB%E5%9D%80%E7%9A%84%E7%BA%BF%E6%80%A7%E6%8E%A2%E6%B5%8B%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9B%A0%E5%AD%90"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/24/daily/2026-09-24-workbench-daily/" title="工作台日报 · 2026-09-24">工作台日报 · 2026-09-24</a><time datetime="2026-09-23T23:04:19.000Z" title="发表于 2026-09-24 07:04:19">2026-09-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/24/foundation/2026-09-24-foundation-deadlock-conditions-cycle-detection/" title="每日基础技术总结 · 2026-09-24 · 死锁的四个必要条件与循环等待检测">每日基础技术总结 · 2026-09-24 · 死锁的四个必要条件与循环等待检测</a><time datetime="2026-09-23T23:04:19.000Z" title="发表于 2026-09-24 07:04:19">2026-09-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/24/foundation/2026-09-24-foundation-hash-open-addressing-linear-probing/" title="每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子">每日基础技术总结 · 2026-09-24 · 哈希表开放寻址的线性探测与负载因子</a><time datetime="2026-09-23T23:04:19.000Z" title="发表于 2026-09-24 07:04:19">2026-09-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/24/foundation/2026-09-24-foundation-tcp-syn-flood-attack-defense/" title="每日基础技术总结 · 2026-09-24 · TCP 的 SYN 洪水攻击与防御">每日基础技术总结 · 2026-09-24 · TCP 的 SYN 洪水攻击与防御</a><time datetime="2026-09-23T23:04:19.000Z" title="发表于 2026-09-24 07:04:19">2026-09-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/23/daily/2026-09-23-workbench-daily/" title="工作台日报 · 2026-09-23">工作台日报 · 2026-09-23</a><time datetime="2026-09-22T23:01:36.000Z" title="发表于 2026-09-23 07:01:36">2026-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/23/foundation/2026-09-23-foundation-cache-failure-ttl-jitter/" title="每日基础技术总结 · 2026-09-23 · 缓存雪崩与过期时间抖动">每日基础技术总结 · 2026-09-23 · 缓存雪崩与过期时间抖动</a><time datetime="2026-09-22T23:01:36.000Z" title="发表于 2026-09-23 07:01:36">2026-09-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
