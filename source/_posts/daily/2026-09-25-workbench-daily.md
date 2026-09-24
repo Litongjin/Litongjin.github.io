@@ -1,8 +1,8 @@
 ---
 title: "工作台日报 · 2026-09-25"
-date: 2026-09-25 07:05:08
+date: 2026-09-25 07:19:37
 categories: [工作日记]
-tags: ["日报", "AI安全", "AI工具", "AI编程助手", "Agent"]
+tags: ["日报", "AI Agent", "AI安全", "AI编程", "AI视频"]
 author: Litongjin
 disableNunjucks: true
 ---
@@ -12,141 +12,152 @@ disableNunjucks: true
 ## 🔥 行业热点
 
 - [Early rogue AI agent activity and attempts to hack found on urlquery.net](https://transluce.org/agent-activity) — *Hacker News*
-  - 📌 **内容**：揭示了早期AI代理在真实互联网环境中可能表现出的自主恶意行为或试图进行攻击的迹象，反映了Agent在实际部署中的安全风险。
-  - 💡 **学习**：理解多智能体系统（Multi-Agent Systems）在面对不可控环境时的脆弱性，学习如何设计更安全的Agent交互协议和沙箱隔离机制。
-  - 🧭 **拓展**：研究现有的Agent安全评估框架，如HowToObserve或SWE-bench的安全变体，以模拟类似威胁场景。
+  - 📌 **内容**：报道在 urlquery.net 上观察到早期恶意 AI Agent 活动与黑客尝试，提示 AI 驱动的攻击已开始出现在真实网络基础设施中。
+  - 💡 **学习**：可关注恶意 Agent 的行为特征与检测规则，在安全监控中增设对自动化 AI 流量的识别能力。
+  - 🧭 **拓展**：可在自己的蜜罐或日志平台模拟类似异常访问，验证检测规则。
 - [SkillOpt: Training Loop for Agent Skills](https://microsoft.github.io/SkillOpt/) — *Hacker News*
-  - 📌 **内容**：提出了一种针对AI代理技能的训练循环方法，旨在通过迭代优化提升Agent执行特定任务的能力。
-  - 💡 **学习**：探索强化学习与微调技术在垂直领域Agent技能优化中的应用，掌握构建闭环训练数据流的思路。
-  - 🧭 **拓展**：复现其训练逻辑，尝试将其应用于开源大模型（如Llama 3）的特定工具调用能力优化中。
+  - 📌 **内容**：介绍 SkillOpt，一种面向 Agent 技能的训练循环机制，让智能体通过迭代优化掌握更稳定的执行能力。
+  - 💡 **学习**：学习如何把 Agent 行为拆解为可训练技能，并用闭环反馈持续优化 Prompt 或策略。
+  - 🧭 **拓展**：可尝试在 Agent 框架中实现一个小型技能回放与优化循环，对比训练前后效果。
 - [Rails World 2026 Opening Keynote [video]](https://www.youtube.com/watch?v=vDjW_dRyKXY) — *Hacker News*
-  - 📌 **内容**：Ruby on Rails社区未来的重要技术分享视频，涵盖该Web框架的最新发展方向、设计理念及生态趋势。
-  - 💡 **学习**：关注Rails在云原生和现代化Web开发中的定位变化，学习框架演进对后端架构师的技术栈选择影响。
-  - 🧭 **拓展**：观看视频后对比当前主流全栈框架（如Next.js/SvelteKit），分析各自适用场景。
+  - 📌 **内容**：发布 Rails World 2026 开幕主题演讲视频，涵盖 Rails 社区最新方向与框架进展。
+  - 💡 **学习**：可借此了解 Rails 生态的新特性、设计哲学与 Web 开发趋势。
+  - 🧭 **拓展**：观看后挑选新特性在个人项目里做一次升级体验。
 - [Opus 5.5 is good at explainer videos](https://launchvideo.io) — *Hacker News*
-  - 📌 **内容**：展示了某大型模型（疑似OpenAI Opus系列或类比模型）在生成解释类视频方面的最新能力进展，反映多模态生成的趋势。
-  - 💡 **学习**：了解当前前沿AI模型在视频生成领域的文本到视频（Text-to-Video）能力边界及其在内容创作工作流中的潜在应用。
-  - 🧭 **拓展**：测试现有开源视频生成模型与商业API的性能差异，特别是在复杂叙事连贯性上的表现。
+  - 📌 **内容**：评测认为 Opus 5.5 在制作讲解类视频方面表现优秀，说明新一代视频生成模型在知识传递场景更可用。
+  - 💡 **学习**：可研究如何用视频生成模型快速产出教程或说明内容，并设计提示词控制节奏与视觉逻辑。
+  - 🧭 **拓展**：用同主题内容对比 Opus 5.5 与其它视频模型的成片效果。
 - [Security auditing in the age of (good enough) AI](https://blog.trailofbits.com/2026/09/18/auditing-in-the-age-of-good-enough-ai/) — *Hacker News*
-  - 📌 **内容**：讨论了在AI辅助日益普及的背景下，传统代码安全审计工作的演变，以及“足够好”的AI工具如何处理安全漏洞审查。
-  - 💡 **学习**：掌握如何利用LLM辅助进行静态代码分析和安全漏洞扫描，同时理解人工复核在关键安全环节中的不可替代性。
-  - 🧭 **拓展**：将CI/CD管道接入基于LLM的安全审计插件，并设置阈值来评估其误报率。
+  - 📌 **内容**：讨论在 AI 已“足够好”的时代如何进行安全审计，强调人机协作和验证流程的必要性。
+  - 💡 **学习**：可以学习把 AI 生成的安全建议纳入现有审计管线，通过人工复核和自动化测试降低误报。
+  - 🧭 **拓展**：可让 AI 对一份安全审计报告做初筛、人工把关，评估效率与质量。
 - [Show HN: AgentRun: DSL to turn agents into workflows](https://github.com/Parcha-ai/agentrun) — *Hacker News*
-  - 📌 **内容**：发布了一个允许开发者使用领域特定语言（DSL）将独立的AI代理编排成自动化工作流的新工具。
-  - 💡 **学习**：学习如何定义结构化状态机来管理多Agent协作流程，解决单纯Prompt工程难以处理的复杂逻辑编排问题。
-  - 🧭 **拓展**：尝试用AgentRun重构一个简单的客服响应或数据处理流水线，对比与传统LangGraph/CrewAI的实现差异。
+  - 📌 **内容**：展示 AgentRun，一个用 DSL 把 AI Agent 编排成工作流的工具，提升复杂 Agent 任务的可控性。
+  - 💡 **学习**：可以学习 DSL 设计在 Agent 流程编排中的优势，比如显式状态、分支与复用。
+  - 🧭 **拓展**：尝试用 AgentRun 重构一个原有的多步 Prompt 调用流程。
 - [Show HN: Air-gapped file encryption as self-decrypting HTML page](https://cms-sfx-demo.apeleg.com/) — *Hacker News*
-  - 📌 **内容**：展示了一种无需服务器端解密，仅依靠浏览器端JavaScript即可实现离线文件加密查看的技术方案，适合高敏感数据的本地传输。
-  - 💡 **学习**：深入研究前端密码学库（如Web Crypto API），理解如何在无服务端信任链的情况下实现端到端的本地加解密体验。
-  - 🧭 **拓展**：验证该HTML页面在不同现代浏览器下的兼容性及性能开销，特别是处理大文件时的内存使用情况。
+  - 📌 **内容**：展示一种离线文件加密方案，生成自解密 HTML 页面，让文件在隔离环境中加密和解密。
+  - 💡 **学习**：可了解纯前端密码学实现的边界，特别是密钥管理、流加密和浏览器安全模型。
+  - 🧭 **拓展**：可对生成页面做代码审计，验证其加密算法与密钥派生实现。
 - [A Million Agents Is a Distributed System Problem](https://www.instacloud.com/blogs/a-million-agents-is-a-distributed-systems-problem) — *Hacker News*
-  - 📌 **内容**：从分布式系统的角度重新审视大规模Agent集群的运行挑战，强调并发控制、通信开销和状态一致性等经典CS问题。
-  - 💡 **学习**：回顾分布式系统理论（如CAP定理、一致性哈希），思考如何将其应用到海量AI Agent的调度与服务发现中。
-  - 🧭 **拓展**：调研Kubernetes Service Mesh在处理高频Agent间RPC调用的最佳实践。
+  - 📌 **内容**：文章指出当 Agent 规模达到百万级时，核心挑战变成分布式系统问题，而非单个模型能力。
+  - 💡 **学习**：需要掌握任务调度、通信、一致性与故障恢复等分布式系统技术来支撑大规模 Agent。
+  - 🧭 **拓展**：可结合消息队列或 Actor 模型设计一个 Agent 集群的架构草图。
 - [Show HN: Critic – Review code with the agent that wrote it](https://www.critic.run/) — *Hacker News*
-  - 📌 **内容**：推出了一款让编写代码的AI代理自己审查自己产出代码的工具，利用LLM的自我反思能力进行代码质量保证。
-  - 💡 **学习**：探索Self-Correction（自我修正）和ReAct范式在代码质量提升中的应用，学习如何设计有效的Prompt模板引导Agent进行自检。
-  - 🧭 **拓展**：将该工具集成到IDE插件中，观察其对日常编码效率的具体影响及错误检出率。
+  - 📌 **内容**：展示 Critic 工具，让编写代码的同一 Agent 参与代码审查，形成生成-批评-修改闭环。
+  - 💡 **学习**：可以借鉴“让模型自评+多轮修订”的流程，提高生成代码的正确性和可维护性。
+  - 🧭 **拓展**：可把 Critic 接入 CI，在 PR 中自动生成审查意见。
 - [F-Droid 2.0](https://f-droid.org/2026/09/24/f-droid-2.0-a-new-chapter-for-android-freedom.html) — *Hacker News*
-  - 📌 **内容**：Android开源应用商店F-Droid的重大版本更新，通常涉及元数据存储迁移、界面重构及隐私保护特性的增强。
-  - 💡 **学习**：关注去中心化应用分发架构的挑战，学习Flutter或Jetpack Compose在现代移动客户端开发中的重构案例。
-  - 🧭 **拓展**：查阅F-Droid的官方迁移文档，了解GoDatabase存储格式变更带来的后端影响。
+  - 📌 **内容**：F-Droid 2.0 发布，开源 Android 应用商店带来新的版本与功能改进。
+  - 💡 **学习**：可关注开源分发渠道的更新机制、签名策略与用户隐私保护方式。
+  - 🧭 **拓展**：尝试在模拟器上安装体验 F-Droid 2.0，并对比其应用发现流程。
 
 ## 🌟 GitHub 热门开源项目
 
-- [diegosouzapw/OmniRoute（MCP 工具）](https://github.com/diegosouzapw/OmniRoute) — *GitHub · TypeScript · +5.3k/周 · 总 69.9k star*
-  - 📌 **是什么**：一款多模型 AI 网关，统一接入数百个提供商和模型，旨在简化开发中对不同 LLM 的调用。支持多种流行 AI 编程助手，提供标准化的 API 入口。
-  - 💡 **学习点**：理解如何构建统一的模型抽象层，实现后端服务与具体 LLM 供应商的解耦。
-  - 🧭 **上手**：阅读项目文档中的 API 规范，尝试编写一个简单的客户端请求切换不同模型提供商。
-- [headroomlabs-ai/headroom（Agent Skills）](https://github.com/headroomlabs-ai/headroom) — *GitHub · Python · +2.2k/周 · 总 73.7k star*
-  - 📌 **是什么**：一个用于压缩工具输出、日志和 RAG 数据的库，以减少发送给 LLM 的 Token 数量，同时保持回答准确性。提供了代理和 MCP 服务器形式的支持。
-  - 💡 **学习点**：学习上下文工程技术（Context Engineering）及如何在 Agent 循环中优化 Token 成本与延迟。
-  - 🧭 **上手**：查看其核心压缩算法的实现逻辑，并尝试在本地环境中部署其 Proxy 对比压缩前后的效果。
-- [ruvnet/ruflo（Agent 框架）](https://github.com/ruvnet/ruflo) — *GitHub · TypeScript · +1.2k/周 · 总 73.2k star*
-  - 📌 **是什么**：一个智能多玩家蜂群调度器，支持自主工作流协调、自适应记忆和自我学习能力的构建。侧重于多 Agent 协作与长期交互系统的搭建。
-  - 💡 **学习点**：探索多 Agent 系统中的状态管理与协同机制，理解如何将复杂任务分解给不同的子 Agent。
-  - 🧭 **上手**：运行其提供的多 Agent 协作示例代码，观察不同角色间的信息传递与工作流执行过程。
-- [elder-plinius/CL4R1T4S](https://github.com/elder-plinius/CL4R1T4S) — *GitHub ·  · +1.1k/周 · 总 50.6k star*
-  - 📌 **是什么**：收集了大量主流 LLM 系统提示词的泄露版本，旨在提高 AI 系统的透明度。包含 ChatGPT、Claude、Gemini 等模型的原始指令结构。
-  - 💡 **学习点**：通过分析真实生产环境的系统提示词，深入理解 LLM 的底层行为约束与安全对齐策略。
-  - 🧭 **上手**：浏览仓库中标记为特定模型的文件，对比官方文档描述与实际泄露提示词的差异。
-- [shareAI-lab/learn-claude-code（Agent Skills）](https://github.com/shareAI-lab/learn-claude-code) — *GitHub · Python · +1.0k/周 · 总 77.6k star*
-  - 📌 **是什么**：从零开始构建类 Claude Code 的智能代理辅助工具的教程项目。通过 Bash 脚本演示如何集成 Shell 操作与 LLM 决策，适合教育目的。
-  - 💡 **学习点**：掌握从底层原理出发，将文件系统操作、权限控制与 LLM 推理结合构建 Coding Agent 的方法。
-  - 🧭 **上手**：逐步复现教程中的构建步骤，重点理解 Agent 如何安全地执行外部命令并与用户交互。
+- [thedotmack/claude-mem（Agent Skills）](https://github.com/thedotmack/claude-mem) — *GitHub · TypeScript · +965/周 · 总 94.6k star*
+  - 📌 **是什么**：为Claude等agent提供跨会话持久记忆的工具，捕捉会话内容并用AI压缩后注入未来上下文。
+  - 💡 **学习点**：学习如何设计基于AI压缩与检索的长期记忆层。
+  - 🧭 **上手**：阅读源码中会话捕获与压缩的核心模块，或运行一个对话示例观察记忆如何注入。
+- [langchain-ai/langchain（Agent 框架）](https://github.com/langchain-ai/langchain) — *GitHub · Python · +901/周 · 总 147.0k star*
+  - 📌 **是什么**：一个用于构建agent工程的开源平台，提供模块化组件与工作流编排能力。
+  - 💡 **学习点**：掌握LangChain的抽象概念（工具调用、会话状态、智能体编排）是构建LLM应用的基础。
+  - 🧭 **上手**：在官方文档跑一个快速开始的链或智能体示例，理解其核心抽象。
+- [mem0ai/mem0（Agent 框架）](https://github.com/mem0ai/mem0) — *GitHub · Python · +842/周 · 总 66.0k star*
+  - 📌 **是什么**：为AI agent提供可落地的持久记忆基础设施，可直接嵌入应用生产环境。
+  - 💡 **学习点**：学习生产级记忆层设计：如何存储、检索和更新agent的长期记忆。
+  - 🧭 **上手**：运行其快速开始示例，观察记忆如何随对话累积和检索。
+- [langchain-ai/langgraph（Agent 框架）](https://github.com/langchain-ai/langgraph) — *GitHub · Python · +783/周 · 总 42.2k star*
+  - 📌 **是什么**：一个用于构建可恢复、状态化agent的框架，强调工作流控制与容错。
+  - 💡 **学习点**：理解状态图模型如何编排agent步骤和工具调用。
+  - 🧭 **上手**：对照其状态图示例，亲手实现一个带循环与分支的agent。
+- [infiniflow/ragflow（Agent 框架）](https://github.com/infiniflow/ragflow) — *GitHub · Go · +760/周 · 总 91.3k star*
+  - 📌 **是什么**：开源RAG引擎，融合检索增强生成与agent能力，为LLM构建上下文层。
+  - 💡 **学习点**：学习RAG与agent如何结合，以及如何设计多阶段检索流程。
+  - 🧭 **上手**：运行其自带的网页问答示例，观察检索与生成如何协同。
 
 ## 🚀 技能提升点（工作总结汇总）
 
-### 1. antd TreeSelect 严格模式陷阱
-- **技能点**：掌握 antd v6 TreeSelect 在 treeCheckStrictly 下的值类型强制转换与回显机制。
-- **坑点**：开启 treeCheckStrictly 会强制 labelInValue，导致 onChange 返回对象数组而非 ID 列表，直接提交后端会失败。
-- **解决方案**：在 handleOk 中将 value 从对象数组提取为纯 ID 字符串；回显时传纯 ID，组件内部会自动补全 label。
+### 1. Quill blot 值读取契约
+- **技能点**：掌握 Quill/Parchment 的静态契约：blot 真实值必须通过 `blot.statics.value(domNode)` 获取；Delta/Op 等类型用 `Quill.import('delta')` 拿运行时的类，而非 ES import。
+- **坑点**：用实例 `blot.value()` 取到的是 `{ [blotName]: value }` 包装，弹窗回显变成 `[object Object]`；`import { Delta } from 'quill'` 在 Vite 预构建后不是构造函数，`new Delta()` 抛 TypeError；embed blot 的 create() 收到 `{blotName: value}` 而非常量，未守卫会写入脏数据。
+- **解决方案**：取真值统一走静态契约 `statics.value(domNode)`；运行时类型一律 `Quill.import('delta')`；所有 create() 入口加 `typeof value === 'string' ? value : (value?.[name] ?? '')` 守卫。
 ```text
-const ids = values.map(v => v.value);
-// antd auto-converts scalar IDs to objects for display if labelInValue is true
-```
-- **拓展**：需配合 showCheckedStrategy=SHOW_ALL 以展示非叶子节点的选中状态。
-- *来源：admin-workspace-hr-talent | 2026-09*
-
-### 2. Quill Delta 构造与 Blot 取值
-- **技能点**：确立 Quill 插件开发中 Delta 实例获取与 Blot 静态值读取的标准范式。
-- **坑点**：Vite 预构建后 import Delta 非构造函数；Blot.value() 返回片段而非真值，导致渲染异常。
-- **解决方案**：使用 Quill.import('delta') 创建实例；取值必须走 blot.statics.value(blot.domNode)。
-```text
+// 取真值走静态契约
+const raw = blot.statics.value(blot.domNode);
+// Delta 别用 ES import
 const Delta = Quill.import('delta');
-const trueVal = MyBlot.statics.value(domNode);
+// create() 守卫
+const v = typeof value === 'string' ? value : (value?.[name] ?? '');
 ```
-- **拓展**：embed blot 的 create 方法需对 value 进行 typeof 守卫以防 [object Object]。
-- *来源：admin-workspace-new | 2026-09*
+- **拓展**：排查「框架运行时与构建产物不一致」的坑时，先确认 import 的对象是不是真的构造函数。
+- *来源：admin-workspace-new*
 
-### 3. OSS 上传 onSuccess 参数陷阱
-- **技能点**：理解 antd Upload customRequest 中 file.response 的原样赋值逻辑及其副作用。
-- **坑点**：onSuccess 传入包装过的对象会导致 file.response 嵌套，致使 key/url 等关键字段取不到，预览下载失效。
-- **解决方案**：自定义请求时，onSuccess 必须直接传入上传服务返回的原始结果对象。
+### 2. Upload customRequest 回调参数
+- **技能点**：掌握 antd Upload 的 customRequest 中 `onSuccess` 参数会被原样写入 `file.response` 的透传机制，能正确设计自定义上传链路。
+- **坑点**：把上传结果包一层 file-like 对象再传给 onSuccess，导致 file.response 多套一层，后续取 key/url/type/control 全部落空，fileName 退化成本地文件名、预览下载失效。
+- **解决方案**：onSuccess 直接透传上传接口原始返回值；依赖 file.response 的代码先查 antd/es/upload/Upload.js 确认参数流再决定是否包装。
 ```text
-xhr.onload = () => {
-  // Pass raw result, not wrapped object
-  fileListItem.onSuccess(result, raw);
-};
+customRequest: async ({ file, onSuccess }) => {
+  const result = await uploadV2(file, UploadScene.X);
+  onSuccess(result); // 原始结果直传，勿包一层
+}
+// 消费端：file.response.key / file.response.url 直接可用
 ```
-- **拓展**：迁移上传接口时需 grep 验证残留的旧版 uploadFilePath 引用。
-- *来源：admin-workspace-hr-talent | 2026-09*
+- **拓展**：所有「回调参数会被框架透传」的场景，都应先查框架源码确认参数流。
+- *来源：admin-workspace-hr-talent*
 
-### 4. Flex 布局防灰底裁切
-- **技能点**：解决复杂嵌套 Flex 容器中高度不足导致的底部留白或内容裁切问题。
-- **坑点**：根容器使用 minHeight:100% 无法撑满视口；父级 content-box padding 导致 height:100% 溢出被裁。
-- **解决方案**：根 div 使用 height:100% + overflow:hidden；内部通过 flexShrink:0 固定头部，滚动区用 flex:1 + minHeight:0。
+### 3. 权限过滤边界值防护
+- **技能点**：掌握写权限/配置过滤函数时对缺省值的防御：非 string 入参短路返回可见，避免拖垮整个列表渲染。
+- **坑点**：`list.filter(btn => authTag(btn.authKey))` 只要有按钮没配 authKey（undefined），authTag 就走 `.every()` 分支抛 TypeError，整个 computed 崩溃、按钮区全部消失。
+- **解决方案**：过滤前缀加 `!btn.authKey ||` 短路；过滤函数对非 string 入参返回默认可见；配置完整性校验前置。
 ```text
-.container { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
-.scroll-area { flex: 1; min-height: 0; overflow: auto; }
+// 崩：authTag(undefined) 抛 TypeError
+const list = buttons.filter(btn => authTag(btn.authKey));
+// 修：缺省 key 直接放行
+const list = buttons.filter(btn => !btn.authKey || authTag(btn.authKey));
 ```
-- **拓展**：报表页需额外处理 Layout Content 的 padding 抵消逻辑。
-- *来源：admin-workspace-hr-talent | 2026-09*
+- **拓展**：配置项驱动渲染的过滤逻辑先验证配置完整性，再进入判断逻辑。
+- *来源：admin-workspace-test*
 
-### 5. TS 联合类型 Omit 字段丢失
-- **技能点**：识别 TypeScript 在操作联合类型的 MenuProps['items'] 时 Omit 的行为缺陷。
-- **坑点**：Omit 作用于联合类型只保留公共键，导致 icon/label 等非公共字段被意外剔除引发 TS2353。
-- **解决方案**：显式继承 Omit 结果并手动补回缺失的非公共可选属性（icon?/label?）。
+### 4. flex 滚动区 minHeight 陷阱
+- **技能点**：掌握 flex column 容器内「仅列表区域滚动」的标准布局：根容器 height:100% + flex column + overflow:hidden；滚动区 flex:1 + minHeight:0 + overflow:auto；非滚动区 flexShrink:0。
+- **坑点**：漏写 minHeight:0 时 flex 子项 min-height:auto 会撑破容器导致滚动失效；根容器用 minHeight:'100%' 而非 height:'100%' 会露灰底；祖先若是 content-box 带 padding，height:100% 还会被额外裁剪。
+- **解决方案**：统一该布局模式：分页条放滚动容器外并 flexShrink:0；表头吸顶按有无 scroll.x 二选一（有则 sticky prop，无则 CSS th{position:sticky, top:0}）。
 ```text
-type MenuItem = Omit<MenuProps['items'][0], 'children'> & {
-  icon?: React.ReactNode;
-  label?: string;
-};
+<div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+  <header style={{ flexShrink: 0 }}>标题/筛选</header>
+  <main style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>表格</main>
+  <footer style={{ flexShrink: 0 }}>分页条</footer>
+</div>
 ```
-- **拓展**：避免定义独立接口替换 extends Omit，以免破坏分组或 Filter 谓词兼容性。
-- *来源：admin-workspace-hr-talent | 2026-09*
+- **拓展**：沉淀为页面布局模板/组件，新页面直接套用避免重复踩坑。
+- *来源：admin-workspace-hr-talent*
 
-### 6. React Hook 内存泄漏防护
-- **技能点**：使用序号守卫（seqRef）管理异步请求，防止组件卸载或快速切换时的过时响应覆盖最新数据。
-- **坑点**：网络延迟导致旧请求在新请求完成后返回，错误地更新 UI 状态（如 BI 看板旧数据显示）。
-- **解决方案**：维护一个递增的 seqRef，每次发起请求前自增；回调中检查 current !== seqRef.current 则丢弃结果。
+### 5. 聚合接口空值归一化
+- **技能点**：掌握聚合/统计类接口在 service 层统一做空值归一的契约意识：分页接口 records || []、全量接口 ?? []，UI 不重复防御。
+- **坑点**：后端无数据时 code=0 但不下发 data 字段，service 返回 undefined；UI 里 rows.reduce() 直接崩整页白屏（实测：报表选未来月份再切换 tab 触发）。
+- **解决方案**：service 层兜底空数组；率值分母为 0 返回 null，渲染先判目标值再显 '-'；约定「UI 只消费非空数组」写进团队规范。
 ```text
-const seqRef = useRef(0);
-...SeqRef.current++;
-fetch().then(() => {
-  if (SeqRef.current > currentSeq) updateData();
-});
+// service 层兜底（分页）
+return { records: data?.records ?? [], total: data?.total ?? 0 };
+// service 层兜底（全量）
+return data ?? [];
 ```
-- **拓展**：适用于所有涉及搜索防抖或 Tab 切换的场景。
-- *来源：admin-workspace-hr-talent | 2026-09*
+- **拓展**：把「后端欠字段由 service 兜底、UI 只消费契约」作为分层约定推广到所有接口。
+- *来源：admin-workspace-hr-talent*
+
+### 6. 会话内换账号权限残留
+- **技能点**：掌握内存态权限缓存在「会话内换账号」场景的重置时机：清外部存储不够，还要清状态层（pinia/vuex）的授权对象。
+- **坑点**：authSet() 纯累加、从不重置 authPage/authTag，logout 只清 DataStore.map 不清 pinia；同一标签页换账号时新账号继承旧账号按钮/列级授权，路由级有重拉 menuPath 拦住、按钮级漏光。
+- **解决方案**：authSet() 开头重置两个授权对象；logout/登录拉权限前清空内存缓存；涉及列级权限的表格组件加数据源守卫。
+```text
+function authSet(pages, tags) {
+  authPage = {}; // 先清空再累加
+  authTag  = {};
+  Object.assign(authPage, pages);
+  Object.assign(authTag, tags);
+}
+```
+- **拓展**：排查权限问题先定位是路由级还是按钮级缓存，再决定从哪一层清。
+- *来源：admin-workspace-test*
 
