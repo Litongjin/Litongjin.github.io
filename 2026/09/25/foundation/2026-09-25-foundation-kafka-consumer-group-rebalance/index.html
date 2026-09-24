@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup） | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）📚 今日主题 Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）（后端基础）  1. 核心概念速览Kafka 消费者组 Rebalance 协议是 Kafka 为维护消费者组内成员与分区之间所有权映射的一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/25/foundation/2026-09-25-foundation-kafka-consumer-group-rebalance/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）📚 今日主题 Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）（后端基础）  1. 核心概念速览Kafka 消费者组 Rebalance 协议是 Kafka 为维护消费者组内成员与分区之间所有权映射的一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-24T23:19:37.000Z">
+<meta property="article:modified_time" content="2026-09-24T23:35:01.321Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/25/foundation/2026-09-25-foundation-kafka-consumer-group-rebalance/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-25 07:35:01'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">618</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">73</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-24T23:35:01.321Z" title="更新于 2026-09-25 07:35:01">2026-09-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-25-·-Kafka-消费者组-Rebalance-协议（JoinGroup-SyncGroup）"><a href="#每日基础技术总结-·-2026-09-25-·-Kafka-消费者组-Rebalance-协议（JoinGroup-SyncGroup）" class="headerlink" title="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）"></a>每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Kafka 消费者组 Rebalance 协议是 Kafka 为维护消费者组内成员与分区之间所有权映射的一致性而设计的分布式协调协议。其本质是一个基于 Group Coordinator 的两阶段提交式状态机：成员加入、离开、会话超时或订阅变更时，协调者利用 JoinGroup 与 SyncGroup 两个 RPC 完成『成员资格确认』与『分区分配方案同步』。它解决的核心问题是：在分布式环境中，多个消费者进程如何对全局分区分配方案达成一致，并保证 Rebalance 期间不出现同一分区被多个消费者同时消费（重复消费）或分区长期无人消费（消费停滞）。该协议属于分布式系统『一致性协调』领域的关键实现，是消息队列语义、流处理扩展（如 Kafka Streams）和微服务消息架构的基石。专业工程师必须掌握它，因为任何消费者组规模的调整、网络抖动、心跳超时都会触发该协议，直接影响系统的吞吐、可用性和数据一致性。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层运行机制分四个阶段：</p>
+<ol>
+<li>定位协调者：消费者根据 group.id 的哈希值向 Kafka 任意 Broker 发送 FindCoordinator 请求，获取负责该消费者组的 GroupCoordinator（通常是某个 Broker 上的一个内部分区）。</li>
+<li>JoinGroup（成员资格确认）：消费者向协调者发送 JoinGroup 请求，携带 group.id、member.id、session.timeout、rebalance.timeout 以及消费者支持的分区分配策略。协调者收集一段窗口内的所有加入请求，选出一个 Leader（通常是第一个加入者），并把组成员列表和各自的订阅元数据返回给 Leader，其他成员则被告知 Leader 是谁。这一阶段本质是『选举 + 元数据收集』。</li>
+<li>SyncGroup（分配方案同步）：Leader 根据分配策略（RangeAssignor、RoundRobinAssignor、StickyAssignor 或自定义策略）计算分区到成员的映射，然后将整个分配结果放在 SyncGroup 请求中发送给协调者。协调者不负责分配计算，只做存储和转发，将对应的分配结果分别下发给每个成员。所有成员收到 SyncGroup 响应后，即获得分区所有权并开始消费。</li>
+<li>世代与故障检测：每次 Rebalance 都会生成一个新的 Generation Id。成员在每次 Rebalance 后持有一份世代标记，后续心跳和提交位移都必须携带该世代。若成员发生 session timeout 或主动离组，协调者会将该成员移出组，并标记当前世代失效，触发新一轮 Rebalance。旧世代成员的任何操作（如提交位移）都会被拒绝，从而防止脑裂和旧分配与新分配冲突。</li>
+</ol>
+<p>与前端已有概念的异同：可类比浏览器多标签页协作中基于 BroadcastChannel 和 Web Locks 的互斥机制。二者都是多个对等执行体就『谁拥有什么资源』达成一致，但前端方案没有协调者、没有世代（epoch）、没有故障检测的租约（session timeout）机制，也缺乏两阶段的成员资格确认流程。另一个对比点是前端中 React 的协调（Reconciliation）：都叫『协调』，但 React 协调是一种单端、基于 VDOM 差异的增量更新算法，而 Kafka Rebalance 是一种多端、基于网络 RPC 的状态机协议，用于分布式资源所有权分配。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">from kafka import KafkaConsumer</span><br><span class="line">from kafka.structs import TopicPartition</span><br><span class="line">from kafka.consumer.group_rebalance import ConsumerRebalanceListener</span><br><span class="line"></span><br><span class="line"># 创建消费者并加入消费组 &#x27;my-group&#x27;</span><br><span class="line">consumer = KafkaConsumer(</span><br><span class="line">    &#x27;my-topic&#x27;,</span><br><span class="line">    group_id=&#x27;my-group&#x27;,</span><br><span class="line">    bootstrap_servers=&#x27;localhost:9092&#x27;,</span><br><span class="line">    enable_auto_commit=False,</span><br><span class="line">    session_timeout_ms=10000,       # 10s 无心跳视为死亡，协调者将移除该成员并触发 Rebalance</span><br><span class="line">    rebalance_timeout_ms=30000      # JoinGroup/SyncGroup 本轮可等待的最长时间</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 注册再平衡监听器 —— 本质是钩入 JoinGroup/SyncGroup 流程的关键回调</span><br><span class="line">class RebalanceListener(ConsumerRebalanceListener):</span><br><span class="line">    def on_partitions_assigned(self, partitions):</span><br><span class="line">        # 该回调在收到 SyncGroup 响应（即获得分区所有权）后触发</span><br><span class="line">        print(f&#x27;Assigned: &#123;partitions&#125;&#x27;)</span><br><span class="line"></span><br><span class="line">    def on_partitions_revoked(self, partitions):</span><br><span class="line">        # 该回调在成员失去分区所有权前触发，用于手动提交位移以避免重复消费</span><br><span class="line">        print(f&#x27;Revoked: &#123;partitions&#125;&#x27;)</span><br><span class="line">        consumer.commit()</span><br><span class="line"></span><br><span class="line">consumer.subscribe(topics=[&#x27;my-topic&#x27;], listener=RebalanceListener())</span><br><span class="line"></span><br><span class="line"># 消费主循环：每次 poll 内部会检测是否需要重新 JoinGroup，并进行心跳维护</span><br><span class="line">for msg in consumer:</span><br><span class="line">    print(f&#x27;topic=&#123;msg.topic&#125; partition=&#123;msg.partition&#125; offset=&#123;msg.offset&#125;&#x27;)</span><br><span class="line"></span><br><span class="line"># 验证方式：启动两个此消费者进程，分别消费同一分组，观察两个进程的 Assigned/Revoked 日志；</span><br><span class="line"># 停止其中一个进程，观察另一个进程触发 Rebalance 并接管全部分区的过程。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区 1：认为 Rebalance 只是简单的『重新分配分区』，忽略 Generation 世代机制。实际上 Rebalance 协议严格依赖 Generation 来区分新旧一轮分配；旧世代的消费者在 Rebalance 后仍提交位移或心跳，会被协调者以 IllegalGeneration 错误拒绝。若不理解世代，就会在故障排查时误判为『消费者卡死』，而实际是旧世代残留操作被协议丢弃。<br>常见误区 2：将消费者组当作无状态的『任务队列 workers』，认为增加消费者数量必然提升吞吐。但 Rebalance 本身有开销（停止消费、协调等待、分区移交），频繁 Rebalance 会造成全局 stop-the-world，且当分区数小于消费者数时会出现空闲消费者。正确认知是：消费者组是一组有状态的分区所有者，其规模应基于分区数和消费负载设计，而非简单的并发弹性。</p>
+<p>进阶思考题：如果协调者已经完成了一轮新的 Rebalance（Generation 从 N 变为 N+1），此时一个持有旧 Generation N 的成员才向协调者发送 JoinGroup 请求，协调者会如何处理？为什么？ 这要求你深入理解世代在协议中的作用：协调者会返回 GENERATION_INVALID 错误，要求该成员重新发起 JoinGroup，因为它的旧世代所有权已经失效，必须丢弃旧分配并重新参与分配。回答该问题需要明确：Rebalance 不是简单的『重新分配』，而是一次带版本的组状态迁移，旧状态必须被显式废弃。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/25/foundation/2026-09-25-foundation-kafka-consumer-group-rebalance/">https://litongjin.github.io/2026/09/25/foundation/2026-09-25-foundation-kafka-consumer-group-rebalance/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/25/foundation/2026-09-25-foundation-heap-top-k-median/" title="每日基础技术总结 · 2026-09-25 · 堆：Top-K 问题与中位数维护"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-25 · 堆：Top-K 问题与中位数维护</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/25/foundation/2026-09-25-foundation-incremental-layout-dirty-bit/" title="每日基础技术总结 · 2026-09-25 · 增量布局（Incremental Layout）与脏位标记（Dirty bit）机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-25 · 增量布局（Incremental Layout）与脏位标记（Dirty bit）机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/03/foundation/2024-01-03-foundation-zookeeper-zab-epoch/" title="每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-03</div><div class="title">每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制</div></div></a></div><div><a href="/2024/02/05/foundation/2024-02-05-foundation-consistent-hashing-virtual-nodes/" title="每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-05</div><div class="title">每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点</div></div></a></div><div><a href="/2024/03/04/foundation/2024-03-04-foundation-rocketmq-half-message-op-message/" title="每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-04</div><div class="title">每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message</div></div></a></div><div><a href="/2024/06/23/foundation/2024-06-23-foundation-http-2-hpack/" title="每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-23</div><div class="title">每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新</div></div></a></div><div><a href="/2024/08/14/foundation/2024-08-14-foundation-mysql-redo-log-binlog/" title="每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-14</div><div class="title">每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交</div></div></a></div><div><a href="/2024/08/16/foundation/2024-08-16-foundation-innodb-buffer-pool-lru/" title="每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-16</div><div class="title">每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">618</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">73</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-25-%C2%B7-Kafka-%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84-Rebalance-%E5%8D%8F%E8%AE%AE%EF%BC%88JoinGroup-SyncGroup%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup&#x2F;SyncGroup）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/daily/2026-09-25-workbench-daily/" title="工作台日报 · 2026-09-25">工作台日报 · 2026-09-25</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-compositor-layers-promotion/" title="每日基础技术总结 · 2026-09-25 · 合成器层（Compositor Layers）的创建条件与层提升陷阱">每日基础技术总结 · 2026-09-25 · 合成器层（Compositor Layers）的创建条件与层提升陷阱</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-heap-top-k-median/" title="每日基础技术总结 · 2026-09-25 · 堆：Top-K 问题与中位数维护">每日基础技术总结 · 2026-09-25 · 堆：Top-K 问题与中位数维护</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-kafka-consumer-group-rebalance/" title="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）">每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-incremental-layout-dirty-bit/" title="每日基础技术总结 · 2026-09-25 · 增量布局（Incremental Layout）与脏位标记（Dirty bit）机制">每日基础技术总结 · 2026-09-25 · 增量布局（Incremental Layout）与脏位标记（Dirty bit）机制</a><time datetime="2026-09-24T23:05:08.000Z" title="发表于 2026-09-25 07:05:08">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-lru-cache-hashmap-linkedlist/" title="每日基础技术总结 · 2026-09-25 · LRU 缓存的哈希表+双向链表与 O(1) 操作">每日基础技术总结 · 2026-09-25 · LRU 缓存的哈希表+双向链表与 O(1) 操作</a><time datetime="2026-09-24T23:05:08.000Z" title="发表于 2026-09-25 07:05:08">2026-09-25</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

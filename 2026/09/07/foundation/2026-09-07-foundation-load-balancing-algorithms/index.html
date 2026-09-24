@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景📚 今日主题 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景（网络基础）  1. 核心概念速览负载均衡算法是分布式系统中将请求分发到后端服务节点的策略集合，其本质是在多个可用资源之间做路径选择，以达成吞吐量最大化、延迟最小化或资源利用率均衡等目标。轮询（Round Robin）、加权轮询">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/07/foundation/2026-09-07-foundation-load-balancing-algorithms/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景📚 今日主题 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景（网络基础）  1. 核心概念速览负载均衡算法是分布式系统中将请求分发到后端服务节点的策略集合，其本质是在多个可用资源之间做路径选择，以达成吞吐量最大化、延迟最小化或资源利用率均衡等目标。轮询（Round Robin）、加权轮询">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-07T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-24T23:35:01.324Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="网络基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/07/foundation/2026-09-07-foundation-load-balancing-algorithms/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-25 07:35:01'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">618</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">73</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-07T00:00:00.000Z" title="发表于 2026-09-07 08:00:00">2026-09-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-24T23:35:01.324Z" title="更新于 2026-09-25 07:35:01">2026-09-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-07-·-负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景"><a href="#每日基础技术总结-·-2026-09-07-·-负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景" class="headerlink" title="每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景"></a>每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景</strong>（网络基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>负载均衡算法是分布式系统中将请求分发到后端服务节点的策略集合，其本质是在多个可用资源之间做路径选择，以达成吞吐量最大化、延迟最小化或资源利用率均衡等目标。轮询（Round Robin）、加权轮询（Weighted Round Robin）与最小连接数（Least Connections）分别对应不同维度的调度决策：轮询基于位置的无状态循环，加权轮询在位置基础上引入静态权重，最小连接数则基于后端实时并发量的动态反馈。该知识点位于网络协议栈与分布式系统设计的交汇处，是反向代理、API 网关、服务发现与流量治理的核心组件。专业工程师必须掌握其原理，因为负载均衡策略直接决定了系统的容量极限、故障恢复能力与成本效率，且在实际调优中需要根据业务特征选择或组合策略，错误选择可能导致资源倾斜、请求堆积或单点过载。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>轮询的核心机制是一个游标（index）在节点列表中循环前进，每次请求命中当前节点后游标加一并取模，数学上等价于对请求序号 n 做 (n % N) 映射到节点 i。该算法不关注任何节点状态，仅保证在理想情况下请求均匀分布，但若各节点处理能力不同，则慢节点会成为瓶颈。</p>
+<p>加权轮询在轮询基础上为每个节点赋予权重 w_i，目标是使节点在单位时间内接收的请求比例约等于 w_i &#x2F; Σw。实现上常用平滑加权轮询（Nginx 实现），维护每个节点的当前有效权重 current，每轮选择 current + weight 最大者，选后将当前有效权重减去总权重。该算法避免了传统权重轮询在连续分发时可能出现的短时间请求突刺，使高权重节点被分散穿插。</p>
+<p>最小连接数则动态维护每个节点当前活跃连接数 conn_i（或并发请求数），每次选择 conn_i 最小的节点。本质是一个贪心策略，以实时并发度作为代理指标模拟节点负载，能自然适应节点处理速度差异与请求耗时差异：处理快的节点连接数下降快，会被更频繁地选中。但需要注意，连接数并不等于 CPU&#x2F;内存占用，长连接与短连接场景下其有效性不同。</p>
+<p>与前端已有知识的对比：JS 中数组的 reduce 或 redux 中间件链中的调度顺序，本质是编译期&#x2F;运行期的固定控制流；而负载均衡算法则是动态多目标选择，属于资源调度范畴。另一个可类比的是浏览器的 Fetch 并发控制或 HTTP&#x2F;2 多路复用中的流调度，但底层权衡维度不同。前端的任务队列调度（如 React 的可中断渲染）是单线程内的优先级抢占，而负载均衡是多节点间的分布式决策，前者依赖事件循环，后者依赖网络状态广播与一致性。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下是一个极简的负载均衡器核心实现，忽略网络细节，仅体现三种算法的选择逻辑。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LoadBalancer</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, nodes, weights=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="variable language_">self</span>.nodes = nodes            <span class="comment"># 节点列表，如 [&#x27;10.0.0.1:8080&#x27;, ...]</span></span><br><span class="line">        <span class="variable language_">self</span>.weights = weights <span class="keyword">or</span> [<span class="number">1</span>] * <span class="built_in">len</span>(nodes)</span><br><span class="line">        <span class="variable language_">self</span>.current_index = <span class="number">0</span>        <span class="comment"># 轮询游标</span></span><br><span class="line">        <span class="variable language_">self</span>.current_weights = [<span class="number">0</span>] * <span class="built_in">len</span>(nodes)  <span class="comment"># 平滑加权轮询的当前权重</span></span><br><span class="line">        <span class="variable language_">self</span>.connections = [<span class="number">0</span>] * <span class="built_in">len</span>(nodes)      <span class="comment"># 每个节点的活跃连接数</span></span><br><span class="line">        <span class="variable language_">self</span>.total_weight = <span class="built_in">sum</span>(<span class="variable language_">self</span>.weights)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">round_robin</span>(<span class="params">self</span>):            <span class="comment"># 纯轮询</span></span><br><span class="line">        node_index = <span class="variable language_">self</span>.current_index</span><br><span class="line">        <span class="variable language_">self</span>.current_index = (<span class="variable language_">self</span>.current_index + <span class="number">1</span>) % <span class="built_in">len</span>(<span class="variable language_">self</span>.nodes)</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.nodes[node_index]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">weighted_round_robin</span>(<span class="params">self</span>):   <span class="comment"># 平滑加权轮询</span></span><br><span class="line">        best_index = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(<span class="variable language_">self</span>.nodes)):</span><br><span class="line">            <span class="variable language_">self</span>.current_weights[i] += <span class="variable language_">self</span>.weights[i]</span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.current_weights[i] &gt; <span class="variable language_">self</span>.current_weights[best_index]:</span><br><span class="line">                best_index = i</span><br><span class="line">        <span class="variable language_">self</span>.current_weights[best_index] -= <span class="variable language_">self</span>.total_weight</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.nodes[best_index]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">least_connections</span>(<span class="params">self</span>):      <span class="comment"># 最小连接数</span></span><br><span class="line">        <span class="comment"># idx = argmin(self.connections)，取连接数最少的节点</span></span><br><span class="line">        idx = <span class="built_in">min</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(<span class="variable language_">self</span>.nodes)), key=<span class="keyword">lambda</span> i: <span class="variable language_">self</span>.connections[i])</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.nodes[idx]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 实际调用时，收到新请求前调用相应方法拿到目标节点，</span></span><br><span class="line">    <span class="comment"># 建立连接后对对应节点的 connections 加 1，连接关闭时减 1，</span></span><br><span class="line">    <span class="comment"># 从而实现动态反馈。</span></span><br></pre></td></tr></table></figure>
+
+<p>关键注释：轮询中的取模运算保证了游标永远在合法范围内，且不会发生整数溢出；平滑加权轮询将权重动态累积与回退，使分发序列平滑；最小连接数中的 argmin 是 O(N) 遍历，生产环境常用堆或概率采样降低复杂度。</p>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>认知误区一：轮询就是最公平的算法。事实上轮询只保证请求数量均等，不考虑请求成本。若后端节点性能异构，或请求处理时间差异大，轮询会让慢节点积压请求，造成整体延迟上升。生产环境中纯轮询仅适用于同规格、同无状态服务且请求成本相近的场景。</p>
+<p>认知误区二：最小连接数永远优于轮询。最小连接数依赖连接数作为负载信号，但当请求全部为短连接（如 HTTP 短连接）时，连接数剧烈波动，算法容易抖动；若后端为 HTTP&#x2F;2 多路复用，一个连接上可承载大量并发流，此时最小连接数反而会错误均衡。另外，若各节点已处于过载状态，最小连接数不会主动避免把请求发给已经过载但连接数偏低的节点。</p>
+<p>思考题：假设后端两个节点，处理能力分别为每秒 100 和 200 个请求，请求到达率恒定 150 每秒，每个请求固定耗时 10ms。分别使用加权轮询（权重比 1:2）和最小连接数，长期运行后两个节点的连接数平均值各是多少？请从稳态概率角度推导，并说明哪种算法更接近最优。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/07/foundation/2026-09-07-foundation-load-balancing-algorithms/">https://litongjin.github.io/2026/09/07/foundation/2026-09-07-foundation-load-balancing-algorithms/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">网络基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/07/foundation/2026-09-07-foundation-kafka-zero-copy-sendfile-splice/" title="每日基础技术总结 · 2026-09-07 · Kafka 零拷贝（Zero Copy）在 Linux sendfile/splice 中的实现原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-07 · Kafka 零拷贝（Zero Copy）在 Linux sendfile/splice 中的实现原理</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/07/daily/2026-09-07-workbench-daily/" title="工作台日报 · 2026-09-07"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-09-07</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/20/foundation/2024-01-20-foundation-https-tls-1-3-pfs/" title="每日基础技术总结 · 2024-01-20 · HTTPS TLS 1.3 握手指令精简过程与前向安全性（PFS）实现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="title">每日基础技术总结 · 2024-01-20 · HTTPS TLS 1.3 握手指令精简过程与前向安全性（PFS）实现</div></div></a></div><div><a href="/2024/01/29/foundation/2024-01-29-foundation-least-connections-vs-weighted-round-robin/" title="每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-29</div><div class="title">每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法</div></div></a></div><div><a href="/2024/02/26/foundation/2024-02-26-foundation-http-1-1-pipelining/" title="每日基础技术总结 · 2024-02-26 · HTTP&#x2F;1.1 的 Pipelining 与队头阻塞"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-26</div><div class="title">每日基础技术总结 · 2024-02-26 · HTTP&#x2F;1.1 的 Pipelining 与队头阻塞</div></div></a></div><div><a href="/2024/03/29/foundation/2024-03-29-foundation-tcp-syn-flood-syn-cookie/" title="每日基础技术总结 · 2024-03-29 · TCP SYN Flood 与 SYN Cookie 机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-29</div><div class="title">每日基础技术总结 · 2024-03-29 · TCP SYN Flood 与 SYN Cookie 机制</div></div></a></div><div><a href="/2024/05/08/foundation/2024-05-08-foundation-tcp-window-scaling/" title="每日基础技术总结 · 2024-05-08 · TCP 的窗口缩放（Window Scaling）与时间戳选项"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-08</div><div class="title">每日基础技术总结 · 2024-05-08 · TCP 的窗口缩放（Window Scaling）与时间戳选项</div></div></a></div><div><a href="/2024/05/20/foundation/2024-05-20-foundation-tcp-nagle-ack/" title="每日基础技术总结 · 2024-05-20 · TCP Nagle 算法与延迟 ACK 交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-20</div><div class="title">每日基础技术总结 · 2024-05-20 · TCP Nagle 算法与延迟 ACK 交互</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">618</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">73</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-07-%C2%B7-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AE%97%E6%B3%95%E5%AF%B9%E6%AF%94%EF%BC%9A%E8%BD%AE%E8%AF%A2%E3%80%81%E5%8A%A0%E6%9D%83%E8%BD%AE%E8%AF%A2%E4%B8%8E%E6%9C%80%E5%B0%8F%E8%BF%9E%E6%8E%A5%E6%95%B0%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-07 · 负载均衡算法对比：轮询、加权轮询与最小连接数的适用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/daily/2026-09-25-workbench-daily/" title="工作台日报 · 2026-09-25">工作台日报 · 2026-09-25</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-compositor-layers-promotion/" title="每日基础技术总结 · 2026-09-25 · 合成器层（Compositor Layers）的创建条件与层提升陷阱">每日基础技术总结 · 2026-09-25 · 合成器层（Compositor Layers）的创建条件与层提升陷阱</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-heap-top-k-median/" title="每日基础技术总结 · 2026-09-25 · 堆：Top-K 问题与中位数维护">每日基础技术总结 · 2026-09-25 · 堆：Top-K 问题与中位数维护</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-kafka-consumer-group-rebalance/" title="每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）">每日基础技术总结 · 2026-09-25 · Kafka 消费者组 Rebalance 协议（JoinGroup/SyncGroup）</a><time datetime="2026-09-24T23:19:37.000Z" title="发表于 2026-09-25 07:19:37">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-incremental-layout-dirty-bit/" title="每日基础技术总结 · 2026-09-25 · 增量布局（Incremental Layout）与脏位标记（Dirty bit）机制">每日基础技术总结 · 2026-09-25 · 增量布局（Incremental Layout）与脏位标记（Dirty bit）机制</a><time datetime="2026-09-24T23:05:08.000Z" title="发表于 2026-09-25 07:05:08">2026-09-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/25/foundation/2026-09-25-foundation-lru-cache-hashmap-linkedlist/" title="每日基础技术总结 · 2026-09-25 · LRU 缓存的哈希表+双向链表与 O(1) 操作">每日基础技术总结 · 2026-09-25 · LRU 缓存的哈希表+双向链表与 O(1) 操作</a><time datetime="2026-09-24T23:05:08.000Z" title="发表于 2026-09-25 07:05:08">2026-09-25</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
