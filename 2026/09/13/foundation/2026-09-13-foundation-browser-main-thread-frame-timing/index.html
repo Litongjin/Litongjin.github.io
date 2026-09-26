@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系📚 今日主题 浏览器主线程上的任务、帧与渲染步骤的时序关系（前端底层与计算机基础）  1. 核心概念速览浏览器主线程上的任务（task）、帧（frame）与渲染步骤（rendering steps）是同一事件循环（event loop）中按严格时序衔接的三个层级的执行单元。任务指通过任务队列（task q">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/13/foundation/2026-09-13-foundation-browser-main-thread-frame-timing/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系📚 今日主题 浏览器主线程上的任务、帧与渲染步骤的时序关系（前端底层与计算机基础）  1. 核心概念速览浏览器主线程上的任务（task）、帧（frame）与渲染步骤（rendering steps）是同一事件循环（event loop）中按严格时序衔接的三个层级的执行单元。任务指通过任务队列（task q">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-13T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-26T23:17:44.497Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/13/foundation/2026-09-13-foundation-browser-main-thread-frame-timing/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-27 07:17:44'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">638</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">75</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-13T00:00:00.000Z" title="发表于 2026-09-13 08:00:00">2026-09-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-26T23:17:44.497Z" title="更新于 2026-09-27 07:17:44">2026-09-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-13-·-浏览器主线程上的任务、帧与渲染步骤的时序关系"><a href="#每日基础技术总结-·-2026-09-13-·-浏览器主线程上的任务、帧与渲染步骤的时序关系" class="headerlink" title="每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系"></a>每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>浏览器主线程上的任务、帧与渲染步骤的时序关系</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>浏览器主线程上的任务（task）、帧（frame）与渲染步骤（rendering steps）是同一事件循环（event loop）中按严格时序衔接的三个层级的执行单元。任务指通过任务队列（task queue）调度的独立执行块，如脚本片段、setTimeout回调、事件回调；帧指一次屏幕刷新周期，通常与显示器刷新率（60Hz&#x2F;120Hz）对齐；渲染步骤指在帧内执行的一组管线段，包括输入事件分发、requestAnimationFrame（rAF）回调、样式计算（style recalc）、布局（layout）、绘制（paint）与合成（composite）。其核心机制是：事件循环每轮只从任务队列取一个任务执行，执行完后若满足渲染时机（如当前时间接近垂直同步信号，或任务耗时长导致帧过期），则进入渲染步骤，而非每执行完一个任务就立即渲染。该机制解决的核心问题是：让 JavaScript 的异步逻辑与屏幕刷新节奏同步，避免一帧内多次布局&#x2F;绘制导致性能浪费，以及避免屏幕撕裂。在整个计算机体系结构中，它位于浏览器内核的渲染进程与操作系统显示服务的交界处，是连接 Web API、JavaScript 执行与光栅化合成器的中间调度模型。专业工程师必须掌握它，因为这是一切前端性能优化（如避免强制同步布局、合理使用 rAF、避免长任务）的底层依据，也是理解响应式系统如何与帧对齐、如何测量 FPS 的基础。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>浏览器事件循环的底层时序可抽象为以下伪代码，直接来自 HTML 规范中的 processing model：</p>
+<p>while (true) {<br>  &#x2F;&#x2F; 1. 从任务队列中选择一个最老的任务执行<br>  const task &#x3D; taskQueue.pop()();</p>
+<p>  &#x2F;&#x2F; 2. 执行微任务检查点（microtask checkpoint），将 microtask 队列清空<br>  microtaskQueue.drain();</p>
+<p>  &#x2F;&#x2F; 3. 判断是否需要渲染（update the rendering）<br>  if (needRender(timeNow)) {<br>    &#x2F;&#x2F; 一组帧内步骤，严格顺序如下：<br>    &#x2F;&#x2F; a. 处理用户输入事件（如 click、scroll）<br>    &#x2F;&#x2F; b. 执行 requestAnimationFrame 回调（按注册顺序）<br>    &#x2F;&#x2F; c. 样式重新计算（style calc）<br>    &#x2F;&#x2F; d. 布局（layout 或 reflow）<br>    &#x2F;&#x2F; e. 绘制（paint 或 rasterize）<br>    &#x2F;&#x2F; f. 合成层合并（composite）并提交到 GPU<br>    render();<br>  }<br>}</p>
+<p>关键点在于“渲染时机”并非每个任务后都发生。浏览器会记录当前帧的开始时间，并在每轮循环末尾检查是否已到下一帧的垂直同步点（vsync）。如果未到，则继续执行下一个任务；如果到了或已经超过，则执行渲染。这意味着：一个长任务会阻塞渲染，导致掉帧；而任务很短时，一个帧内可能执行多个任务。</p>
+<p>与前端已有概念的对比：它本质上类似于“生产者-消费者”与“临界区”的组合。任务队列是生产者放入的，事件循环是消费者，而渲染步骤是必须持锁（帧期）执行的临界区。这与 Java 接口和 TypeScript 接口的对比类似：二者都定义了“契约”，但一个关注运行时多态，一个关注编译期结构；同样，任务与渲染虽然在事件循环中共存，但一个关注逻辑执行，一个关注像素输出，二者由“帧同步”这一隐式契约连接。理解这种异同，能避免把 rAF 当作 setTimeout 的替代品这类的认知偏差。</p>
+<p>更深入地看，microtask 在渲染前会被完全清空，因此使用 Promise 或 MutationObserver 产生的回调会阻塞渲染，可能延迟帧提交；而使用 task 则可能被渲染步骤“插队”，导致回调时机不确定。rAF 是唯一一个由渲染系统主动调度、保证在下一帧样式计算前执行的回调，因此它适合批量读取布局和修改样式。而 setTimeout(fn, 0) 的最小延迟受限于当前任务队列和渲染调度，实际执行时间不精确，且如果前一轮有渲染步骤，则 setTimeout 的回调总在下一帧渲染之后才可能执行。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">// 验证主线程任务、微任务、渲染帧与 rAF 的执行顺序</span><br><span class="line">// 运行环境：浏览器，非 Node.js</span><br><span class="line"></span><br><span class="line">// 1. 同步阶段：当前任务（script 标签）开始执行</span><br><span class="line">console.log(&#x27;1. script start&#x27;);</span><br><span class="line"></span><br><span class="line">// 2. 注册一个微任务，它会在当前任务结束后、渲染前执行</span><br><span class="line">Promise.resolve().then(() =&gt; &#123;</span><br><span class="line">  console.log(&#x27;2. microtask&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 3. 注册一个 rAF 回调，它只会在下一帧的渲染步骤内执行</span><br><span class="line">requestAnimationFrame(() =&gt; &#123;</span><br><span class="line">  console.log(&#x27;4. rAF callback (before style/layout/paint)&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 4. 注册一个 setTimeout 回调，它作为新任务被放入任务队列</span><br><span class="line">setTimeout(() =&gt; &#123;</span><br><span class="line">  console.log(&#x27;5. setTimeout task (after render in next event loop)&#x27;);</span><br><span class="line">&#125;, 0);</span><br><span class="line"></span><br><span class="line">// 5. 强制当前任务占用主线程超过一帧（例如 20ms，60Hz 下帧间隔约 16.7ms）</span><br><span class="line">const start = performance.now();</span><br><span class="line">while (performance.now() - start &lt; 20) &#123;</span><br><span class="line">  // 阻塞主线程，模拟长任务</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 6. 当前任务结束，打印同步日志</span><br><span class="line">console.log(&#x27;3. script end&#x27;);</span><br><span class="line"></span><br><span class="line">// 预期输出顺序（在大部分浏览器中稳定）：</span><br><span class="line">// 1. script start</span><br><span class="line">// 3. script end</span><br><span class="line">// 2. microtask</span><br><span class="line">// 4. rAF callback (before style/layout/paint)</span><br><span class="line">// 5. setTimeout task (after render in next event loop)</span><br><span class="line"></span><br><span class="line">// 注释：</span><br><span class="line">// - setTimeout 回调虽然延迟为 0ms，但需要等待浏览器完成至少一次渲染步骤后，</span><br><span class="line">//   才会作为新任务被取出执行，因此它几乎总是出现在 rAF 之后。</span><br><span class="line">// - microtask 在当前任务结束后立刻清空，不会等到渲染步骤，</span><br><span class="line">//   所以它先于 rAF。</span><br><span class="line">// - rAF 回调在浏览器渲染管道的最前端执行，此时尚未进行样式计算和布局。</span><br><span class="line"></span><br><span class="line">// 扩展验证：连续观察 rAF 的调用频率可测量实际帧率</span><br><span class="line">let last = performance.now();</span><br><span class="line">function frame(time) &#123;</span><br><span class="line">  const delta = time - last;</span><br><span class="line">  last = time;</span><br><span class="line">  console.log(&#x27;Frame interval:&#x27;, delta);</span><br><span class="line">  requestAnimationFrame(frame);</span><br><span class="line">&#125;</span><br><span class="line">requestAnimationFrame(frame);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>认知误区一：认为 setTimeout(fn, 0) 会在下一帧渲染之前执行。实际上，setTimeout 回调是 task，渲染步骤也是从事件循环中触发的独立流程。如果当前帧的 vsync 时机先到达，渲染会先于下一个 task 执行；反之如果任务队列清空后还没到 vsync，setTimeout 可能会执行。因此 setTimeout(fn, 0) 的时机与帧边界没有严格保证，而 rAF 则保证在渲染前执行。</p>
+<p>认知误区二：认为每次修改 DOM 样式都会立即触发一次 layout，然后把避免强制同步布局仅仅理解为“少读多写”。事实上，布局本身是按需计算的，浏览器会懒执行。只有当主线程执行渲染步骤或同步读取布局属性（如 offsetWidth、getBoundingClientRect）时才会计算。而任务执行期间的多次样式修改在进入渲染步骤前只会维护 dirty 标记，最终合并为一次 layout。真正的性能杀手是在同一任务中先写后读，强制浏览器提前执行 layout，导致帧内出现多次布局。</p>
+<p>深度思考题：假设一个动画帧内需要更新 100 个 DOM 节点的样式，然后用 100 次读取每个节点的 offsetWidth 来验证位置，最后再执行一个 ajax 回调。如果你把读取操作放进微任务而不是同步执行，是否可能避免强制同步布局？请结合事件循环和 microtask checkpoint 在每任务结束时的执行时机，分析微任务中的读取发生在渲染管道的哪一阶段，这能否减少布局次数？这直接检验你对“任务、微任务、渲染”三层时序的真正理解。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/13/foundation/2026-09-13-foundation-browser-main-thread-frame-timing/">https://litongjin.github.io/2026/09/13/foundation/2026-09-13-foundation-browser-main-thread-frame-timing/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/14/daily/2026-09-14-workbench-daily/" title="工作台日报 · 2026-09-14"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">工作台日报 · 2026-09-14</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/13/foundation/2026-09-13-foundation-linux-epoll-lt-et/" title="每日基础技术总结 · 2026-09-13 · Linux epoll 的 LT（水平触发）与 ET（边缘触发）模式差异及边界条件处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-13 · Linux epoll 的 LT（水平触发）与 ET（边缘触发）模式差异及边界条件处理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">638</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">75</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-13-%C2%B7-%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%BB%E7%BA%BF%E7%A8%8B%E4%B8%8A%E7%9A%84%E4%BB%BB%E5%8A%A1%E3%80%81%E5%B8%A7%E4%B8%8E%E6%B8%B2%E6%9F%93%E6%AD%A5%E9%AA%A4%E7%9A%84%E6%97%B6%E5%BA%8F%E5%85%B3%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-13 · 浏览器主线程上的任务、帧与渲染步骤的时序关系</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/27/daily/2026-09-27-workbench-daily/" title="工作台日报 · 2026-09-27">工作台日报 · 2026-09-27</a><time datetime="2026-09-26T23:03:48.000Z" title="发表于 2026-09-27 07:03:48">2026-09-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/27/foundation/2026-09-27-foundation-css-stacking-context-z-index/" title="每日基础技术总结 · 2026-09-27 · CSS 层叠上下文与 z-index 堆叠规则">每日基础技术总结 · 2026-09-27 · CSS 层叠上下文与 z-index 堆叠规则</a><time datetime="2026-09-26T23:03:48.000Z" title="发表于 2026-09-27 07:03:48">2026-09-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/27/foundation/2026-09-27-foundation-main-thread-task-frame-rendering/" title="每日基础技术总结 · 2026-09-27 · 浏览器主线程上的任务、帧与渲染步骤的时序关系">每日基础技术总结 · 2026-09-27 · 浏览器主线程上的任务、帧与渲染步骤的时序关系</a><time datetime="2026-09-26T23:03:48.000Z" title="发表于 2026-09-27 07:03:48">2026-09-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/27/foundation/2026-09-27-foundation-tls-sni-alpn-https/" title="每日基础技术总结 · 2026-09-27 · TLS 的 SNI 与 ALPN 扩展在 HTTPS 中的角色">每日基础技术总结 · 2026-09-27 · TLS 的 SNI 与 ALPN 扩展在 HTTPS 中的角色</a><time datetime="2026-09-26T23:03:48.000Z" title="发表于 2026-09-27 07:03:48">2026-09-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/26/daily/2026-09-26-workbench-daily/" title="工作台日报 · 2026-09-26">工作台日报 · 2026-09-26</a><time datetime="2026-09-25T23:05:30.000Z" title="发表于 2026-09-26 07:05:30">2026-09-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/26/foundation/2026-09-26-foundation-compositor-scrolling-vs-main-thread/" title="每日基础技术总结 · 2026-09-26 · 合成器滚动（Compositor Scrolling）与主线程滚动的路径差异">每日基础技术总结 · 2026-09-26 · 合成器滚动（Compositor Scrolling）与主线程滚动的路径差异</a><time datetime="2026-09-25T23:05:30.000Z" title="发表于 2026-09-26 07:05:30">2026-09-26</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
