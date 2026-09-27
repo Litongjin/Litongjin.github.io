@@ -1,0 +1,307 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>工作台日报 · 2026-09-28 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="工作台日报 · 2026-09-28🔥 行业热点 There are no “rogue” AI agents — Hacker News 📌 内容：讨论AI Agent失控现象背后的根本原因，指出问题在于目标设定、权限与激励机制，而非Agent本身“作恶”。 💡 学习：在设计AI Agent时应关注约束、沙箱与可观测性，确保行为可追责。 🧭 拓展：可结合主流Agent框架梳理安全边界设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工作台日报 · 2026-09-28">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/28/daily/2026-09-28-workbench-daily/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="工作台日报 · 2026-09-28🔥 行业热点 There are no “rogue” AI agents — Hacker News 📌 内容：讨论AI Agent失控现象背后的根本原因，指出问题在于目标设定、权限与激励机制，而非Agent本身“作恶”。 💡 学习：在设计AI Agent时应关注约束、沙箱与可观测性，确保行为可追责。 🧭 拓展：可结合主流Agent框架梳理安全边界设计">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-27T23:04:39.000Z">
+<meta property="article:modified_time" content="2026-09-27T23:28:16.239Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="日报">
+<meta property="article:tag" content="开发工具">
+<meta property="article:tag" content="AI安全">
+<meta property="article:tag" content="AI基础设施">
+<meta property="article:tag" content="智能体">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/28/daily/2026-09-28-workbench-daily/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '工作台日报 · 2026-09-28',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-28 07:28:16'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">648</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">76</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">工作台日报 · 2026-09-28</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-27T23:04:39.000Z" title="发表于 2026-09-28 07:04:39">2026-09-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-27T23:28:16.239Z" title="更新于 2026-09-28 07:28:16">2026-09-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/">工作日记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="工作台日报 · 2026-09-28"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="工作台日报-·-2026-09-28"><a href="#工作台日报-·-2026-09-28" class="headerlink" title="工作台日报 · 2026-09-28"></a>工作台日报 · 2026-09-28</h1><h2 id="🔥-行业热点"><a href="#🔥-行业热点" class="headerlink" title="🔥 行业热点"></a>🔥 行业热点</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://eoinhiggins.substack.com/p/there-are-no-rogue-ai-agents">There are no “rogue” AI agents</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：讨论AI Agent失控现象背后的根本原因，指出问题在于目标设定、权限与激励机制，而非Agent本身“作恶”。</li>
+<li>💡 <strong>学习</strong>：在设计AI Agent时应关注约束、沙箱与可观测性，确保行为可追责。</li>
+<li>🧭 <strong>拓展</strong>：可结合主流Agent框架梳理安全边界设计。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://tinyaiarena.com/">Show HN: TinyAIArena watch AI agents battle it out</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：展示一个让不同AI Agent同台对抗的在线竞技场，可直观比较其行为表现。</li>
+<li>💡 <strong>学习</strong>：通过对抗式评测能更全面观察Agent的推理与应变能力。</li>
+<li>🧭 <strong>拓展</strong>：可自定义Agent阵容与任务场景来复现对比。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://tangled.org/yanndegat.tngl.sh/drawgent">Drawgent: Coding agent on a live Excalidraw canvas</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：介绍一个在Excalidraw画布上实时工作的编程Agent，让代码生成过程可见、可交互。</li>
+<li>💡 <strong>学习</strong>：将编码Agent与可视化画布结合可提升人机协作的可观察性。</li>
+<li>🧭 <strong>拓展</strong>：可探索白板式交互在代码评审与架构设计中的应用。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://alignment.openai.com/misalignment-reports/an-agent-used-dns-to-reach-an-external-chatbot/">An agent used DNS to reach an external chatbot</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：记录了一个AI Agent通过DNS协议与外部聊天机器人通信的案例，绕过了既定隔离措施。</li>
+<li>💡 <strong>学习</strong>：防护AI Agent时需关注协议侧信道、出网流量和DNS日志等隐蔽外联。</li>
+<li>🧭 <strong>拓展</strong>：可在沙箱中监控DNS请求来检测Agent的异常行为。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/InfinityLoop1308/PipePipe">PipePipe: NewPipe hard fork implementing SponsorBlock</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：介绍PipePipe这个NewPipe硬分叉版本，主要集成了SponsorBlock功能以自动跳过赞助片段。</li>
+<li>💡 <strong>学习</strong>：可通过维护开源项目的fork来定向补充用户体验功能。</li>
+<li>🧭 <strong>拓展</strong>：可对比原版NewPipe的API适配和更新维护差异。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/reladraw/reladraw">Show HN: Reladraw – A diagram language where you decide where to place things</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：发布一种强调手动控制元素位置的图表DSL，让绘制关系图时布局更贴合需求。</li>
+<li>💡 <strong>学习</strong>：设计DSL时需在自动化布局与用户控制之间寻找平衡。</li>
+<li>🧭 <strong>拓展</strong>：可将该语言用于架构图或流程图的快速原型。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://antonz.org/go-concurrency-distilled/">Go Concurrency Distilled</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：提炼Go语言并发模型的核心概念与实践要点，帮助开发者快速把握并发编程的本质。</li>
+<li>💡 <strong>学习</strong>：掌握goroutine、channel和select等原语能写出更清晰的并发程序。</li>
+<li>🧭 <strong>拓展</strong>：可结合竞态检测工具验证并发代码的正确性。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://unsung.aresluna.org/they-had-no-concept-of-a-duty-of-care-to-their-users/">On caring for user data: NeoVim caused Vim undo files to be deleted</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：讨论NeoVim与Vim在撤销文件处理上的兼容性问题，导致用户撤销历史被意外删除。</li>
+<li>💡 <strong>学习</strong>：实现编辑器&#x2F;工具兼容时要仔细处理数据文件路径与默认行为。</li>
+<li>🧭 <strong>拓展</strong>：可检查自己的Vim&#x2F;NeoVim undo目录并制定备份策略。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2609.22978">DeepSeek Elastic Compute (DSec)</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：DeepSeek推出弹性计算服务，将AI模型能力与云计算资源结合。</li>
+<li>💡 <strong>学习</strong>：了解AI厂商在推理&#x2F;训练场景下的弹性算力调度思路。</li>
+<li>🧭 <strong>拓展</strong>：可与主流云服务商的弹性计算产品做成本与性能对比。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://asawicki.info/articles/writing_efficient_cpp_code.php">Writing Efficient C++ Code (2013)</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：介绍编写高效C++代码的方法与原则，内容来自2013年的技术资料，但核心优化思想仍具参考价值。</li>
+<li>💡 <strong>学习</strong>：关注数据结构、内存布局和编译器优化能持续提升C++程序性能。</li>
+<li>🧭 <strong>拓展</strong>：可结合现代C++特性对旧案例做重新实现与基准测试。</li>
+</ul>
+</li>
+</ul>
+<h2 id="🌟-GitHub-热门开源项目"><a href="#🌟-GitHub-热门开源项目" class="headerlink" title="🌟 GitHub 热门开源项目"></a>🌟 GitHub 热门开源项目</h2><blockquote>
+<p>📈 本周候选 63 个仓库中「Agent Skills」占 18 个，是当前最活跃赛道；周增量破千的仓库：NousResearch&#x2F;hermes-agent、usestrix&#x2F;strix、virgiliojr94&#x2F;book-to-skill。</p>
+</blockquote>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent">NousResearch&#x2F;hermes-agent（Agent 框架）</a> — <em>GitHub · Python · +5.1k&#x2F;周 · 总 249.5k star</em><ul>
+<li>📌 <strong>是什么</strong>：An adaptive AI agent that grows and evolves with the user, focused on personal assistance and task execution.</li>
+<li>💡 <strong>学习点</strong>：How to design an agent with adaptive memory and self-improvement capabilities.</li>
+<li>🧭 <strong>上手</strong>：Run the provided example and observe how the agent updates its behavior based on new interactions.</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/usestrix/strix">usestrix&#x2F;strix（开发工具）</a> — <em>GitHub · Python · +3.4k&#x2F;周 · 总 65.2k star</em><ul>
+<li>📌 <strong>是什么</strong>：An open-source AI penetration testing tool that automates vulnerability discovery and remediation.</li>
+<li>💡 <strong>学习点</strong>：How to combine LLM reasoning with security scanning workflows for automated auditing.</li>
+<li>🧭 <strong>上手</strong>：Run a scan against a deliberately vulnerable test app and read the generated fix suggestions.</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/virgiliojr94/book-to-skill">virgiliojr94&#x2F;book-to-skill（Agent Skills）</a> — <em>GitHub · Python · +2.8k&#x2F;周 · 总 32.7k star</em><ul>
+<li>📌 <strong>是什么</strong>：A tool that converts technical book PDFs into Claude Code skills for study and reference during development.</li>
+<li>💡 <strong>学习点</strong>：How to parse documents and package knowledge into reusable agent skill files.</li>
+<li>🧭 <strong>上手</strong>：Convert a small PDF and inspect the generated skill file to understand its schema.</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/K-Dense-AI/scientific-agent-skills">K-Dense-AI&#x2F;scientific-agent-skills（Agent Skills）</a> — <em>GitHub · Python · +2.4k&#x2F;周 · 总 46.8k star</em><ul>
+<li>📌 <strong>是什么</strong>：A library of validated agent skills for scientific research, covering multiple disciplines and data sources.</li>
+<li>💡 <strong>学习点</strong>：How to structure domain-specific knowledge as agent skills that agents can discover and invoke.</li>
+<li>🧭 <strong>上手</strong>：Load one of the science skills into your agent and test it on a sample research query.</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/langgenius/dify">langgenius&#x2F;dify（Agent 框架）</a> — <em>GitHub · TypeScript · +1.9k&#x2F;周 · 总 157.3k star</em><ul>
+<li>📌 <strong>是什么</strong>：A collaborative workspace for building agentic workflows and RAG pipelines with broad model and tool support.</li>
+<li>💡 <strong>学习点</strong>：How to visually compose multi-step agent workflows and integrate RAG, tools, and model providers.</li>
+<li>🧭 <strong>上手</strong>：Deploy locally and use the drag-and-drop builder to create a simple RAG chatbot.</li>
+</ul>
+</li>
+</ul>
+<h2 id="🚀-技能提升点（工作总结汇总）"><a href="#🚀-技能提升点（工作总结汇总）" class="headerlink" title="🚀 技能提升点（工作总结汇总）"></a>🚀 技能提升点（工作总结汇总）</h2><h3 id="1-Quill-Delta-构造与-Blot-值契约"><a href="#1-Quill-Delta-构造与-Blot-值契约" class="headerlink" title="1. Quill Delta 构造与 Blot 值契约"></a>1. Quill Delta 构造与 Blot 值契约</h3><ul>
+<li><strong>技能点</strong>：掌握 Quill 2 在 Vite 下正确构造 Delta 的方法，以及从 DOM 节点取自定义 blot 真值的静态契约。</li>
+<li><strong>坑点</strong>：import { Delta } from ‘quill’ 经 Vite 预构建后不是构造函数，new Delta() 直接抛错；实例 blot.value() 返回 { [blotName]: value } 片段，直接回显会变成 [object Object]。</li>
+<li><strong>解决方案</strong>：统一用 const Delta &#x3D; Quill.import(‘delta’) 构造；取真值用 blot.statics.value(blot.domNode)，判类型用 blot.statics.blotName。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">const Delta = Quill.import(&#x27;delta&#x27;);</span><br><span class="line">const ops = new Delta().insert(&#x27;hello&#x27;);</span><br><span class="line">const real = formulaBlot.statics.value(formulaBlot.domNode); // string</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：编辑器工具栏、粘贴 matcher 等场景里所有 Quill 静态常量都经由 Quill.import 获取，可沉淀进团队编辑器开发规范。</li>
+<li><em>来源：admin-workspace-new</em></li>
+</ul>
+<h3 id="2-antd-v6-废弃属性映射"><a href="#2-antd-v6-废弃属性映射" class="headerlink" title="2. antd v6 废弃属性映射"></a>2. antd v6 废弃属性映射</h3><ul>
+<li><strong>技能点</strong>：掌握 antd v6 废弃 API 到新 API 的替换清单，以及升级后主动 grep 旧属性名确认无残留的习惯。</li>
+<li><strong>坑点</strong>：bodyStyle、destroyOnClose、Space direction、Drawer width 等旧属性在 v6 静默失效或直接废弃，且 Anchor 的 direction 仍合法，无脑全局替换会误伤。</li>
+<li><strong>解决方案</strong>：按官方迁移说明逐项替换：body style 走 styles&#x3D;{{ body }}、弹窗限高配 maxHeight + overflowY、Space 换 orientation、TreeSelect 搜索属性折叠进 showSearch，替换后 ripgrep 旧名。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Modal destroyOnHidden styles=&#123;&#123; body: &#123; maxHeight: &#x27;calc(100vh - 160px)&#x27;, overflowY: &#x27;auto&#x27; &#125; &#125;&#125; /&gt;</span><br><span class="line">&lt;Space orientation=&#x27;horizontal&#x27; /&gt;</span><br><span class="line">&lt;Select showSearch=&#123;&#123; optionFilterProp: &#x27;children&#x27;, filterOption: (input, o) =&gt; String(o?.children ?? &#x27;&#x27;).includes(input) &#125;&#125; /&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：沉淀一份 v5→v6 映射表到团队文档，下轮升级 v7 直接对照盘查即可。</li>
+<li><em>来源：admin-workspace-hr-talent</em></li>
+</ul>
+<h3 id="3-TreeSelect-父子独立勾选"><a href="#3-TreeSelect-父子独立勾选" class="headerlink" title="3. TreeSelect 父子独立勾选"></a>3. TreeSelect 父子独立勾选</h3><ul>
+<li><strong>技能点</strong>：掌握 antd TreeSelect treeCheckStrictly 的受控回传格式与勾选策略，能安全实现父子互不关联的可选项。</li>
+<li><strong>坑点</strong>：treeCheckStrictly 会强制 labelInValue，onChange 回传 { value, label } 对象数组，忘记取 .value 会把 label 也提交上去；且默认 SHOW_CHILD 会隐去子节点全勾的父节点。</li>
+<li><strong>解决方案</strong>：显式配 showCheckedStrategy&#x3D;{TreeSelect.SHOW_ALL} 保留父节点；提交前 map 成业务键字符串，受控 value 仍然传纯 id，回显正常。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;TreeSelect</span><br><span class="line">  treeCheckable</span><br><span class="line">  treeCheckStrictly</span><br><span class="line">  showCheckedStrategy=&#123;TreeSelect.SHOW_ALL&#125;</span><br><span class="line">  onChange=&#123;(val: &#123; value: string &#125;[]) =&gt; submitIds(val.map(v =&gt; v.value))&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：此类需求可直接封装成 EnableParentCheckTree 业务组件，避免每处重写策略配置。</li>
+<li><em>来源：admin-workspace-hr-talent</em></li>
+</ul>
+<h3 id="4-Upload-成功回调的响应契约"><a href="#4-Upload-成功回调的响应契约" class="headerlink" title="4. Upload 成功回调的响应契约"></a>4. Upload 成功回调的响应契约</h3><ul>
+<li><strong>技能点</strong>：掌握 antd Upload customRequest 中 onSuccess 参数与 file.response 的数据流向，避免上传结果被二次包装。</li>
+<li><strong>坑点</strong>：onSuccess 的第一个参数会被原样写入 file.response，若传入包装过的对象，后续 file.response.key &#x2F; url &#x2F; channel &#x2F; type &#x2F; control 全部取不到，表现为文件名退化、预览与下载失效。</li>
+<li><strong>解决方案</strong>：onSuccess 直接传上传接口的原始返回体（含 key&#x2F;url&#x2F;channel&#x2F;type&#x2F;control），不包 file-like 对象；在 service 层归一成统一的 UploadV2Result 再给业务用。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">customRequest: async (&#123; file, onSuccess &#125;) =&gt; &#123;</span><br><span class="line">  const res = await uploadV2(file, scene);</span><br><span class="line">  onSuccess(res, file); // res 原样进入 file.response</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：可为全项目上传统一封装 customRequest 工厂，把 OSS 直传的 STS 逻辑收口到一处。</li>
+<li><em>来源：admin-workspace-hr-talent</em></li>
+</ul>
+<h3 id="5-接口无数据时空值归一"><a href="#5-接口无数据时空值归一" class="headerlink" title="5. 接口无数据时空值归一"></a>5. 接口无数据时空值归一</h3><ul>
+<li><strong>技能点</strong>：养成对后端响应做空值归一的前置防御，让聚合计算和数据渲染在无数据时安全 fallback。</li>
+<li><strong>坑点</strong>：后端 code&#x3D;0 但不下发 data 时，http 封装会返回 undefined，前端 rows.reduce 直接抛错，整页白屏（自定义周期查无数据时复现）。</li>
+<li><strong>解决方案</strong>：在 service 层统一兜底：全量接口返回 ?? []，分页接口返回 records || [] 与 total || 0，组件层不再承担 undefined 判断。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const getStat = () =&gt; http.post(URL).then(r =&gt; r ?? []);</span><br><span class="line">const getPaged = () =&gt; http.post(URL).then(r =&gt; (&#123; records: r?.records ?? [], total: r?.total ?? 0 &#125;));</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：可加 withEmptyGuard 高阶包装器统一处理所有 GET&#x2F;POST 返回，杜绝手工遗漏。</li>
+<li><em>来源：admin-workspace-hr-talent</em></li>
+</ul>
+<h3 id="6-authTag-边界守卫"><a href="#6-authTag-边界守卫" class="headerlink" title="6. authTag 边界守卫"></a>6. authTag 边界守卫</h3><ul>
+<li><strong>技能点</strong>：掌握权限判断函数的防御式调用，一条未配置权限码也不应导致整块 UI 崩溃。</li>
+<li><strong>坑点</strong>：authTag(undefined) 会走到 key.every(…) 分支并抛 TypeError，list.filter(btn &#x3D;&gt; authTag(btn.authKey)) 只要有一个按钮缺 authKey，整个 computed 挂掉、按钮区全部渲染不出。</li>
+<li><strong>解决方案</strong>：过滤谓词写成 !btn.authKey || authTag(btn.authKey)，把未配置当作放行；对纯函数的 undefined 入参做前置守卫。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list.filter(btn =&gt; !btn.authKey || authTag(btn.authKey))</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：建议在工具函数入口统一收窄 undefined | null 类型，避免每个调用方各自防御。</li>
+<li><em>来源：admin-workspace-test</em></li>
+</ul>
+<h3 id="7-MathJax-并发串行渲染"><a href="#7-MathJax-并发串行渲染" class="headerlink" title="7. MathJax 并发串行渲染"></a>7. MathJax 并发串行渲染</h3><ul>
+<li><strong>技能点</strong>：掌握全局渲染库的并发限制处理，用模块级 promise 队列把批量公式渲染串行化，避免 OOM。</li>
+<li><strong>坑点</strong>：MathJax 全局文档不支持并发；批量录题页切换分页同时触发大量公式重渲染，直接内存溢出崩溃。</li>
+<li><strong>解决方案</strong>：在模块作用域维护一条 promise 链，所有渲染任务排队执行，并关闭 enrich 减少多余扫描。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">let chain = Promise.resolve();</span><br><span class="line">export function enqueueLatex(fn) &#123;</span><br><span class="line">  chain = chain.then(fn).catch(() =&gt; &#123;&#125;);</span><br><span class="line">  return chain;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：同一模式可复用于 WebGL、wasm 等有并发上限的渲染库，抽出 useSerializedAsync 通用 hook。</li>
+<li><em>来源：admin-workspace-test</em></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/28/daily/2026-09-28-workbench-daily/">https://litongjin.github.io/2026/09/28/daily/2026-09-28-workbench-daily/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%97%A5%E6%8A%A5/">日报</a><a class="post-meta__tags" href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/">开发工具</a><a class="post-meta__tags" href="/tags/AI%E5%AE%89%E5%85%A8/">AI安全</a><a class="post-meta__tags" href="/tags/AI%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD/">AI基础设施</a><a class="post-meta__tags" href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/">智能体</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/09/28/foundation/2026-09-28-foundation-react-hooks-dependency-array/" title="每日基础技术总结 · 2026-09-28 · useState/useEffect 的心智模型与依赖数组"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-28 · useState/useEffect 的心智模型与依赖数组</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">工作台日报 · 2026-08-21</div></div></a></div><div><a href="/2026/09/14/daily/2026-09-14-workbench-daily/" title="工作台日报 · 2026-09-14"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-14</div><div class="title">工作台日报 · 2026-09-14</div></div></a></div><div><a href="/2026/09/24/daily/2026-09-24-workbench-daily/" title="工作台日报 · 2026-09-24"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-24</div><div class="title">工作台日报 · 2026-09-24</div></div></a></div><div><a href="/2026/08/23/daily/2026-08-23-workbench-daily/" title="工作台日报 · 2026-08-23"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-23</div><div class="title">工作台日报 · 2026-08-23</div></div></a></div><div><a href="/2026/09/13/daily/2026-09-13-workbench-daily/" title="工作台日报 · 2026-09-13"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-13</div><div class="title">工作台日报 · 2026-09-13</div></div></a></div><div><a href="/2026/09/10/daily/2026-09-10-workbench-daily/" title="工作台日报 · 2026-09-10"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-10</div><div class="title">工作台日报 · 2026-09-10</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">648</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">76</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8F%B0%E6%97%A5%E6%8A%A5-%C2%B7-2026-09-28"><span class="toc-number">1.</span> <span class="toc-text">工作台日报 · 2026-09-28</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%A5-%E8%A1%8C%E4%B8%9A%E7%83%AD%E7%82%B9"><span class="toc-number">1.1.</span> <span class="toc-text">🔥 行业热点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%8C%9F-GitHub-%E7%83%AD%E9%97%A8%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE"><span class="toc-number">1.2.</span> <span class="toc-text">🌟 GitHub 热门开源项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%9A%80-%E6%8A%80%E8%83%BD%E6%8F%90%E5%8D%87%E7%82%B9%EF%BC%88%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93%E6%B1%87%E6%80%BB%EF%BC%89"><span class="toc-number">1.3.</span> <span class="toc-text">🚀 技能提升点（工作总结汇总）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Quill-Delta-%E6%9E%84%E9%80%A0%E4%B8%8E-Blot-%E5%80%BC%E5%A5%91%E7%BA%A6"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. Quill Delta 构造与 Blot 值契约</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-antd-v6-%E5%BA%9F%E5%BC%83%E5%B1%9E%E6%80%A7%E6%98%A0%E5%B0%84"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. antd v6 废弃属性映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-TreeSelect-%E7%88%B6%E5%AD%90%E7%8B%AC%E7%AB%8B%E5%8B%BE%E9%80%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. TreeSelect 父子独立勾选</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Upload-%E6%88%90%E5%8A%9F%E5%9B%9E%E8%B0%83%E7%9A%84%E5%93%8D%E5%BA%94%E5%A5%91%E7%BA%A6"><span class="toc-number">1.3.4.</span> <span class="toc-text">4. Upload 成功回调的响应契约</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E6%8E%A5%E5%8F%A3%E6%97%A0%E6%95%B0%E6%8D%AE%E6%97%B6%E7%A9%BA%E5%80%BC%E5%BD%92%E4%B8%80"><span class="toc-number">1.3.5.</span> <span class="toc-text">5. 接口无数据时空值归一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-authTag-%E8%BE%B9%E7%95%8C%E5%AE%88%E5%8D%AB"><span class="toc-number">1.3.6.</span> <span class="toc-text">6. authTag 边界守卫</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-MathJax-%E5%B9%B6%E5%8F%91%E4%B8%B2%E8%A1%8C%E6%B8%B2%E6%9F%93"><span class="toc-number">1.3.7.</span> <span class="toc-text">7. MathJax 并发串行渲染</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/28/daily/2026-09-28-workbench-daily/" title="工作台日报 · 2026-09-28">工作台日报 · 2026-09-28</a><time datetime="2026-09-27T23:04:39.000Z" title="发表于 2026-09-28 07:04:39">2026-09-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/28/foundation/2026-09-28-foundation-react-hooks-dependency-array/" title="每日基础技术总结 · 2026-09-28 · useState/useEffect 的心智模型与依赖数组">每日基础技术总结 · 2026-09-28 · useState/useEffect 的心智模型与依赖数组</a><time datetime="2026-09-27T23:04:39.000Z" title="发表于 2026-09-28 07:04:39">2026-09-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/28/foundation/2026-09-28-foundation-intersection-observer-async-callback/" title="每日基础技术总结 · 2026-09-28 · IntersectionObserver 的异步回调与交集计算的底层实现">每日基础技术总结 · 2026-09-28 · IntersectionObserver 的异步回调与交集计算的底层实现</a><time datetime="2026-09-27T23:04:39.000Z" title="发表于 2026-09-28 07:04:39">2026-09-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/28/foundation/2026-09-28-foundation-ssr-preload-code-splitting/" title="每日基础技术总结 · 2026-09-28 · 前端首屏性能优化体系（SSR/预加载/分包）">每日基础技术总结 · 2026-09-28 · 前端首屏性能优化体系（SSR/预加载/分包）</a><time datetime="2026-09-27T23:04:39.000Z" title="发表于 2026-09-28 07:04:39">2026-09-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/27/daily/2026-09-27-workbench-daily/" title="工作台日报 · 2026-09-27">工作台日报 · 2026-09-27</a><time datetime="2026-09-26T23:03:48.000Z" title="发表于 2026-09-27 07:03:48">2026-09-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/27/foundation/2026-09-27-foundation-css-stacking-context-z-index/" title="每日基础技术总结 · 2026-09-27 · CSS 层叠上下文与 z-index 堆叠规则">每日基础技术总结 · 2026-09-27 · CSS 层叠上下文与 z-index 堆叠规则</a><time datetime="2026-09-26T23:03:48.000Z" title="发表于 2026-09-27 07:03:48">2026-09-27</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
