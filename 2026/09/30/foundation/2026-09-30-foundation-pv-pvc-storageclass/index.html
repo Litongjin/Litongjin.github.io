@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-09-30 · 存储编排：PV/PVC/StorageClass | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-09-30 · 存储编排：PV&#x2F;PVC&#x2F;StorageClass📚 今日主题 存储编排：PV&#x2F;PVC&#x2F;StorageClass（云原生与 DevOps（Docker &#x2F; K8s））  1. 核心概念速览PV（PersistentVolume）是集群中由管理员或动态供给创建的存储资源抽象，本质上是将外部存储系统（NF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-09-30 · 存储编排：PV&#x2F;PVC&#x2F;StorageClass">
+<meta property="og:url" content="https://litongjin.github.io/2026/09/30/foundation/2026-09-30-foundation-pv-pvc-storageclass/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-09-30 · 存储编排：PV&#x2F;PVC&#x2F;StorageClass📚 今日主题 存储编排：PV&#x2F;PVC&#x2F;StorageClass（云原生与 DevOps（Docker &#x2F; K8s））  1. 核心概念速览PV（PersistentVolume）是集群中由管理员或动态供给创建的存储资源抽象，本质上是将外部存储系统（NF">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-09-29T23:05:48.000Z">
+<meta property="article:modified_time" content="2026-09-29T23:09:43.384Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="云原生与 DevOps（Docker &#x2F; K8s）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/09/30/foundation/2026-09-30-foundation-pv-pvc-storageclass/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-09-30 · 存储编排：PV/PVC/StorageClass',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-09-30 07:09:43'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">656</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">78</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-09-30 · 存储编排：PV/PVC/StorageClass</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-29T23:05:48.000Z" title="发表于 2026-09-30 07:05:48">2026-09-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-29T23:09:43.384Z" title="更新于 2026-09-30 07:09:43">2026-09-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-09-30 · 存储编排：PV/PVC/StorageClass"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-09-30-·-存储编排：PV-PVC-StorageClass"><a href="#每日基础技术总结-·-2026-09-30-·-存储编排：PV-PVC-StorageClass" class="headerlink" title="每日基础技术总结 · 2026-09-30 · 存储编排：PV&#x2F;PVC&#x2F;StorageClass"></a>每日基础技术总结 · 2026-09-30 · 存储编排：PV&#x2F;PVC&#x2F;StorageClass</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>存储编排：PV&#x2F;PVC&#x2F;StorageClass</strong>（云原生与 DevOps（Docker &#x2F; K8s））</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>PV（PersistentVolume）是集群中由管理员或动态供给创建的存储资源抽象，本质上是将外部存储系统（NFS、Ceph、云盘等）的挂载能力封装为集群可调度的 API 对象；PVC（PersistentVolumeClaim）是用户对存储资源的请求声明，本质上是资源需求与访问模式的约束集合；StorageClass 则是动态供给的模板，定义了存储类型、回收策略、挂载参数与供给者（Provisioner）。它们共同构成了 Kubernetes 存储编排的『控制面与数据面解耦』机制：用户只声明需求（PVC），系统负责将需求匹配到满足条件的 PV，或通过 StorageClass 动态创建 PV，并将实际存储挂载到 Pod 的文件系统路径。该机制解决了静态配置存储与动态调度之间不可调和的问题——存储生命周期与 Pod 生命周期无关，且存储的供给、绑定、使用、回收全部由控制平面自动管理。在整个计算机体系里，这属于资源抽象与编排层，类比操作系统的虚拟内存与物理内存的映射关系，但粒度在分布式存储之上。专业工程师必须掌握，因为它是构建有状态服务（数据库、消息队列）的基石，不理解 PV&#x2F;PVC 就无法在 Kubernetes 上正确设计持久化架构，更无法诊断存储相关的故障。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>PV&#x2F;PVC 的底层运行机制可以拆解为三个阶段：供给、绑定与消费。供给分为静态和动态：静态供给时，管理员预先创建 PV 对象，其中包含存储类型（如 NFS 的 server&#x2F;path、CSI 的 volumeHandle）、容量、访问模式（ReadWriteOnce&#x2F;ReadOnlyMany&#x2F;ReadWriteMany）以及回收策略（Retain&#x2F;Delete&#x2F;Recycle）；动态供给时，当 PVC 无法匹配任何现存 PV，就会触发 StorageClass 对应的 Provisioner（通常是一个 CSI 插件或内置插件）创建底层存储并生成 PV。绑定过程采用双向匹配算法：控制平面（kube-controller-manager 中的 PersistentVolumeController）监听 PVC 和 PV 的创建事件，遍历所有 PV，找出满足容量（&gt;&#x3D;）、访问模式子集、storageClassName 一致且未被绑定的 PV，将 PV 的 claimRef 指向该 PVC，完成绑定。绑定本质上是写入 API Server 的 etcd，并触发相关 Finalizer 与回收策略的注册。消费过程由 kubelet 负责：当 Pod 调度到节点后，kubelet 根据 Pod 声明的 volume 数组，找到对应的 PVC 和绑定的 PV，调用具体的 volume plugin（如 CSI、NFS、hostPath）进行挂载操作——先做阶段挂载（全局挂载到节点），再做全局挂载到 Pod 的 volume 目录，最后 bind-mount 到容器路径。整个过程中，PVC 与 PV 的访问模式必须严格匹配，否则无法绑定；容量是绝对值，PV 大于等于 PVC 即可绑定，但配额取 PVC 的请求值。与前端概念对比：PVC 相当于 TypeScript 的 interface——它只描述『我需要什么』（容量、模式），而 PV 类似于 interface 的实现类，StorageClass 则接近于依赖注入的工厂函数——根据接口描述动态创建实现。更精确地说，PVC 是『存储接口』，PV 是『具体存储实例』，StorageClass 是『存储工厂』。但与外界的 Java 接口不同，K8s 的绑定是隐式的，由控制器根据语义匹配，不要求显式引用；且 PV 与 PVC 之间存在生命周期绑定关系，类似 TypeScript 接口与实现类的动态注入，但具有状态与回收语义。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><p>以下为验证 PV&#x2F;PVC&#x2F;StorageClass 绑定与动态供给机制的极简 YAML 序列，不依赖复杂框架。</p>
+<ol>
+<li><p>定义 StorageClass（动态供给入口）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">fast</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">kubernetes.io/no-provisioner</span>  <span class="comment"># 这里使用 no-provisioner 只做演示，实际 CSI 需要接存储后端</span></span><br><span class="line"><span class="attr">reclaimPolicy:</span> <span class="string">Delete</span>  <span class="comment"># 当 PVC 删除时，PV 及其底层存储被删除</span></span><br><span class="line"><span class="attr">volumeBindingMode:</span> <span class="string">Immediate</span>  <span class="comment"># 立即绑定，而非 WaitForFirstConsumer</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建 PVC（用户声明需求）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolumeClaim</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-pvc</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ReadWriteOnce</span>  <span class="comment"># 单节点读写，对应底层存储的访问限制</span></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="attr">requests:</span></span><br><span class="line">      <span class="attr">storage:</span> <span class="string">1Gi</span>  <span class="comment"># 请求容量，控制平面会寻找 PV 满足此大小</span></span><br><span class="line">  <span class="attr">storageClassName:</span> <span class="string">fast</span>  <span class="comment"># 指定 StorageClass，若 none 则禁用动态供给</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>观察绑定过程（验证控制平面自动创建 PV）：<br>执行 <code>kubectl get pv, pvc</code>，当 PVC 提交后，若 StorageClass 有 provisioner 逻辑，则控制平面会创建 PV 并绑定；若使用 no-provisioner，则 PVC 会处于 Pending，直到人工创建匹配的 PV</p>
+</li>
+<li><p>手动创建静态 PV（用于演示静态供给匹配）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolume</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-pv</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">capacity:</span></span><br><span class="line">    <span class="attr">storage:</span> <span class="string">2Gi</span>  <span class="comment"># 容量大于 PVC 请求的 1Gi，允许绑定</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ReadWriteOnce</span>  <span class="comment"># 访问模式需包含 PVC 的模式</span></span><br><span class="line">  <span class="attr">storageClassName:</span> <span class="string">fast</span>  <span class="comment"># 必须与 PVC 的 storageClassName 一致</span></span><br><span class="line">  <span class="attr">hostPath:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">/tmp/demo-storage</span>  <span class="comment"># 实际存储路径，仅演示用，生产应使用 CSI</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>关键机制解析：</p>
+<ul>
+<li>PVC 创建后，PersistentVolumeController 会同时扫描集群中的 PV 和 StorageClass，执行 capacity 比较与 accessModes 子集校验。</li>
+<li>匹配成功后，控制器将 PV 的 <code>status.phase</code> 从 Available 变为 Bound，并在 PV 中写入 <code>claimRef</code> 指向 PVC 的命名空间与名称。</li>
+<li>若 PV 被手动创建且未指定 storageClassName，且 PVC 也未指定，则系统会尝试绑定；但如果集群启用了默认 StorageClass，则双方必须显式一致。</li>
+</ul>
+<p>以下为验证挂载到 Pod 的片段：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">demo-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">app</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">nginx</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">data</span></span><br><span class="line">          <span class="attr">mountPath:</span> <span class="string">/usr/share/nginx/html</span>  <span class="comment"># 容器内路径</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">data</span></span><br><span class="line">      <span class="attr">persistentVolumeClaim:</span></span><br><span class="line">        <span class="attr">claimName:</span> <span class="string">my-pvc</span>  <span class="comment"># 引用 PVC，kubelet 会解析其对应的 PV</span></span><br></pre></td></tr></table></figure>
+<p>kubelet 在 Pod 启动前会调用 volume plugin 将 PV 的存储挂载到节点上，然后 bind-mount 到容器指定路径，过程与 <code>kubectl exec</code> 的 namespace 隔离无关，而是通过 mount 系统调用实现。</p>
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：认为 PV 的容量就是实际可用容量。实际中 PV 是一个资源抽象，容量只是声明值，底层存储可能超卖或存在文件系统开销，若使用 hostPath 或某些网络存储，容量限制根本不会强制，读写大小超出声明时可能不报错直到磁盘写满。误区二：认为 PVC 与 PV 的绑定是持久化的物理连接，忽略回收策略。如果 PV 的 reclaimPolicy 是 Retain，删除 PVC 后 PV 仍会存在但其 phase 变为 Released，且旧的 claimRef 仍指向已删除的 PVC，导致该 PV 不会被重新绑定，必须人工清理保留的数据和 claimRef 才能复用。很多工程师因此删了 PVC 后，PV 无法自动挂到新 PVC，误以为系统故障。</p>
+<p>思考题：在 volumeBindingMode: WaitForFirstConsumer 模式下，PVC 不会被立即绑定，而是等到某个 Pod 引用该 PVC 并被调度时，调度器才根据 Pod 的节点选择以及 PV 的拓扑约束（如 zone 可用性）来动态绑定。请思考这种延迟绑定是如何影响 StorageClass 中 provisioner 创建 PV 时的参数选择？如果调度器与控制平面之间没有同步机制，会发生什么竞态？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/09/30/foundation/2026-09-30-foundation-pv-pvc-storageclass/">https://litongjin.github.io/2026/09/30/foundation/2026-09-30-foundation-pv-pvc-storageclass/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F%E4%B8%8E-DevOps%EF%BC%88Docker-K8s%EF%BC%89/">云原生与 DevOps（Docker / K8s）</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/09/30/foundation/2026-09-30-foundation-js-lexical-environment-scope-chain/" title="每日基础技术总结 · 2026-09-30 · JavaScript 词法环境（Lexical Environment）与作用域链的底层结构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-09-30 · JavaScript 词法环境（Lexical Environment）与作用域链的底层结构</div></div></a></div><div class="next-post pull-right"><a href="/2026/09/30/foundation/2026-09-30-foundation-jwt-signature-attacks/" title="每日基础技术总结 · 2026-09-30 · JWT 结构、签名验证与常见攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-09-30 · JWT 结构、签名验证与常见攻击</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/04/14/foundation/2024-04-14-foundation-k8s/" title="每日基础技术总结 · 2024-04-14 · K8s 调度：亲和性&#x2F;污点与资源配额"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="title">每日基础技术总结 · 2024-04-14 · K8s 调度：亲和性&#x2F;污点与资源配额</div></div></a></div><div><a href="/2024/05/13/foundation/2024-05-13-foundation-operator-crd/" title="每日基础技术总结 · 2024-05-13 · Operator 模式与 CRD 扩展"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-13</div><div class="title">每日基础技术总结 · 2024-05-13 · Operator 模式与 CRD 扩展</div></div></a></div><div><a href="/2024/04/30/foundation/2024-04-30-foundation-service-ingress/" title="每日基础技术总结 · 2024-04-30 · Service 与 Ingress：集群内外的流量"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-30</div><div class="title">每日基础技术总结 · 2024-04-30 · Service 与 Ingress：集群内外的流量</div></div></a></div><div><a href="/2024/06/26/foundation/2024-06-26-foundation-ci-cd-github-actions/" title="每日基础技术总结 · 2024-06-26 · CI&#x2F;CD：GitHub Actions 流水线设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-26</div><div class="title">每日基础技术总结 · 2024-06-26 · CI&#x2F;CD：GitHub Actions 流水线设计</div></div></a></div><div><a href="/2024/07/12/foundation/2024-07-12-foundation-bridge-host-overlay/" title="每日基础技术总结 · 2024-07-12 · 容器网络：bridge&#x2F;host&#x2F;overlay 模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-12</div><div class="title">每日基础技术总结 · 2024-07-12 · 容器网络：bridge&#x2F;host&#x2F;overlay 模型</div></div></a></div><div><a href="/2024/06/24/foundation/2024-06-24-foundation-pod-init/" title="每日基础技术总结 · 2024-06-24 · Pod 生命周期：Init&#x2F;探针与重启策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-24</div><div class="title">每日基础技术总结 · 2024-06-24 · Pod 生命周期：Init&#x2F;探针与重启策略</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">656</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">78</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-09-30-%C2%B7-%E5%AD%98%E5%82%A8%E7%BC%96%E6%8E%92%EF%BC%9APV-PVC-StorageClass"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-09-30 · 存储编排：PV&#x2F;PVC&#x2F;StorageClass</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/30/daily/2026-09-30-workbench-daily/" title="工作台日报 · 2026-09-30">工作台日报 · 2026-09-30</a><time datetime="2026-09-29T23:05:48.000Z" title="发表于 2026-09-30 07:05:48">2026-09-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/30/foundation/2026-09-30-foundation-js-lexical-environment-scope-chain/" title="每日基础技术总结 · 2026-09-30 · JavaScript 词法环境（Lexical Environment）与作用域链的底层结构">每日基础技术总结 · 2026-09-30 · JavaScript 词法环境（Lexical Environment）与作用域链的底层结构</a><time datetime="2026-09-29T23:05:48.000Z" title="发表于 2026-09-30 07:05:48">2026-09-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/30/foundation/2026-09-30-foundation-pv-pvc-storageclass/" title="每日基础技术总结 · 2026-09-30 · 存储编排：PV/PVC/StorageClass">每日基础技术总结 · 2026-09-30 · 存储编排：PV/PVC/StorageClass</a><time datetime="2026-09-29T23:05:48.000Z" title="发表于 2026-09-30 07:05:48">2026-09-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/30/foundation/2026-09-30-foundation-jwt-signature-attacks/" title="每日基础技术总结 · 2026-09-30 · JWT 结构、签名验证与常见攻击">每日基础技术总结 · 2026-09-30 · JWT 结构、签名验证与常见攻击</a><time datetime="2026-09-29T23:05:48.000Z" title="发表于 2026-09-30 07:05:48">2026-09-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/29/foundation/2026-09-29-foundation-redis-sds-ziplist-skiplist/" title="每日基础技术总结 · 2026-09-29 · Redis 底层结构：SDS/ziplist/skiplist 演进">每日基础技术总结 · 2026-09-29 · Redis 底层结构：SDS/ziplist/skiplist 演进</a><time datetime="2026-09-28T23:20:08.000Z" title="发表于 2026-09-29 07:20:08">2026-09-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/09/29/daily/2026-09-29-workbench-daily/" title="工作台日报 · 2026-09-29">工作台日报 · 2026-09-29</a><time datetime="2026-09-28T23:20:08.000Z" title="发表于 2026-09-29 07:20:08">2026-09-29</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
