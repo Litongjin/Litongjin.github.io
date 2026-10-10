@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-11 · 服务降级与熔断 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-11 · 服务降级与熔断📚 今日主题 服务降级与熔断（分布式与架构设计）  1. 核心概念速览服务降级（Service Degradation）是在依赖不可用、延迟升高或系统过载时，主动关闭非核心路径、简化响应或返回兜底数据，以保护核心链路容量与响应时间。服务熔断（Circuit Breaking）是调用方维护一个基于失败反馈的有状态自动开关：在时间窗口内统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-11 · 服务降级与熔断">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/11/foundation/2026-10-11-foundation-service-degradation-circuit-breaker/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-11 · 服务降级与熔断📚 今日主题 服务降级与熔断（分布式与架构设计）  1. 核心概念速览服务降级（Service Degradation）是在依赖不可用、延迟升高或系统过载时，主动关闭非核心路径、简化响应或返回兜底数据，以保护核心链路容量与响应时间。服务熔断（Circuit Breaking）是调用方维护一个基于失败反馈的有状态自动开关：在时间窗口内统">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-10T23:15:24.000Z">
+<meta property="article:modified_time" content="2026-10-10T23:25:40.909Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="分布式与架构设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/11/foundation/2026-10-11-foundation-service-degradation-circuit-breaker/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-11 · 服务降级与熔断',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-11 07:25:40'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">702</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">83</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-11 · 服务降级与熔断</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-10T23:15:24.000Z" title="发表于 2026-10-11 07:15:24">2026-10-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-10T23:25:40.909Z" title="更新于 2026-10-11 07:25:40">2026-10-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-11 · 服务降级与熔断"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-11-·-服务降级与熔断"><a href="#每日基础技术总结-·-2026-10-11-·-服务降级与熔断" class="headerlink" title="每日基础技术总结 · 2026-10-11 · 服务降级与熔断"></a>每日基础技术总结 · 2026-10-11 · 服务降级与熔断</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>服务降级与熔断</strong>（分布式与架构设计）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>服务降级（Service Degradation）是在依赖不可用、延迟升高或系统过载时，主动关闭非核心路径、简化响应或返回兜底数据，以保护核心链路容量与响应时间。服务熔断（Circuit Breaking）是调用方维护一个基于失败反馈的有状态自动开关：在时间窗口内统计对下游的失败率或失败次数，达到阈值后直接短路后续请求并快速失败，冷却期结束后进入半开探测，成功则恢复，失败则重新打开。<br>两者的本质不同：降级是“牺牲局部服务质量换取全局可用性”的业务策略；熔断是“根据依赖健康状态自动阻止调用”的闭环状态机。<br>它解决的核心问题是分布式调用链中的级联故障、线程&#x2F;连接资源被慢&#x2F;坏依赖耗尽、重试放大流量造成雪崩。在计算机&#x2F;AI 体系中位于稳定性治理与流量防护层，与超时、重试、限流、隔离共同构成弹性工程。专业工程师必须掌握，因为前端在 BFF、SSR&#x2F;边缘聚合、API 网关等场景同样面对不稳定的下游依赖，缺乏熔断的有状态反馈控制就无法实现真正的弹性。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>熔断器底层是一个三态有限状态机：</p>
+<ol>
+<li><p>Closed（闭合）</p>
+<ul>
+<li>正常放行请求。</li>
+<li>维护统计窗口：requestCount、failureCount。</li>
+<li>判定条件：failureRate &#x3D; failureCount &#x2F; requestCount，且 requestCount &gt;&#x3D; minRequests（避免低流量误判）。</li>
+<li>达到阈值后切换到 Open。</li>
+</ul>
+</li>
+<li><p>Open（打开）</p>
+<ul>
+<li>不调用下游，立即返回 fallback（快速失败）。</li>
+<li>启动冷却计时 cooldownMs。</li>
+<li>冷却结束切换到 Half-Open。</li>
+</ul>
+</li>
+<li><p>Half-Open（半开）</p>
+<ul>
+<li>仅放行有限数量（通常 1 个）探测请求。</li>
+<li>探测成功：切换到 Closed，重置统计窗口。</li>
+<li>探测失败：切换到 Open，重置冷却时间。</li>
+</ul>
+</li>
+</ol>
+<p>状态迁移可由如下布尔条件表示：<br>  transitionToOpen      &#x3D; (state &#x3D;&#x3D; CLOSED  &amp;&amp; failureRate &gt;&#x3D; threshold &amp;&amp; requestCount &gt;&#x3D; minRequests)<br>                          || (state &#x3D;&#x3D; HALF_OPEN &amp;&amp; probeFailed)<br>  transitionToClosed    &#x3D; (state &#x3D;&#x3D; HALF_OPEN &amp;&amp; probeSucceeded)<br>  transitionToHalfOpen  &#x3D; (state &#x3D;&#x3D; OPEN &amp;&amp; now - openedAt &gt;&#x3D; cooldownMs)</p>
+<p>统计窗口用固定窗口简化，但生产应使用滑动窗口或环形缓冲，避免窗口边界处的突刺绕过。降级策略（fallback）可以是缓存、默认值、静态兜底、备用服务、只读&#x2F;异步化，它必须与熔断状态绑定，但又独立于状态机。</p>
+<p>与前端已有概念对比：</p>
+<ul>
+<li>前端图片 onerror 替换占位图、Promise.catch 返回默认值、React ErrorBoundary 属于“无状态单请求降级”，只处理当次失败，不维护跨请求的失败率，也无法阻止后续请求继续打到坏依赖。</li>
+<li>节流&#x2F;防抖是主动限频或合并，不基于失败反馈改变状态。</li>
+<li>服务熔断是有状态闭环控制，基于失败反馈驱动状态迁移 + 时间冷却 + 探测恢复。其机制更接近 TCP 拥塞控制：丢包驱动拥塞窗口状态迁移，而非简单的错误兜底。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">class CircuitBreaker &#123;</span><br><span class="line">  constructor(&#123; failureThreshold = 3, windowMs = 10000, cooldownMs = 5000 &#125; = &#123;&#125;) &#123;</span><br><span class="line">    this.state = &#x27;CLOSED&#x27;; // 三态：CLOSED | OPEN | HALF_OPEN</span><br><span class="line">    this.failureThreshold = failureThreshold; // 固定窗口内失败次数阈值</span><br><span class="line">    this.windowMs = windowMs;</span><br><span class="line">    this.cooldownMs = cooldownMs;</span><br><span class="line">    this.windowStart = Date.now();</span><br><span class="line">    this.requestCount = 0;</span><br><span class="line">    this.failureCount = 0;</span><br><span class="line">    this.openedAt = 0;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  async call(fn, fallback) &#123;</span><br><span class="line">    const now = Date.now();</span><br><span class="line"></span><br><span class="line">    if (this.state === &#x27;OPEN&#x27;) &#123;</span><br><span class="line">      if (now - this.openedAt &gt;= this.cooldownMs) &#123;</span><br><span class="line">        this.state = &#x27;HALF_OPEN&#x27;; // 冷却结束，进入半开探测</span><br><span class="line">        this.resetWindow();</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        return fallback(); // 熔断打开：直接降级，不调用下游，避免资源消耗</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (this.state === &#x27;HALF_OPEN&#x27; &amp;&amp; this.requestCount &gt; 0) &#123;</span><br><span class="line">      return fallback(); // 半开并发控制：仅允许一个探测请求，防止冷启动打满下游</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (now - this.windowStart &gt;= this.windowMs) &#123;</span><br><span class="line">      this.resetWindow(); // 固定窗口滚动：过期后清零统计</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    this.requestCount++;</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">      const result = await fn();</span><br><span class="line">      this.handleSuccess(now);</span><br><span class="line">      return result;</span><br><span class="line">    &#125; catch (err) &#123;</span><br><span class="line">      this.handleFailure(now);</span><br><span class="line">      return fallback(); // 单次失败也要降级，但状态迁移由 handleFailure 决定</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  resetWindow() &#123;</span><br><span class="line">    this.windowStart = Date.now();</span><br><span class="line">    this.requestCount = 0;</span><br><span class="line">    this.failureCount = 0;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  handleSuccess(now) &#123;</span><br><span class="line">    if (this.state === &#x27;HALF_OPEN&#x27;) &#123;</span><br><span class="line">      this.state = &#x27;CLOSED&#x27;; // 探测成功：状态恢复闭合</span><br><span class="line">      this.resetWindow();</span><br><span class="line">    &#125;</span><br><span class="line">    // CLOSED 状态成功不重置窗口，保持窗口内失败率统计连续</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  handleFailure(now) &#123;</span><br><span class="line">    this.failureCount++;</span><br><span class="line"></span><br><span class="line">    if (this.state === &#x27;HALF_OPEN&#x27;) &#123;</span><br><span class="line">      this.state = &#x27;OPEN&#x27;; // 探测失败：重新打开，并重置冷却</span><br><span class="line">      this.openedAt = now;</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (this.state === &#x27;CLOSED&#x27; &amp;&amp; this.failureCount &gt;= this.failureThreshold) &#123;</span><br><span class="line">      this.state = &#x27;OPEN&#x27;; // 闭合状态失败数达到阈值：触发熔断</span><br><span class="line">      this.openedAt = now;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 验证：下游前 3 次失败，之后恢复</span><br><span class="line">(async () =&gt; &#123;</span><br><span class="line">  let i = 0;</span><br><span class="line">  const downstream = async () =&gt; &#123;</span><br><span class="line">    i++;</span><br><span class="line">    if (i &lt;= 3) throw new Error(&#x27;downstream unavailable&#x27;);</span><br><span class="line">    return &#x27;from-downstream&#x27;;</span><br><span class="line">  &#125;;</span><br><span class="line">  const breaker = new CircuitBreaker(&#123; failureThreshold: 2, windowMs: 1000, cooldownMs: 100 &#125;);</span><br><span class="line"></span><br><span class="line">  for (let n = 1; n &lt;= 5; n++) &#123;</span><br><span class="line">    const result = await breaker.call(downstream, () =&gt; &#x27;fallback-data&#x27;);</span><br><span class="line">    console.log(`request $&#123;n&#125;: $&#123;result&#125;`);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  await new Promise(resolve =&gt; setTimeout(resolve, 150)); // 等待冷却结束</span><br><span class="line">  const result = await breaker.call(downstream, () =&gt; &#x27;fallback-data&#x27;);</span><br><span class="line">  console.log(`after cooldown: $&#123;result&#125;`);</span><br><span class="line">&#125;)();</span><br><span class="line"></span><br><span class="line">// 预期：前 2 次失败后第 2 次触发 OPEN；第 3-5 次直接返回 fallback-data；</span><br><span class="line">// 冷却 150ms 后半开探测成功，返回 from-downstream 并恢复 CLOSED。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区：</p>
+<ol>
+<li>把“服务降级”等同于“熔断”：降级是返回兜底结果的业务策略，熔断是基于失败反馈的自动短路状态机。只做降级不做熔断，每次请求仍会穿透到坏依赖并消耗线程&#x2F;连接&#x2F;超时时间；只做熔断不设计降级，快速失败后调用方依旧拿不到可用数据。二者应组合使用。</li>
+<li>使用绝对失败次数作为阈值，忽略最小请求数和时间窗口：低流量下少量失败就误熔断，高流量下绝对阈值可能过晚或过早。正确做法是基于滑动窗口的失败率，并设置 minRequests 防止低样本抖动。</li>
+</ol>
+<p>进阶思考：<br>在固定窗口统计中，如果故障模式是“前 5 秒全部失败，后 5 秒全部成功”，阈值 50%，窗口边界重置会导致失败率统计被清零而不触发熔断；滑动窗口如何通过重叠桶或环形缓冲避免这种边界绕过？进一步，半开探测请求若下游只是高延迟而非不可用，每个冷却期放行的探测请求仍可能堆积，此时如何用超时、并发信号量或舱壁隔离来约束探测流量？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/11/foundation/2026-10-11-foundation-service-degradation-circuit-breaker/">https://litongjin.github.io/2026/10/11/foundation/2026-10-11-foundation-service-degradation-circuit-breaker/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%8E%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">分布式与架构设计</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/11/foundation/2026-10-11-foundation-http-strong-cache/" title="每日基础技术总结 · 2026-10-11 · HTTP 缓存：强缓存"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-10-11 · HTTP 缓存：强缓存</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/11/foundation/2026-10-11-foundation-lcp-calculation-blocking/" title="每日基础技术总结 · 2026-10-11 · Web Vitals 中 Largest Contentful Paint (LCP) 的计算逻辑与阻塞因素"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-10-11 · Web Vitals 中 Largest Contentful Paint (LCP) 的计算逻辑与阻塞因素</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/13/foundation/2024-02-13-foundation-service-registration-discovery-health-check/" title="每日基础技术总结 · 2024-02-13 · 服务注册发现与健康检查"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-13</div><div class="title">每日基础技术总结 · 2024-02-13 · 服务注册发现与健康检查</div></div></a></div><div><a href="/2024/05/11/foundation/2024-05-11-foundation-vs-vs-serverless/" title="每日基础技术总结 · 2024-05-11 · 架构取舍：单体 vs 微服务 vs Serverless"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-11</div><div class="title">每日基础技术总结 · 2024-05-11 · 架构取舍：单体 vs 微服务 vs Serverless</div></div></a></div><div><a href="/2024/07/22/foundation/2024-07-22-foundation-event-sourcing/" title="每日基础技术总结 · 2024-07-22 · 事件溯源（Event Sourcing）与最终一致"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-22</div><div class="title">每日基础技术总结 · 2024-07-22 · 事件溯源（Event Sourcing）与最终一致</div></div></a></div><div><a href="/2024/09/02/foundation/2024-09-02-foundation-circuit-breaker-half-open-state/" title="每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-02</div><div class="title">每日基础技术总结 · 2024-09-02 · 服务降级与熔断（熔断器的半开状态）</div></div></a></div><div><a href="/2024/10/22/foundation/2024-10-22-foundation-cqrs/" title="每日基础技术总结 · 2024-10-22 · CQRS 命令查询职责分离"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-22</div><div class="title">每日基础技术总结 · 2024-10-22 · CQRS 命令查询职责分离</div></div></a></div><div><a href="/2024/10/18/foundation/2024-10-18-foundation-token/" title="每日基础技术总结 · 2024-10-18 · 接口幂等设计：Token&#x2F;去重表&#x2F;状态机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-18</div><div class="title">每日基础技术总结 · 2024-10-18 · 接口幂等设计：Token&#x2F;去重表&#x2F;状态机</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">702</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">83</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-11-%C2%B7-%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7%E4%B8%8E%E7%86%94%E6%96%AD"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-11 · 服务降级与熔断</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/11/daily/2026-10-11-workbench-daily/" title="工作台日报 · 2026-10-11">工作台日报 · 2026-10-11</a><time datetime="2026-10-10T23:15:24.000Z" title="发表于 2026-10-11 07:15:24">2026-10-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/11/foundation/2026-10-11-foundation-http-strong-cache/" title="每日基础技术总结 · 2026-10-11 · HTTP 缓存：强缓存">每日基础技术总结 · 2026-10-11 · HTTP 缓存：强缓存</a><time datetime="2026-10-10T23:15:24.000Z" title="发表于 2026-10-11 07:15:24">2026-10-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/11/foundation/2026-10-11-foundation-service-degradation-circuit-breaker/" title="每日基础技术总结 · 2026-10-11 · 服务降级与熔断">每日基础技术总结 · 2026-10-11 · 服务降级与熔断</a><time datetime="2026-10-10T23:15:24.000Z" title="发表于 2026-10-11 07:15:24">2026-10-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/11/foundation/2026-10-11-foundation-lcp-calculation-blocking/" title="每日基础技术总结 · 2026-10-11 · Web Vitals 中 Largest Contentful Paint (LCP) 的计算逻辑与阻塞因素">每日基础技术总结 · 2026-10-11 · Web Vitals 中 Largest Contentful Paint (LCP) 的计算逻辑与阻塞因素</a><time datetime="2026-10-10T23:15:24.000Z" title="发表于 2026-10-11 07:15:24">2026-10-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/10/daily/2026-10-10-workbench-daily/" title="工作台日报 · 2026-10-10">工作台日报 · 2026-10-10</a><time datetime="2026-10-10T07:53:13.000Z" title="发表于 2026-10-10 15:53:13">2026-10-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/10/foundation/2026-10-10-foundation-monotonic-stack-queue/" title="每日基础技术总结 · 2026-10-10 · 单调栈与单调队列">每日基础技术总结 · 2026-10-10 · 单调栈与单调队列</a><time datetime="2026-10-10T07:53:13.000Z" title="发表于 2026-10-10 15:53:13">2026-10-10</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
