@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略📚 今日主题 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略（前端底层与计算机基础）  1. 核心概念速览回流（Reflow，又称 Layout）是浏览器渲染引擎根据 DOM 几何属性（尺寸、位置、盒模型）重新计算元素布局树（Layout Tree &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/17/foundation/2026-10-17-foundation-browser-reflow-repaint/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略📚 今日主题 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略（前端底层与计算机基础）  1. 核心概念速览回流（Reflow，又称 Layout）是浏览器渲染引擎根据 DOM 几何属性（尺寸、位置、盒模型）重新计算元素布局树（Layout Tree &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-16T23:03:00.000Z">
+<meta property="article:modified_time" content="2026-10-16T23:21:17.004Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/17/foundation/2026-10-17-foundation-browser-reflow-repaint/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-17 07:21:17'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">726</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">89</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-16T23:03:00.000Z" title="发表于 2026-10-17 07:03:00">2026-10-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-16T23:21:17.004Z" title="更新于 2026-10-17 07:21:17">2026-10-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-17-·-浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略"><a href="#每日基础技术总结-·-2026-10-17-·-浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略" class="headerlink" title="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略"></a>每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>回流（Reflow，又称 Layout）是浏览器渲染引擎根据 DOM 几何属性（尺寸、位置、盒模型）重新计算元素布局树（Layout Tree &#x2F; Render Tree）的过程；重绘（Repaint，又称 Paint）是在不改变几何结构的前提下，仅更新元素视觉属性（color、background、visibility 等）并重新生成绘制指令（Paint Records）的过程。两者的本质区别在于：回流必触发后续的重绘与合成（Composite），而重绘可跳过 Layout 直接进入 Paint 阶段。在现代浏览器渲染流水线（Rendering Pipeline）中，完整的帧更新流程为：JavaScript → Style → Layout → Paint → Composite。回流对应 Layout 阶段的失效与重算，重绘对应 Paint 阶段的失效与重绘。专业工程师必须掌握此机制，因为 Layout 是典型的 O(N) 树遍历算法（N 为受影响节点数），且读写分离不当会强制同步布局（Forced Synchronous Layout），导致帧预算（Frame Budget，通常 16.6ms）耗尽，直接引发主线程阻塞与掉帧。这是浏览器性能优化、渲染层理解及后续合成器（Compositor）优化的底层基石。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>触发机制与依赖关系：</p>
+<ol>
+<li>回流的触发条件（几何属性变更或布局信息查询）：<ul>
+<li>几何属性变更：修改 width&#x2F;height&#x2F;margin&#x2F;padding&#x2F;border-width、font-size、position（除 transform&#x2F;opacity 的 translate）、display、float 等。</li>
+<li>内容变更：文本增删、图片加载完成（未预设尺寸）、DOM 结构增删改。</li>
+<li>视口与字体：窗口 resize、devicePixelRatio 变化、字体加载完成（FOUT）。</li>
+<li>强制同步布局：读取 offsetWidth&#x2F;offsetHeight&#x2F;scrollTop&#x2F;clientTop&#x2F;getComputedStyle 等布局属性前，若存在未处理的样式变更，浏览器被迫立即执行 Layout 以确保返回最新值，形成 Layout Thrashing。</li>
+</ul>
+</li>
+<li>重绘的触发条件（外观属性变更且几何不变）：<ul>
+<li>color、background-color、background-image、visibility、outline、box-shadow（几何不变时）、text-decoration 等。</li>
+</ul>
+</li>
+<li>合成层（Composite Layer）豁免：transform 与 opacity 的动画若被提升为合成层，则跳过 Layout 与 Paint，直接在 GPU 合成器线程完成变换。但 will-change 或层爆炸（Layer Explosion）会增加内存与合成开销。</li>
+</ol>
+<p>与前端已有概念的对比：</p>
+<ul>
+<li>与 Virtual DOM Diff 对比：Virtual DOM 解决的是 JS 层面的最小 DOM 操作集计算，属于『做什么』；回流&#x2F;重绘解决的是浏览器层面的最小渲染失效集计算，属于『怎么做』。React 的批量更新（Batch Update）减少了 JS 到 DOM 的调用次数，但无法消除单次 DOM 变更引发的 Layout 成本。若 Diff 结果仍需修改几何属性，回流依然发生。</li>
+<li>与 CSS Containment 对比：contain: layout&#x2F;paint&#x2F;size 通过建立独立的格式化上下文（Formatting Context）或裁剪边界，将回流&#x2F;重绘的失效范围从全局树剪枝为子树，其思想类似数据库的索引下推（Index Condition Pushdown）——将计算下推到最小作用域，减少全局扫描。</li>
+<li>与 GPU 合成对比：Composite 阶段的 layer 合成类似前端构建中的 Code Splitting，将页面拆分为独立纹理（Texture），变更时仅重绘受影响层，避免整页重排。但合成层数量受内存与 GPU 带宽限制，过度提升（Over-promotion）会导致层爆炸，反而降低性能。</li>
+</ul>
+<p>失效传播机制：回流是树形结构的失效传播。修改某节点的几何属性，会标记其自身及祖先链为 dirty，并可能因兄弟节点或文档流的依赖关系触发连锁回流（如 float 清除、flex&#x2F;grid 的交叉轴对齐）。现代浏览器采用增量布局（Incremental Layout）与布局缓存（Layout Cache），仅重算 dirty 子树，但最坏情况下仍退化为 O(N) 全树遍历。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">// 1. 反例：读写交叉导致的强制同步布局（Layout Thrashing）</span><br><span class="line">// 每次循环先写（修改样式）后读（offsetWidth），强制浏览器立即执行 Layout</span><br><span class="line">function layoutThrashing(elements) &#123;</span><br><span class="line">  for (let i = 0; i &lt; elements.length; i++) &#123;</span><br><span class="line">    elements[i].style.width = &#x27;100px&#x27;; // 写：标记 Layout 为 dirty</span><br><span class="line">    const w = elements[i].offsetWidth;   // 读：强制同步 Layout，清除 dirty 标记</span><br><span class="line">    elements[i].style.height = w + &#x27;px&#x27;; // 再次写，触发下一轮 Layout</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 2. 正例：读写分离（FastDom 模式核心）</span><br><span class="line">// 先集中读取所有布局信息，再集中写入，确保 Layout 仅执行一次</span><br><span class="line">function batchReadWrite(elements) &#123;</span><br><span class="line">  const widths = [];</span><br><span class="line">  // 阶段1：批量读（此时无 dirty 样式，读取的是旧值，不触发新 Layout）</span><br><span class="line">  for (let i = 0; i &lt; elements.length; i++) &#123;</span><br><span class="line">    widths.push(elements[i].offsetWidth); // 纯读，不强制 Layout</span><br><span class="line">  &#125;</span><br><span class="line">  // 阶段2：批量写（所有变更合并，仅触发一次 Layout）</span><br><span class="line">  for (let i = 0; i &lt; elements.length; i++) &#123;</span><br><span class="line">    elements[i].style.width = &#x27;100px&#x27;;</span><br><span class="line">    elements[i].style.height = widths[i] + &#x27;px&#x27;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 3. 使用 requestAnimationFrame 对齐浏览器渲染帧</span><br><span class="line">// 将写操作调度至下一帧的 JS 执行阶段，与浏览器 Style/Layout 阶段对齐</span><br><span class="line">function rafOptimized(elements) &#123;</span><br><span class="line">  requestAnimationFrame(() =&gt; &#123;</span><br><span class="line">    // 在 rAF 回调中执行写操作，确保在本帧的 Layout 之前完成</span><br><span class="line">    elements.forEach(el =&gt; &#123;</span><br><span class="line">      el.style.transform = &#x27;translateX(10px)&#x27;; // 仅触发 Composite，不触发 Layout</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 4. CSS  containment 隔离回流范围</span><br><span class="line">// 在 CSS 中：.widget &#123; contain: layout paint; &#125;</span><br><span class="line">// 该元素的几何变更不会传播到祖先，重绘也被限制在元素边界内</span><br><span class="line">// 类似于 React 的 React.memo，但在浏览器渲染层生效</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为重绘（Repaint）代价低可以忽略，或认为回流（Reflow）只是『重新排列一下』。实际上，一次全文档回流（Full Document Reflow）的算法复杂度接近 O(N)（N 为 DOM 节点数），且涉及盒模型计算、浮动清除、flex&#x2F;grid 约束求解等 CPU 密集操作。在低端移动设备上，单次大规模回流可能耗时超过 10ms，直接耗尽 16.6ms 的帧预算。更严重的是，回流导致的布局抖动（Layout Shift）会产生累积布局偏移（CLS，Cumulative Layout Shift），这是 Core Web Vitals 的核心指标，直接影响 SEO 与用户体验。忽视回流的代价，等同于在数据库查询中忽视全表扫描的成本。</p>
+<p>误区2：滥用 will-change 或 translateZ(0) 强制提升合成层，认为『GPU 加速总是更快』。合成层的创建与维护需要消耗 GPU 内存（每个层对应一个纹理，尺寸为元素宽高 × devicePixelRatio² × 4 bytes），层数量过多会导致纹理上传（Texture Upload）开销、内存占用激增（尤其在移动端），甚至触发浏览器的层压缩（Layer Squashing）机制，反而引入额外合成开销。正确的策略是：仅对确实需要高频动画（如 60fps 的 transform&#x2F;opacity 变化）的元素进行层提升，并在动画结束后及时移除（will-change: auto）。</p>
+<p>进阶思考题：在React&#x2F;Vue等框架中， setState 触发的批量更新（Batch Update）与浏览器的渲染流水线（Rendering Pipeline）在时序上如何对齐？ 如果在同一帧内连续调用多次 setState（或在 useEffect 中读取布局属性），框架的调度机制（如 React 的 Scheduler）如何与浏览器的 requestAnimationFrame 及 Layout 阶段交互，才能避免强制同步布局（Forced Synchronous Layout）并确保帧率稳定？ 这需要理解框架的异步渲染（Concurrent Mode）、时间切片（Time Slicing）与浏览器帧生命周期的协同机制。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/17/foundation/2026-10-17-foundation-browser-reflow-repaint/">https://litongjin.github.io/2026/10/17/foundation/2026-10-17-foundation-browser-reflow-repaint/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/10/17/daily/2026-10-17-workbench-daily/" title="工作台日报 · 2026-10-17"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-10-17</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">726</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">89</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-17-%C2%B7-%E6%B5%8F%E8%A7%88%E5%99%A8%E5%9B%9E%E6%B5%81%EF%BC%88Reflow%EF%BC%89%E4%B8%8E%E9%87%8D%E7%BB%98%EF%BC%88Repaint%EF%BC%89%E7%9A%84%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6%E4%B8%8E%E6%9C%80%E5%B0%8F%E5%8C%96%E7%AD%96%E7%95%A5"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/17/foundation/2026-10-17-foundation-browser-reflow-repaint/" title="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略">每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略</a><time datetime="2026-10-16T23:03:00.000Z" title="发表于 2026-10-17 07:03:00">2026-10-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/17/daily/2026-10-17-workbench-daily/" title="工作台日报 · 2026-10-17">工作台日报 · 2026-10-17</a><time datetime="2026-10-16T23:03:00.000Z" title="发表于 2026-10-17 07:03:00">2026-10-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/17/foundation/2026-10-17-foundation-mysql-index-implicit-cast/" title="每日基础技术总结 · 2026-10-17 · MySQL索引失效场景：类型转换与隐式CAST的影响">每日基础技术总结 · 2026-10-17 · MySQL索引失效场景：类型转换与隐式CAST的影响</a><time datetime="2026-10-16T23:03:00.000Z" title="发表于 2026-10-17 07:03:00">2026-10-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/17/foundation/2026-10-17-foundation-dns-recursive-iterative-resolution/" title="每日基础技术总结 · 2026-10-17 · DNS递归查询与迭代查询的交互流程及根服务器缓存一致性挑战">每日基础技术总结 · 2026-10-17 · DNS递归查询与迭代查询的交互流程及根服务器缓存一致性挑战</a><time datetime="2026-10-16T23:03:00.000Z" title="发表于 2026-10-17 07:03:00">2026-10-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/16/daily/2026-10-16-workbench-daily/" title="工作台日报 · 2026-10-16">工作台日报 · 2026-10-16</a><time datetime="2026-10-15T23:01:08.000Z" title="发表于 2026-10-16 07:01:08">2026-10-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/16/foundation/2026-10-16-foundation-g1-mixed-gc-selection/" title="每日基础技术总结 · 2026-10-16 · JVM G1 GC  Mixed Garbage Collection 的混合收集判断逻辑">每日基础技术总结 · 2026-10-16 · JVM G1 GC  Mixed Garbage Collection 的混合收集判断逻辑</a><time datetime="2026-10-15T23:01:08.000Z" title="发表于 2026-10-16 07:01:08">2026-10-16</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
