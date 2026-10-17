@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用📚 今日主题 Kafka Zero-Copy机制与Page Cache在文件传输中的作用（后端基础）  1. 核心概念速览Kafka 的 Zero-Copy（零拷贝）并非一种单一技术，而是一套消除数据在用户空间（User Space）与内核空间（Kernel Space）之间">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/18/foundation/2026-10-18-foundation-kafka-zero-copy-page-cache/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用📚 今日主题 Kafka Zero-Copy机制与Page Cache在文件传输中的作用（后端基础）  1. 核心概念速览Kafka 的 Zero-Copy（零拷贝）并非一种单一技术，而是一套消除数据在用户空间（User Space）与内核空间（Kernel Space）之间">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-17T23:05:15.000Z">
+<meta property="article:modified_time" content="2026-10-17T23:19:19.301Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/18/foundation/2026-10-18-foundation-kafka-zero-copy-page-cache/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-18 07:19:19'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">733</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">90</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-17T23:05:15.000Z" title="发表于 2026-10-18 07:05:15">2026-10-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-17T23:19:19.301Z" title="更新于 2026-10-18 07:19:19">2026-10-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-18-·-Kafka-Zero-Copy机制与Page-Cache在文件传输中的作用"><a href="#每日基础技术总结-·-2026-10-18-·-Kafka-Zero-Copy机制与Page-Cache在文件传输中的作用" class="headerlink" title="每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用"></a>每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Kafka Zero-Copy机制与Page Cache在文件传输中的作用</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Kafka 的 Zero-Copy（零拷贝）并非一种单一技术，而是一套<strong>消除数据在用户空间（User Space）与内核空间（Kernel Space）之间冗余拷贝</strong>的 I&#x2F;O 优化机制。其核心目标是：当 Broker 需要将磁盘上的日志文件（Log Segment）通过 Socket 发送给消费者时，避免传统 read&#x2F;write 模式导致的 4 次上下文切换和 4 次数据拷贝（其中 2 次为 CPU 负责的内存拷贝）。</p>
+<p>Page Cache（页缓存）是 Linux 内核的文件系统缓存层，Kafka 重度依赖其作为消息存储的”一级缓存”。Producer 写入的消息先进入 Page Cache（由内核异步刷盘），Consumer 读取的消息若命中 Page Cache 则完全绕过磁盘 I&#x2F;O。Zero-Copy 与 Page Cache 协同工作：前者消除网络传输中的内存拷贝开销，后者消除磁盘 I&#x2F;O 瓶颈，共同构成 Kafka 高吞吐的底层基石。</p>
+<p>专业工程师必须掌握此机制，因为它是理解现代高性能中间件（如 RocketMQ、Redis、Nginx）I&#x2F;O 优化的通用范式，也是进行系统级性能调优（如判断何时该调整 <code>vm.dirty_ratio</code> 或评估网络带宽瓶颈）的前提。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p><strong>传统拷贝路径（Read + Write）</strong></p>
+<ol>
+<li><code>read()</code> 系统调用：CPU 上下文从 User Mode 切换至 Kernel Mode；DMA（Direct Memory Access）将磁盘数据拷贝至内核空间的 Read Buffer（Page Cache 的组成部分）。</li>
+<li>CPU 将数据从 Kernel Space 的 Read Buffer 拷贝至 User Space 的 Application Buffer。</li>
+<li><code>write()</code> 系统调用：CPU 再次切换上下文；CPU 将数据从 Application Buffer 拷贝至 Kernel Space 的 Socket Buffer。</li>
+<li>DMA 将数据从 Socket Buffer 拷贝至网卡（NIC）的协议引擎缓冲区。<br>总计：4 次上下文切换，4 次数据拷贝（2 次 CPU 拷贝，2 次 DMA 拷贝）。</li>
+</ol>
+<p><strong>Kafka Zero-Copy 路径（transferTo &#x2F; sendfile）</strong><br>Kafka 通过 Java NIO 的 <code>FileChannel.transferTo()</code> 调用 Linux 的 <code>sendfile()</code> 系统调用，实现数据在内核空间内的直接流转：</p>
+<ol>
+<li>DMA 将磁盘数据拷贝至内核空间的 Page Cache（Read Buffer）。</li>
+<li>CPU 仅将包含数据位置和长度信息的少量元数据（Descriptor）从 Read Buffer 拷贝至 Socket Buffer，<strong>不发生实际数据的 CPU 拷贝</strong>。</li>
+<li>DMA 根据 Socket Buffer 中的 Descriptor，直接从 Page Cache 将数据拷贝至 NIC 缓冲区。<br>总计：2 次上下文切换，2 次 DMA 拷贝，0 次 CPU 数据拷贝（或仅极少量元数据拷贝）。</li>
+</ol>
+<p><strong>Page Cache 的关键作用</strong></p>
+<ul>
+<li><strong>写路径</strong>：Producer 发送的消息先写入 Page Cache，Kafka 不强制每次 <code>fsync</code>（依赖操作系统后台刷盘或配置 <code>flush.messages</code>），将随机写转化为顺序写（Page Cache 的 Write-back 机制）。</li>
+<li><strong>读路径</strong>：Consumer 消费的数据若近期被写入（追尾读，Tailing Read），大概率仍驻留在 Page Cache 中，实现”内存级”读取速度，避免磁盘寻道。</li>
+<li><strong>内存映射</strong>：Kafka 的索引文件（.index&#x2F;.timeindex）使用 <code>mmap</code>（Memory-Mapped Files）将磁盘文件映射至用户空间虚拟内存，访问索引时直接操作 Page Cache，无需显式 <code>read()</code>。</li>
+</ul>
+<p><strong>与前端体系的对比</strong><br>前端熟悉的”零拷贝”概念多指 <strong>内存共享</strong>（如 SharedArrayBuffer 在多线程间共享内存，避免 <code>postMessage</code> 的序列化拷贝）或 <strong>流式处理</strong>（Streams API 分块读取避免一次性加载大文件）。这与 Kafka 的 Zero-Copy 有本质区别：前者是<strong>用户态多线程&#x2F;上下文间的数据共享</strong>，后者是<strong>内核态消除系统调用边界的数据搬运</strong>。</p>
+<p>类比 V8 引擎的内存管理：Page Cache 类似 JS 的 Heap 对象缓存（避免重复创建），而 Zero-Copy 类似结构化克隆算法中的 Transferable Objects（转移所有权而非复制数据）。但 Kafka 的场景涉及硬件（DMA）、操作系统（系统调用）和网络协议栈（Socket Buffer），比前端纯粹的内存操作更底层。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">// 极简 Kafka Producer：验证 Page Cache 写入与 Zero-Copy 前提</span><br><span class="line">// 依赖：仅需 JDK 原生 NIO，无需引入 Kafka Client 库即可验证底层机制</span><br><span class="line"></span><br><span class="line">import java.io.FileInputStream;</span><br><span class="line">import java.net.InetSocketAddress;</span><br><span class="line">import java.nio.channels.FileChannel;</span><br><span class="line">import java.nio.channels.SocketChannel;</span><br><span class="line"></span><br><span class="line">public class ZeroCopyVerifier &#123;</span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        // 1. 模拟 Kafka 的日志段文件（实际为 .log 文件）</span><br><span class="line">        String logFilePath = &quot;/var/kafka-logs/topic-0/00000000000000000000.log&quot;;</span><br><span class="line">        </span><br><span class="line">        try (FileChannel fileChannel = new FileInputStream(logFilePath).getChannel();</span><br><span class="line">             SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress(&quot;localhost&quot;, 9092))) &#123;</span><br><span class="line">            </span><br><span class="line">            // 2. 核心：调用 transferTo，触发底层 sendfile 系统调用</span><br><span class="line">            // 参数：position=0, count=fileChannel.size(), target=socketChannel</span><br><span class="line">            // 效果：数据从 Page Cache 直接经 DMA 传输至网卡，不经过 JVM 堆内存（User Space）</span><br><span class="line">            long position = 0;</span><br><span class="line">            long size = fileChannel.size();</span><br><span class="line">            </span><br><span class="line">            // 3. 循环确保全部传输完成（transferTo 可能不一次性写完）</span><br><span class="line">            while (position &lt; size) &#123;</span><br><span class="line">                long transferred = fileChannel.transferTo(position, size - position, socketChannel);</span><br><span class="line">                position += transferred;</span><br><span class="line">                // 关键注释：此时 JVM 的 User Space 中不存在该文件内容的副本</span><br><span class="line">                // 若使用传统 read()，需先分配 ByteBuffer.allocate() 将数据读入堆内存</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/* </span><br><span class="line"> * Page Cache 验证代码（Linux 环境）：</span><br><span class="line"> * 1. 启动上述程序前，执行 `vmtouch /var/kafka-logs/topic-0/00000000000000000000.log`</span><br><span class="line"> *    观察 &quot;Resident Pages&quot;（驻留内存的页数）占比，确认数据是否在 Page Cache 中。</span><br><span class="line"> * 2. 使用 `strace -e trace=sendfile,read,write java ZeroCopyVerifier`</span><br><span class="line"> *    观察系统调用：应看到大量 sendfile()，而非 read()+write() 组合。</span><br><span class="line"> * 3. 监控工具：`iostat -x 1` 观察磁盘 util%（应趋近 0% 若命中 Page Cache），</span><br><span class="line"> *    `iftop` 观察网络带宽（应打满网卡线速）。</span><br><span class="line"> */</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p><strong>误区一：认为 Zero-Copy 意味着”零次数据拷贝”</strong><br>Zero-Copy 消除的是<strong>CPU 参与的内存到内存拷贝</strong>（Kernel Space ↔ User Space），但 DMA 拷贝（磁盘→内存，内存→网卡）依然存在。在极端场景下（如数据未命中 Page Cache 需从磁盘加载），DMA 拷贝次数与传统模式相同，Zero-Copy 的优势主要体现为<strong>减少 CPU 占用率和内存带宽压力</strong>，而非完全消除数据搬运。</p>
+<p><strong>误区二：忽视 Page Cache 的”脏页”风险</strong><br>Kafka 依赖 Page Cache 实现高吞吐写入，但默认配置下（<code>log.flush.interval.messages</code> 和 <code>log.flush.interval.ms</code> 设为极大值），消息仅存在于 Page Cache 中，若 Broker 宕机且尚未触发内核 <code>pdflush</code> 刷盘，会导致数据丢失。这与前端使用 <code>localStorage</code>（同步持久化）或 <code>IndexedDB</code>（异步持久化但有事务保证）的可靠性模型不同，Kafka 的持久化是<strong>延迟批量异步</strong>的，需通过 <code>acks=all</code> + <code>min.insync.replicas</code> 的副本机制弥补单机 Page Cache 的可靠性缺口。</p>
+<p><strong>进阶思考题</strong><br>在 Kafka 消费者发生<strong>冷读（Cold Read）</strong>（即消费的数据已被换出 Page Cache，需从磁盘加载）的场景下，Zero-Copy 是否仍能提供性能优势？请从 DMA 拷贝、CPU 缓存污染（Cache Pollution）和上下文切换三个维度分析，并说明为何现代高吞吐系统（如 RocketMQ）会引入<strong>堆外内存（Off-Heap）缓存</strong>作为 Page Cache 的补充，以应对冷读场景下的性能抖动。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/18/foundation/2026-10-18-foundation-kafka-zero-copy-page-cache/">https://litongjin.github.io/2026/10/18/foundation/2026-10-18-foundation-kafka-zero-copy-page-cache/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/18/foundation/2026-10-18-foundation-dnssec-chain-validation-latency/" title="每日基础技术总结 · 2026-10-18 · DNSSEC签名链验证机制及其对解析延迟与带宽的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-10-18 · DNSSEC签名链验证机制及其对解析延迟与带宽的影响</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/17/foundation/2026-10-17-foundation-browser-reflow-repaint/" title="每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-10-17 · 浏览器回流（Reflow）与重绘（Repaint）的触发条件与最小化策略</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/03/foundation/2024-01-03-foundation-zookeeper-zab-epoch/" title="每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-03</div><div class="title">每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制</div></div></a></div><div><a href="/2024/02/05/foundation/2024-02-05-foundation-consistent-hashing-virtual-nodes/" title="每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-05</div><div class="title">每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点</div></div></a></div><div><a href="/2024/03/04/foundation/2024-03-04-foundation-rocketmq-half-message-op-message/" title="每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-04</div><div class="title">每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message</div></div></a></div><div><a href="/2024/06/23/foundation/2024-06-23-foundation-http-2-hpack/" title="每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-23</div><div class="title">每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新</div></div></a></div><div><a href="/2024/08/14/foundation/2024-08-14-foundation-mysql-redo-log-binlog/" title="每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-14</div><div class="title">每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交</div></div></a></div><div><a href="/2024/08/16/foundation/2024-08-16-foundation-innodb-buffer-pool-lru/" title="每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-16</div><div class="title">每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">733</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">90</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-18-%C2%B7-Kafka-Zero-Copy%E6%9C%BA%E5%88%B6%E4%B8%8EPage-Cache%E5%9C%A8%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-18 · Kafka Zero-Copy机制与Page Cache在文件传输中的作用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/18/daily/2026-10-18-workbench-daily/" title="工作台日报 · 2026-10-18">工作台日报 · 2026-10-18</a><time datetime="2026-10-17T23:19:53.000Z" title="发表于 2026-10-18 07:19:53">2026-10-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/18/foundation/2026-10-18-foundation-qpack-quic-head-of-line-blocking/" title="每日基础技术总结 · 2026-10-18 · HTTP/3基于QUIC协议的头部压缩（QPACK）解决队头阻塞的原理">每日基础技术总结 · 2026-10-18 · HTTP/3基于QUIC协议的头部压缩（QPACK）解决队头阻塞的原理</a><time datetime="2026-10-17T23:19:53.000Z" title="发表于 2026-10-18 07:19:53">2026-10-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/18/foundation/2026-10-18-foundation-trace-id-async-thread-pool/" title="每日基础技术总结 · 2026-10-18 · 微服务链路追踪：TraceID在异步线程池中的透传难题">每日基础技术总结 · 2026-10-18 · 微服务链路追踪：TraceID在异步线程池中的透传难题</a><time datetime="2026-10-17T23:19:53.000Z" title="发表于 2026-10-18 07:19:53">2026-10-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/18/foundation/2026-10-18-foundation-css-grid-flexbox-sizing-algorithm/" title="每日基础技术总结 · 2026-10-18 · CSS Grid 与 Flexbox 的尺寸计算算法：主轴与交叉轴的优先级差异">每日基础技术总结 · 2026-10-18 · CSS Grid 与 Flexbox 的尺寸计算算法：主轴与交叉轴的优先级差异</a><time datetime="2026-10-17T23:19:53.000Z" title="发表于 2026-10-18 07:19:53">2026-10-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/18/foundation/2026-10-18-foundation-custom-elements-lifecycle-upgrade/" title="每日基础技术总结 · 2026-10-18 · Web Components Custom Elements 生命周期钩子与升级（Upgrade）过程">每日基础技术总结 · 2026-10-18 · Web Components Custom Elements 生命周期钩子与升级（Upgrade）过程</a><time datetime="2026-10-17T23:05:15.000Z" title="发表于 2026-10-18 07:05:15">2026-10-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/18/foundation/2026-10-18-foundation-dnssec-chain-validation-latency/" title="每日基础技术总结 · 2026-10-18 · DNSSEC签名链验证机制及其对解析延迟与带宽的影响">每日基础技术总结 · 2026-10-18 · DNSSEC签名链验证机制及其对解析延迟与带宽的影响</a><time datetime="2026-10-17T23:05:15.000Z" title="发表于 2026-10-18 07:05:15">2026-10-18</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
