@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为📚 今日主题 TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为（网络基础）  1. 核心概念速览TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）是TCP拥塞控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/23/foundation/2026-10-23-foundation-tcp-fast-retransmit-recovery/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为📚 今日主题 TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为（网络基础）  1. 核心概念速览TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）是TCP拥塞控">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-22T23:02:06.000Z">
+<meta property="article:modified_time" content="2026-10-22T23:22:35.235Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="网络基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/23/foundation/2026-10-23-foundation-tcp-fast-retransmit-recovery/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-23 07:22:35'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">752</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">91</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-22T23:02:06.000Z" title="发表于 2026-10-23 07:02:06">2026-10-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-22T23:22:35.235Z" title="更新于 2026-10-23 07:22:35">2026-10-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-23-·-TCP快速重传（Fast-Retransmit）与快速恢复（Fast-Recovery）的状态机行为"><a href="#每日基础技术总结-·-2026-10-23-·-TCP快速重传（Fast-Retransmit）与快速恢复（Fast-Recovery）的状态机行为" class="headerlink" title="每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为"></a>每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为</strong>（网络基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）是TCP拥塞控制机制中处理丢包的两个协同算法。快速重传解决『RTO（Retransmission Timeout）超时等待过长』的问题：接收方收到乱序段后立即发送重复ACK（duplicate ACK），发送方收到3个重复ACK时不等待RTO超时就立即重传丢失段。快速恢复解决『重传后窗口重置导致吞吐量骤降』的问题：触发快速重传后，发送方不进入慢启动（Slow Start），而是执行拥塞避免（Congestion Avoidance）的变体——将慢启动阈值ssthresh设为当前拥塞窗口cwnd的一半，将cwnd设为ssthresh+3（补偿3个重复ACK代表的已离开网络的段），之后每收到一个重复ACK就将cwnd加1（窗口膨胀），收到确认新数据的ACK时将cwnd缩减回ssthresh并退出快速恢复。这两个机制使TCP在轻度丢包（单段丢失）场景下避免RTO的指数退避惩罚和慢启动的窗口归零重建，将吞吐量损失从秒级压缩到RTT级。位置：传输层核心可靠性机制，位于TCP协议栈内核态实现（如Linux的tcp_input.c），是理解TCP性能调优（如net.ipv4.tcp_congestion_control、BBR算法对比）、网络编程中write&#x2F;recv行为、抓包分析（Wireshark中的TCP Fast Retransmission标记）的必备基础。前端工程师必须掌握它的原因：HTTP&#x2F;1.1和HTTP&#x2F;2均构建于TCP之上，页面加载性能、API响应延迟直接受TCP重传行为影响；当出现『接口偶发性卡顿』『大文件上传中断』等问题时，快速重传与快速恢复的状态转换是定位问题的关键线索。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>状态机转换逻辑（发送方视角）：</p>
+<ol>
+<li><p>正常状态（Open）：cwnd按拥塞避免（每RTT加1 MSS）或慢启动（每RTT翻倍）增长。ssthresh初始为65535字节。</p>
+</li>
+<li><p>触发快速重传：</p>
+<ul>
+<li>条件：收到3个重复ACK（即收到4个相同ACK号的ACK包，第一个为正常ACK，后续3个为duplicate）</li>
+<li>动作：<br>a) 立即重传丢失的段（无需等待RTO计时器到期）<br>b) ssthresh &#x3D; max(cwnd &#x2F; 2, 2 * MSS)<br>c) cwnd &#x3D; ssthresh + 3 * MSS（+3补偿3个已确认离开网络的段）<br>d) 进入快速恢复状态</li>
+</ul>
+</li>
+<li><p>快速恢复状态：</p>
+<ul>
+<li>每收到1个重复ACK：cwnd +&#x3D; MSS（窗口膨胀，允许发送新数据，因为每个重复ACK代表一个段已离开网络到达接收方）</li>
+<li>收到确认新数据的ACK（即ACK号大于重传前的最高ACK号）：<br>a) cwnd &#x3D; ssthresh（窗口缩减回新阈值，称为『窗口收缩』）<br>b) 退出快速恢复，回到正常状态（Open），进入拥塞避免阶段</li>
+<li>若RTO超时（极端情况）：cwnd &#x3D; 1 MSS，ssthresh &#x3D; max(cwnd &#x2F; 2, 2 * MSS)，进入慢启动</li>
+</ul>
+</li>
+<li><p>伪代码（简化版）：<br>on_ack_received(ack_num):<br>  if ack_num &#x3D;&#x3D; last_ack_num:<br>dup_ack_count++<br>if dup_ack_count &#x3D;&#x3D; 3 and state &#x3D;&#x3D; OPEN:<br>  retransmit_lost_segment()<br>  ssthresh &#x3D; max(cwnd &#x2F; 2, 2 * MSS)<br>  cwnd &#x3D; ssthresh + 3 * MSS<br>  state &#x3D; FAST_RECOVERY<br>elif state &#x3D;&#x3D; FAST_RECOVERY:<br>  cwnd +&#x3D; MSS  &#x2F;&#x2F; 窗口膨胀<br>  else:  &#x2F;&#x2F; 收到新ACK<br>if state &#x3D;&#x3D; FAST_RECOVERY:<br>  cwnd &#x3D; ssthresh  &#x2F;&#x2F; 窗口收缩<br>  state &#x3D; OPEN<br>last_ack_num &#x3D; ack_num<br>dup_ack_count &#x3D; 0</p>
+</li>
+</ol>
+<p>与前端概念的对比：</p>
+<ul>
+<li>vs Promise重试：Promise重试是应用层逻辑，超时时间由开发者设定，重试次数固定；快速重传是传输层自动机制，由ACK模式触发，无需应用介入。</li>
+<li>vs RxJS的retryWhen操作符：retryWhen基于流的事件驱动，可自定义退避策略；快速恢复是内核态状态机，策略固定（RFC 2001&#x2F;2581&#x2F;5681），不可编程。</li>
+<li>vs HTTP缓存：HTTP缓存减少请求次数，优化带宽；快速重传减少重传延迟，优化单连接吞吐量。</li>
+<li>与HTTP&#x2F;2的关联：HTTP&#x2F;2多路复用单个TCP连接，若TCP层触发快速重传，所有流（stream）都会被阻塞（TCP层head-of-line blocking），这是HTTP&#x2F;3转向QUIC的核心动机之一。</li>
+</ul>
+<p>关键细节：</p>
+<ul>
+<li>快速重传只能处理『单个段丢失』。若同一窗口内多个段丢失，快速恢复可能失败，仍需RTO。</li>
+<li>SACK（Selective Acknowledgment）扩展可告知发送方具体哪些段已收到，允许在快速恢复中重传多个丢失段（NewReno算法，RFC 6582）。</li>
+<li>Linux实现中，可通过net.ipv4.tcp_early_retrans参数调整触发阈值（默认3，可改为更早触发）。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">验证方法：使用tcpdump或Wireshark抓包观察快速重传行为。</span><br><span class="line"></span><br><span class="line">步骤1：模拟丢包环境（Linux + tc命令）</span><br><span class="line">  # 在发送方机器上添加10ms延迟和1%丢包率</span><br><span class="line">  sudo tc qdisc add dev eth0 root netem delay 10ms loss 1%</span><br><span class="line"></span><br><span class="line">步骤2：启动一个TCP服务并传输数据</span><br><span class="line">  # 服务端：nc -l 9999 &gt; received_file</span><br><span class="line">  # 客户端：cat large_file | nc server_ip 9999</span><br><span class="line"></span><br><span class="line">步骤3：抓包观察</span><br><span class="line">  sudo tcpdump -i eth0 -w capture.pcap &#x27;tcp port 9999&#x27;</span><br><span class="line"></span><br><span class="line">步骤4：用Wireshark打开capture.pcap，筛选器输入：</span><br><span class="line">  tcp.analysis.fast_retransmission</span><br><span class="line"></span><br><span class="line">预期观察到的包序列（简化）：</span><br><span class="line">  Seq=1000, Len=1460  [原始发送]</span><br><span class="line">  Seq=2460, Len=1460  [原始发送]</span><br><span class="line">  Seq=3920, Len=1460  [丢失，网络中未到达]</span><br><span class="line">  Seq=5380, Len=1460  [原始发送]</span><br><span class="line">  Ack=3920            [接收方：我期望3920，但收到了5380，发重复ACK]</span><br><span class="line">  Ack=3920            [dup ACK #1]</span><br><span class="line">  Ack=3920            [dup ACK #2]</span><br><span class="line">  Ack=3920            [dup ACK #3，触发快速重传]</span><br><span class="line">  Seq=3920, Len=1460  [快速重传：不等RTO，立即重发3920段]</span><br><span class="line">  Ack=6840            [接收方：3920和后续都收到了，确认到6840]</span><br><span class="line">  [此时cwnd从ssthresh+3收缩回ssthresh，进入拥塞避免]</span><br><span class="line"></span><br><span class="line">通过/proc/net/tcp观察内核状态（需root）：</span><br><span class="line">  # 查看当前TCP连接的拥塞窗口和状态</span><br><span class="line">  cat /proc/net/tcp | grep &#x27;:270F&#x27;  # 270F是9999端口的16进制</span><br><span class="line">  # 输出第4列（state）含义：</span><br><span class="line">  #   01 = ESTABLISHED（正常）</span><br><span class="line">  #   状态字段不直接显示快速恢复，但可通过ss -i命令查看：</span><br><span class="line">  ss -i dst server_ip</span><br><span class="line">  # 输出示例：</span><br><span class="line">  #   cubic wscale:7,7 rto:204 rtt:2.5/1.5 cwnd:10 ssthresh:7</span><br><span class="line">  #   若cwnd骤降且ssthresh减半，说明刚经历快速恢复</span><br><span class="line"></span><br><span class="line">清除模拟环境：</span><br><span class="line">  sudo tc qdisc del dev eth0 root</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区1：认为快速重传可以替代RTO，RTO机制可以被禁用。<br>真相：快速重传仅适用于『收到3个重复ACK』的场景，前提是网络中只有单个段丢失且后续段能到达接收方触发重复ACK。若发生以下情况，RTO仍是唯一保障：(a) 整个窗口的数据全部丢失，接收方无任何段可确认；(b) ACK包本身丢失；(c) 窗口大小小于4个段（无法产生3个重复ACK）。Linux内核中RTO最小值为200ms（tcp_rto_min），是最后的兜底机制。实际抓包中会看到『Fast Retransmission』和『Retransmission (RTO)』并存。</p>
+<p>误区2：认为快速恢复后cwnd回到丢包前的水平，吞吐量无损。<br>真相：快速恢复将ssthresh降为cwnd&#x2F;2（乘法减小，multiplicative decrease），然后cwnd从ssthresh开始线性增长（加法增大，additive increase）。这意味着每次丢包事件后，cwnd会经历『腰斩→缓慢恢复』的过程，长期吞吐量为sawtooth（锯齿）波形。假设丢包率1%，稳定状态下cwnd在W&#x2F;2到W之间波动，平均吞吐量为(3&#x2F;4)*W&#x2F;RTT。这是TCP Reno&#x2F;NewReno的固有特性，也是BBR等现代算法试图改进的点（BBR不基于丢包，基于带宽和RTT测量）。</p>
+<p>思考题：为什么快速恢复中每收到一个重复ACK要将cwnd加1 MSS（窗口膨胀），而不是保持cwnd不变？<br>提示：从『ACK时钟』（ACK clocking）角度思考——TCP的自时钟（self-clocking）机制依赖ACK到达速率来控制发送速率。每个重复ACK代表网络中有一个段已到达接收方并离开网络，此时网络容量有空余，允许发送方注入一个新段。若不膨胀窗口，发送方会因窗口耗尽而暂停发送，浪费了网络已恢复的空闲容量。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/23/foundation/2026-10-23-foundation-tcp-fast-retransmit-recovery/">https://litongjin.github.io/2026/10/23/foundation/2026-10-23-foundation-tcp-fast-retransmit-recovery/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">网络基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/23/foundation/2026-10-23-foundation-v8-gc-mark-sweep-compact/" title="每日基础技术总结 · 2026-10-23 · V8 垃圾回收算法：Mark-Sweep 与 Mark-Compact 的分代收集策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-10-23 · V8 垃圾回收算法：Mark-Sweep 与 Mark-Compact 的分代收集策略</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/23/foundation/2026-10-23-foundation-mq-idempotent-consumer-unique-index/" title="每日基础技术总结 · 2026-10-23 · 消息队列重复消费：幂等性设计与唯一索引的双重保障"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-10-23 · 消息队列重复消费：幂等性设计与唯一索引的双重保障</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/20/foundation/2024-01-20-foundation-https-tls-1-3-pfs/" title="每日基础技术总结 · 2024-01-20 · HTTPS TLS 1.3 握手指令精简过程与前向安全性（PFS）实现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="title">每日基础技术总结 · 2024-01-20 · HTTPS TLS 1.3 握手指令精简过程与前向安全性（PFS）实现</div></div></a></div><div><a href="/2024/01/29/foundation/2024-01-29-foundation-least-connections-vs-weighted-round-robin/" title="每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-29</div><div class="title">每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法</div></div></a></div><div><a href="/2024/02/26/foundation/2024-02-26-foundation-http-1-1-pipelining/" title="每日基础技术总结 · 2024-02-26 · HTTP&#x2F;1.1 的 Pipelining 与队头阻塞"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-26</div><div class="title">每日基础技术总结 · 2024-02-26 · HTTP&#x2F;1.1 的 Pipelining 与队头阻塞</div></div></a></div><div><a href="/2024/03/29/foundation/2024-03-29-foundation-tcp-syn-flood-syn-cookie/" title="每日基础技术总结 · 2024-03-29 · TCP SYN Flood 与 SYN Cookie 机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-29</div><div class="title">每日基础技术总结 · 2024-03-29 · TCP SYN Flood 与 SYN Cookie 机制</div></div></a></div><div><a href="/2024/05/08/foundation/2024-05-08-foundation-tcp-window-scaling/" title="每日基础技术总结 · 2024-05-08 · TCP 的窗口缩放（Window Scaling）与时间戳选项"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-08</div><div class="title">每日基础技术总结 · 2024-05-08 · TCP 的窗口缩放（Window Scaling）与时间戳选项</div></div></a></div><div><a href="/2024/05/20/foundation/2024-05-20-foundation-tcp-nagle-ack/" title="每日基础技术总结 · 2024-05-20 · TCP Nagle 算法与延迟 ACK 交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-20</div><div class="title">每日基础技术总结 · 2024-05-20 · TCP Nagle 算法与延迟 ACK 交互</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">752</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">91</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-23-%C2%B7-TCP%E5%BF%AB%E9%80%9F%E9%87%8D%E4%BC%A0%EF%BC%88Fast-Retransmit%EF%BC%89%E4%B8%8E%E5%BF%AB%E9%80%9F%E6%81%A2%E5%A4%8D%EF%BC%88Fast-Recovery%EF%BC%89%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA%E8%A1%8C%E4%B8%BA"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/23/daily/2026-10-23-workbench-daily/" title="工作台日报 · 2026-10-23">工作台日报 · 2026-10-23</a><time datetime="2026-10-22T23:02:06.000Z" title="发表于 2026-10-23 07:02:06">2026-10-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/23/foundation/2026-10-23-foundation-v8-gc-mark-sweep-compact/" title="每日基础技术总结 · 2026-10-23 · V8 垃圾回收算法：Mark-Sweep 与 Mark-Compact 的分代收集策略">每日基础技术总结 · 2026-10-23 · V8 垃圾回收算法：Mark-Sweep 与 Mark-Compact 的分代收集策略</a><time datetime="2026-10-22T23:02:06.000Z" title="发表于 2026-10-23 07:02:06">2026-10-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/23/foundation/2026-10-23-foundation-tcp-fast-retransmit-recovery/" title="每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为">每日基础技术总结 · 2026-10-23 · TCP快速重传（Fast Retransmit）与快速恢复（Fast Recovery）的状态机行为</a><time datetime="2026-10-22T23:02:06.000Z" title="发表于 2026-10-23 07:02:06">2026-10-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/23/foundation/2026-10-23-foundation-mq-idempotent-consumer-unique-index/" title="每日基础技术总结 · 2026-10-23 · 消息队列重复消费：幂等性设计与唯一索引的双重保障">每日基础技术总结 · 2026-10-23 · 消息队列重复消费：幂等性设计与唯一索引的双重保障</a><time datetime="2026-10-22T23:02:06.000Z" title="发表于 2026-10-23 07:02:06">2026-10-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/22/daily/2026-10-22-workbench-daily/" title="工作台日报 · 2026-10-22">工作台日报 · 2026-10-22</a><time datetime="2026-10-21T23:05:08.000Z" title="发表于 2026-10-22 07:05:08">2026-10-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/22/foundation/2026-10-22-foundation-es-inverted-index-segment-merge/" title="每日基础技术总结 · 2026-10-22 · Elasticsearch倒排索引的建立过程与Segment合并策略">每日基础技术总结 · 2026-10-22 · Elasticsearch倒排索引的建立过程与Segment合并策略</a><time datetime="2026-10-21T23:05:08.000Z" title="发表于 2026-10-22 07:05:08">2026-10-22</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
