@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱📚 今日主题 Redis Lua脚本原子性与Pipeline批量操作的陷阱（后端基础）  1. 核心概念速览Redis Lua 脚本与 Pipeline 是两种性能优化手段，但原子性边界截然不同。 Lua 脚本：Redis 通过 EVAL&#x2F;EVALSHA 加载 Lua 5.1 脚">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/26/foundation/2026-10-26-foundation-redis-lua-atomicity-pipeline/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱📚 今日主题 Redis Lua脚本原子性与Pipeline批量操作的陷阱（后端基础）  1. 核心概念速览Redis Lua 脚本与 Pipeline 是两种性能优化手段，但原子性边界截然不同。 Lua 脚本：Redis 通过 EVAL&#x2F;EVALSHA 加载 Lua 5.1 脚">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-25T23:01:07.000Z">
+<meta property="article:modified_time" content="2026-10-25T23:24:11.614Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/26/foundation/2026-10-26-foundation-redis-lua-atomicity-pipeline/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-26 07:24:11'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">764</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">93</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-25T23:24:11.614Z" title="更新于 2026-10-26 07:24:11">2026-10-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-26-·-Redis-Lua脚本原子性与Pipeline批量操作的陷阱"><a href="#每日基础技术总结-·-2026-10-26-·-Redis-Lua脚本原子性与Pipeline批量操作的陷阱" class="headerlink" title="每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱"></a>每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Redis Lua脚本原子性与Pipeline批量操作的陷阱</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Redis Lua 脚本与 Pipeline 是两种性能优化手段，但原子性边界截然不同。</p>
+<p><strong>Lua 脚本</strong>：Redis 通过 <code>EVAL</code>&#x2F;<code>EVALSHA</code> 加载 Lua 5.1 脚本，在 Redis 主线程中<strong>原子性执行</strong>（Atomic Execution）。整个脚本作为一个不可分割的单元运行，期间不会插入其他客户端命令，等效于单命令的隔离级别（Read Committed）。其本质是<strong>服务端逻辑封装</strong>，将多次网络往返合并为一次，同时保证中间状态对并发客户端不可见。</p>
+<p><strong>Pipeline</strong>：客户端将多个命令打包为一次 TCP 发送（批量传输），服务端顺序执行后批量返回结果。Pipeline <strong>仅优化网络 RTT</strong>，不保证原子性；执行过程中其他客户端命令可插入，形成交错执行（Interleaving）。</p>
+<p>掌握此知识点是构建高并发分布式系统的基础：Lua 用于实现复杂原子操作（如库存扣减、分布式锁续期），Pipeline 用于批量数据同步或缓存预热；混淆两者边界将导致并发数据不一致。对于前端工程师，可类比为：Lua 类似 JavaScript 的 <code>Atomics.wait()</code> 提供的临界区语义，而 Pipeline 类似浏览器同时发送多个 HTTP 请求（可能交错响应）。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><h3 id="Lua-原子性实现机制"><a href="#Lua-原子性实现机制" class="headerlink" title="Lua 原子性实现机制"></a>Lua 原子性实现机制</h3><p>Redis 采用单线程事件循环处理命令。当执行 <code>EVAL</code> 时：</p>
+<ol>
+<li>服务器加载脚本到 Lua 虚拟机（<code>luaL_loadbuffer</code>），生成 SHA1 摘要缓存（<code>EVALSHA</code> 复用）。</li>
+<li>执行期间，Redis 阻塞所有其他命令处理（包括其他客户端的 Pipeline 或单命令），直到脚本返回或超时（<code>lua-time-limit</code>）。</li>
+<li>脚本内部错误不会回滚已执行的写操作（无事务回滚机制），需通过 <code>redis.error_reply()</code> 或手动补偿处理。</li>
+</ol>
+<p>关键约束：</p>
+<ul>
+<li><strong>无全局锁</strong>：原子性由单线程串行化保证，非悲观锁。</li>
+<li><strong>禁止长时间运行</strong>：脚本超时会导致 Redis 阻塞，触发 <code>BUSY</code> 错误。</li>
+</ul>
+<h3 id="Pipeline-执行模型"><a href="#Pipeline-执行模型" class="headerlink" title="Pipeline 执行模型"></a>Pipeline 执行模型</h3><p>Pipeline 是客户端层面的批量优化：</p>
+<ol>
+<li>客户端将 N 个命令（如 <code>SET</code>, <code>GET</code>, <code>INCR</code>）序列化为 RESP 协议数据包，一次性写入 Socket 缓冲区。</li>
+<li>服务端按序解析执行，但<strong>每执行完一个命令即释放 CPU</strong>，允许处理其他客户端请求。</li>
+<li>结果按顺序返回，客户端通过回调匹配（类似 HTTP&#x2F;1.1 Pipelining，但 Redis 支持全双工）。</li>
+</ol>
+<p>与前端 <code>Promise.all</code> 的本质区别：<code>Promise.all</code> 并发发送请求，服务端并行处理；Redis Pipeline 串行执行但网络往返合并。</p>
+<h3 id="原子性对比矩阵"><a href="#原子性对比矩阵" class="headerlink" title="原子性对比矩阵"></a>原子性对比矩阵</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Lua 脚本</th>
+<th>Pipeline</th>
+<th>MULTI&#x2F;EXEC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原子性</td>
+<td>强（脚本内）</td>
+<td>无（命令间可交错）</td>
+<td>弱（命令打包，但 EXEC 前可能失败）</td>
+</tr>
+<tr>
+<td>隔离性</td>
+<td>串行化（Serialized）</td>
+<td>读已提交（Read Committed）</td>
+<td>读已提交</td>
+</tr>
+<tr>
+<td>网络开销</td>
+<td>1 RTT</td>
+<td>1 RTT</td>
+<td>1 RTT</td>
+</tr>
+<tr>
+<td>回滚能力</td>
+<td>无（错误中断）</td>
+<td>无</td>
+<td>无（但可 <code>DISCARD</code>）</td>
+</tr>
+</tbody></table>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">// 场景：库存扣减（需原子性）</span><br><span class="line">// 错误方式：Pipeline 导致竞态条件</span><br><span class="line">const pipeline = redis.pipeline();</span><br><span class="line">const stock = await redis.get(&#x27;stock&#x27;); // 读取当前值</span><br><span class="line">if (stock &gt; 0) &#123;</span><br><span class="line">  // 危险：此处若其他客户端修改 stock，将超卖</span><br><span class="line">  pipeline.decr(&#x27;stock&#x27;); // 客户端逻辑与服务端状态分离</span><br><span class="line">  await pipeline.exec(); // 执行时 stock 可能已被其他连接修改</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 正确方式：Lua 脚本原子执行</span><br><span class="line">const luaScript = `</span><br><span class="line">  local current = tonumber(redis.call(&#x27;GET&#x27;, KEYS[1]))</span><br><span class="line">  if current &gt; 0 then</span><br><span class="line">    return redis.call(&#x27;DECR&#x27;, KEYS[1]) -- 原子性递减，无竞态</span><br><span class="line">  else</span><br><span class="line">    return -1 -- 库存不足</span><br><span class="line">  end</span><br><span class="line">`;</span><br><span class="line">// EVAL 命令将脚本加载至服务端，执行期间阻塞其他命令</span><br><span class="line">const result = await redis.eval(luaScript, 1, &#x27;stock&#x27;);</span><br><span class="line"></span><br><span class="line">// Pipeline 正确用法：批量独立操作（无因果依赖）</span><br><span class="line">const keys = [&#x27;k1&#x27;, &#x27;k2&#x27;, &#x27;k3&#x27;];</span><br><span class="line">const pipe = redis.pipeline();</span><br><span class="line">keys.forEach(k =&gt; pipe.set(k, Date.now())); // 仅减少 RTT，不保证互斥</span><br><span class="line">await pipe.exec(); // 执行期间其他客户端可写入相同 key</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p><strong>误区 1：Pipeline 隐含原子性</strong><br>工程师常误以为将多个命令放入 Pipeline 即形成事务。实际上 Pipeline 只是网络层批处理，命令间可被其他客户端插入。例如扣库存时，Pipeline 中的 <code>GET</code> 和 <code>DECR</code> 之间若有其他请求扣减库存，将导致超卖。正确方案是 Lua 脚本或 <code>WATCH</code>&#x2F;<code>MULTI</code> 乐观锁。</p>
+<p><strong>误区 2：Lua 脚本支持回滚</strong><br>Lua 脚本执行出错（如类型错误）时，已执行的写操作<strong>不会回滚</strong>，仅终止脚本执行。这与传统数据库事务截然不同。例如脚本先 <code>SET</code> 后出错，数据已变更。必须确保脚本逻辑完备，或利用 <code>redis.replicate_commands()</code> 处理复制一致性。</p>
+<p><strong>进阶思考题</strong><br>Redis 6.0 引入多线程 IO（<code>io-threads</code>）提升网络吞吐量，但 Lua 脚本原子性是否受影响？</p>
+<ul>
+<li>提示：多线程仅用于 Socket 读写与协议解析，命令执行仍在主线程串行处理。思考这种设计如何平衡高并发网络与原子性保证，以及与 V8 引擎（JS 单线程 + Worker 多线程）的架构异同。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/26/foundation/2026-10-26-foundation-redis-lua-atomicity-pipeline/">https://litongjin.github.io/2026/10/26/foundation/2026-10-26-foundation-redis-lua-atomicity-pipeline/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/26/foundation/2026-10-26-foundation-css-scroll-snap-alignment/" title="每日基础技术总结 · 2026-10-26 · CSS Scroll Snapping 机制：滚动容器、项目对齐与惯性滚动交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-10-26 · CSS Scroll Snapping 机制：滚动容器、项目对齐与惯性滚动交互</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/25/daily/2026-10-25-workbench-daily/" title="工作台日报 · 2026-10-25"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-10-25</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/03/foundation/2024-01-03-foundation-zookeeper-zab-epoch/" title="每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-03</div><div class="title">每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制</div></div></a></div><div><a href="/2024/02/05/foundation/2024-02-05-foundation-consistent-hashing-virtual-nodes/" title="每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-05</div><div class="title">每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点</div></div></a></div><div><a href="/2024/03/04/foundation/2024-03-04-foundation-rocketmq-half-message-op-message/" title="每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-04</div><div class="title">每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message</div></div></a></div><div><a href="/2024/06/23/foundation/2024-06-23-foundation-http-2-hpack/" title="每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-23</div><div class="title">每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新</div></div></a></div><div><a href="/2024/08/14/foundation/2024-08-14-foundation-mysql-redo-log-binlog/" title="每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-14</div><div class="title">每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交</div></div></a></div><div><a href="/2024/08/16/foundation/2024-08-16-foundation-innodb-buffer-pool-lru/" title="每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-16</div><div class="title">每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">764</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">93</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-26-%C2%B7-Redis-Lua%E8%84%9A%E6%9C%AC%E5%8E%9F%E5%AD%90%E6%80%A7%E4%B8%8EPipeline%E6%89%B9%E9%87%8F%E6%93%8D%E4%BD%9C%E7%9A%84%E9%99%B7%E9%98%B1"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lua-%E5%8E%9F%E5%AD%90%E6%80%A7%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6"><span class="toc-number">1.1.3.</span> <span class="toc-text">Lua 原子性实现机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Pipeline-%E6%89%A7%E8%A1%8C%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.4.</span> <span class="toc-text">Pipeline 执行模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E5%AD%90%E6%80%A7%E5%AF%B9%E6%AF%94%E7%9F%A9%E9%98%B5"><span class="toc-number">1.1.5.</span> <span class="toc-text">原子性对比矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.6.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.7.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/26/daily/2026-10-26-workbench-daily/" title="工作台日报 · 2026-10-26">工作台日报 · 2026-10-26</a><time datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/26/foundation/2026-10-26-foundation-ingress-vs-service-mesh-sidecar/" title="每日基础技术总结 · 2026-10-26 · Kubernetes Ingress Controller与Service Mesh Sidecar在流量治理上的层级区别">每日基础技术总结 · 2026-10-26 · Kubernetes Ingress Controller与Service Mesh Sidecar在流量治理上的层级区别</a><time datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/26/foundation/2026-10-26-foundation-css-scroll-snap-alignment/" title="每日基础技术总结 · 2026-10-26 · CSS Scroll Snapping 机制：滚动容器、项目对齐与惯性滚动交互">每日基础技术总结 · 2026-10-26 · CSS Scroll Snapping 机制：滚动容器、项目对齐与惯性滚动交互</a><time datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/26/foundation/2026-10-26-foundation-redis-lua-atomicity-pipeline/" title="每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱">每日基础技术总结 · 2026-10-26 · Redis Lua脚本原子性与Pipeline批量操作的陷阱</a><time datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/25/daily/2026-10-25-workbench-daily/" title="工作台日报 · 2026-10-25">工作台日报 · 2026-10-25</a><time datetime="2026-10-24T23:02:50.000Z" title="发表于 2026-10-25 07:02:50">2026-10-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/25/foundation/2026-10-25-foundation-mysql-binlog-format-consistency/" title="每日基础技术总结 · 2026-10-25 · MySQL Binlog三种模式（Statement/Row/Mixed）的数据一致性差异">每日基础技术总结 · 2026-10-25 · MySQL Binlog三种模式（Statement/Row/Mixed）的数据一致性差异</a><time datetime="2026-10-24T23:02:50.000Z" title="发表于 2026-10-25 07:02:50">2026-10-25</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
