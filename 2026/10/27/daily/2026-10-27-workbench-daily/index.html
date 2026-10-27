@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>工作台日报 · 2026-10-27 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="工作台日报 · 2026-10-27🔥 行业热点 Concerning behavior from a popular open-weight AI model — Hacker News 📌 内容：围绕某流行开源权重模型出现的令人担忧行为展开讨论，通常指向模型在特定提示下的异常输出或对齐失效。 💡 学习：可借此了解开源模型的红队测试与行为边界评估方法，思考部署前该加哪些安全护栏。 🧭 拓">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工作台日报 · 2026-10-27">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/27/daily/2026-10-27-workbench-daily/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="工作台日报 · 2026-10-27🔥 行业热点 Concerning behavior from a popular open-weight AI model — Hacker News 📌 内容：围绕某流行开源权重模型出现的令人担忧行为展开讨论，通常指向模型在特定提示下的异常输出或对齐失效。 💡 学习：可借此了解开源模型的红队测试与行为边界评估方法，思考部署前该加哪些安全护栏。 🧭 拓">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-27T03:29:41.000Z">
+<meta property="article:modified_time" content="2026-10-27T03:41:53.827Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="日报">
+<meta property="article:tag" content="前端">
+<meta property="article:tag" content="AI安全">
+<meta property="article:tag" content="大模型">
+<meta property="article:tag" content="Web开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/27/daily/2026-10-27-workbench-daily/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '工作台日报 · 2026-10-27',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-27 11:41:53'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">768</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">94</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">工作台日报 · 2026-10-27</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-27T03:29:41.000Z" title="发表于 2026-10-27 11:29:41">2026-10-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-27T03:41:53.827Z" title="更新于 2026-10-27 11:41:53">2026-10-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/">工作日记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="工作台日报 · 2026-10-27"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="工作台日报-·-2026-10-27"><a href="#工作台日报-·-2026-10-27" class="headerlink" title="工作台日报 · 2026-10-27"></a>工作台日报 · 2026-10-27</h1><h2 id="🔥-行业热点"><a href="#🔥-行业热点" class="headerlink" title="🔥 行业热点"></a>🔥 行业热点</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model">Concerning behavior from a popular open-weight AI model</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：围绕某流行开源权重模型出现的令人担忧行为展开讨论，通常指向模型在特定提示下的异常输出或对齐失效。</li>
+<li>💡 <strong>学习</strong>：可借此了解开源模型的红队测试与行为边界评估方法，思考部署前该加哪些安全护栏。</li>
+<li>🧭 <strong>拓展</strong>：用公开权重模型在本地复现相关提示，比较不同推理框架与采样参数下的输出差异。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://blog.cloudflare.com/kv-cache-exposure-remediation/">Cross-request KV cache exposure in the GLM-5.3 Workers AI model (155 responses)</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：指出某托管推理服务中 KV 缓存可能跨请求暴露，属于长上下文推理优化引入的新一类安全与隐私风险。</li>
+<li>💡 <strong>学习</strong>：理解 KV 缓存复用&#x2F;前缀缓存机制，以及多租户推理服务中隔离与隐私边界的工程取舍。</li>
+<li>🧭 <strong>拓展</strong>：在自建 vLLM&#x2F;SGLang 服务上检查 prefix caching 的租户隔离配置，构造并发请求验证是否会串数据。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://magazine.sebastianraschka.com/p/building-reasoning-models">Sebastian Raschka’s from-scratch video course on building reasoning models</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：一套从零动手构建推理模型的视频课程，覆盖训练流程与推理链等核心环节。</li>
+<li>💡 <strong>学习</strong>：可跟着课程实现小型推理模型，理解让模型“会思考”的训练与后训练工程路径。</li>
+<li>🧭 <strong>拓展</strong>：用课程代码在单卡上跑通小规模实验，对比不同训练&#x2F;数据策略对推理表现的影响。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://openai.com/index/building-scientific-understanding-with-academic-communities/">Three new discoveries in mathematics, computer science, and physics</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：汇总数学、计算机科学与物理领域的三项新发现，通常包含可复用的方法与证明思路。</li>
+<li>💡 <strong>学习</strong>：关注这些结果背后的新方法，思考能否迁移到算法设计与工程问题中。</li>
+<li>🧭 <strong>拓展</strong>：找到原始论文阅读证明细节，用复现或社区讨论来验证结论可靠性。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://openai.com/index/introducing-gpt-6-1-terra/">GPT-6.1 Terra</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：关于新版本大模型发布的讨论，一般涉及能力提升、上下文长度与接口变化等方向。</li>
+<li>💡 <strong>学习</strong>：关注新模型的 API 变更与能力边界，评估在自身业务中替换或并用的成本。</li>
+<li>🧭 <strong>拓展</strong>：搭建自有评测集，对旧版与新版模型做同题 A&#x2F;B 对比。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://css-tricks.com/css-tricks-has-a-new-owner/">CSS-Tricks has a new owner</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：知名前端博客 CSS-Tricks 易主，反映独立技术媒体与内容站点的经营与传承变化。</li>
+<li>💡 <strong>学习</strong>：关注前端社区内容生态的迁移，思考技术写作与知识沉淀如何长期可持续。</li>
+<li>🧭 <strong>拓展</strong>：观察该站后续内容与作者变动，评估其他前端学习资源的替代性。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/paper.pdf">The Exponential Time Hypothesis Is False [pdf]</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：一篇声称否证指数时间假设的论文，若成立将影响复杂性理论对算法下界的既有认知。</li>
+<li>💡 <strong>学习</strong>：了解 ETH 在算法下界与参数化复杂性中的作用，学习如何审阅此类重大声明的证明结构。</li>
+<li>🧭 <strong>拓展</strong>：精读论文并查证已知反例与社区质疑，通过同行讨论判断证明是否成立。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://brennenputh.me/blog/printable-websites/">Websites Should Be Printable</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：呼吁网站重新重视打印样式，让网页内容可被打印、归档与离线保存。</li>
+<li>💡 <strong>学习</strong>：复习 print 媒体查询、分页控制与适合归档的排版与无障碍技巧。</li>
+<li>🧭 <strong>拓展</strong>：给自己常访问的页面写一段 @media print 样式，用浏览器打印预览对比效果。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/notaroomba/keybytes">Show HN: A Truly Modular Keyboard</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：一个真正模块化的键盘项目，允许按需组合按键与功能模块。</li>
+<li>💡 <strong>学习</strong>：了解开源硬件中的模块化设计思路、固件方案与可维护性权衡。</li>
+<li>🧭 <strong>拓展</strong>：查看其硬件设计与固件仓库，评估自行复刻或改造的可行性。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://pharo.org/news/2026-10-26-Pharo14Release.html">Pharo 14</a> — <em>Hacker News</em><ul>
+<li>📌 <strong>内容</strong>：Smalltalk 系语言与环境 Pharo 发布新版本，带来工具链与运行时的改进。</li>
+<li>💡 <strong>学习</strong>：了解 Smalltalk 式活对象编程与镜像开发模式，对交互式调试和快速迭代有启发。</li>
+<li>🧭 <strong>拓展</strong>：下载 Pharo 14 镜像，试着在运行中的系统里实时修改并调试一段代码。</li>
+</ul>
+</li>
+</ul>
+<h2 id="🌟-GitHub-热门开源项目"><a href="#🌟-GitHub-热门开源项目" class="headerlink" title="🌟 GitHub 热门开源项目"></a>🌟 GitHub 热门开源项目</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/HKUDS/DeepTutor">HKUDS&#x2F;DeepTutor（LLM 应用）</a> — <em>GitHub · Python · +3.8k&#x2F;周 · 总 44.1k star</em><ul>
+<li>📌 <strong>是什么</strong>：一个面向终身个性化学习的 AI 导师项目，把多智能体协作、检索增强与深度研究能力组合成能持续跟踪学习者的辅导系统，并提供命令行等交互入口。</li>
+<li>💡 <strong>学习点</strong>：可以观察一个完整 AI 应用如何把 RAG、多智能体编排与长期用户画像拼装成产品级流程，而不只是单次调用模型。</li>
+<li>🧭 <strong>上手</strong>：先跑通 README 里最简的 CLI 快速开始命令，再顺着“检索 → 规划 → 讲解生成”的调用链读一遍主流程代码。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/koala73/worldmonitor">koala73&#x2F;worldmonitor（MCP 工具）</a> — <em>GitHub · TypeScript · +2.2k&#x2F;周 · 总 89.6k star</em><ul>
+<li>📌 <strong>是什么</strong>：一个实时全球情报仪表盘，用 AI 做新闻聚合、地缘政治监测与基础设施追踪，把多源信息汇总到统一的态势界面，并对外暴露 MCP 接口。</li>
+<li>💡 <strong>学习点</strong>：学它如何把 LLM 的摘要与信息抽取能力接到实时数据流上，并用可视化界面承载 Agent 的输出。</li>
+<li>🧭 <strong>上手</strong>：先读它 MCP server 的工具定义文件，看新闻与监测数据是怎样被包装成可供 Agent 调用的工具。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/unclecode/crawl4ai">unclecode&#x2F;crawl4ai（MCP 工具）</a> — <em>GitHub · Python · +2.0k&#x2F;周 · 总 86.3k star</em><ul>
+<li>📌 <strong>是什么</strong>：面向 LLM 与 AI Agent 的开源网页抓取器，把任意网站转成干净的、可直接喂给模型的 Markdown，既可自托管也提供云端与 MCP 接入。</li>
+<li>💡 <strong>学习点</strong>：这是前端转 AI 最实用的“数据入口”技能：如何把网页内容处理成适合塞进上下文的结构化文本。</li>
+<li>🧭 <strong>上手</strong>：用 README 的快速示例抓取一个自己熟悉的网页，对比原始 HTML 与输出的 Markdown，理解它的内容清洗策略。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/hesreallyhim/awesome-claude-code">hesreallyhim&#x2F;awesome-claude-code（Agent Skills）</a> — <em>GitHub · Python · +2.0k&#x2F;周 · 总 56.6k star</em><ul>
+<li>📌 <strong>是什么</strong>：一份关于 Claude Code 的社区精选资源合集，收录命令、工作流与扩展配置等使用技巧，为社区维护而非官方出品。</li>
+<li>💡 <strong>学习点</strong>：通过别人整理好的实战清单快速建立 Agent 编码工作流的心智模型，比从零摸索省很多时间。</li>
+<li>🧭 <strong>上手</strong>：挑其中一条工作流（如代码审查或提交信息生成）在自己项目里照做一遍，感受 Agent 编码与手写代码的差异。</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/mem0ai/mem0">mem0ai&#x2F;mem0（Agent 框架）</a> — <em>GitHub · Python · +1.8k&#x2F;周 · 总 67.9k star</em><ul>
+<li>📌 <strong>是什么</strong>：为 AI Agent 和应用提供的记忆层，以可插拔方式给模型加上跨会话持久化的上下文，定位为生产可用的记忆基础设施。</li>
+<li>💡 <strong>学习点</strong>：理解长期记忆是 Agent 从“一次性问答”走向“越用越好用”的关键，并学习记忆写入、检索与更新接口的设计。</li>
+<li>🧭 <strong>上手</strong>：跑一遍基础的 add&#x2F;search 示例，把同一段对话重复存两次，观察记忆去重与检索排序的行为。</li>
+</ul>
+</li>
+</ul>
+<h2 id="🚀-技能提升点（工作总结汇总）"><a href="#🚀-技能提升点（工作总结汇总）" class="headerlink" title="🚀 技能提升点（工作总结汇总）"></a>🚀 技能提升点（工作总结汇总）</h2><h3 id="1-Vue-watch-双向同步防死循环"><a href="#1-Vue-watch-双向同步防死循环" class="headerlink" title="1. Vue watch 双向同步防死循环"></a>1. Vue watch 双向同步防死循环</h3><ul>
+<li><strong>技能点</strong>：识别并阻断「状态 A→数组→状态 B→状态 A」的回写环，掌握 watch 联动链的守卫写法，能快速定位 Maximum recursive updates exceeded。</li>
+<li><strong>坑点</strong>：两个 watch 互相唤醒：flags 变化写新数组引用 → deep watch 数组又回写 flags；即使最终值没变，新引用 + deep 也必然再次触发，递归到报错。</li>
+<li><strong>解决方案</strong>：每个方向的同步函数先算出目标值并逐项比对，相等就直接 return，不写回；回写前也先判断「当前值 !&#x3D;&#x3D; 推导值」。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">function syncSizesFromFlags() &#123;</span><br><span class="line">  const next = [leftWidth, &#x27;auto&#x27;, rightWidth]</span><br><span class="line">  if (next.every((v, i) =&gt; v === localPanelSizes.value[i])) return</span><br><span class="line">  localPanelSizes.value = next</span><br><span class="line">&#125;</span><br><span class="line">watch(localPanelSizes, (v) =&gt; &#123;</span><br><span class="line">  const folded = v[0] !== &#x27;auto&#x27;</span><br><span class="line">  if (isFilePreviewFolded.value !== folded) isFilePreviewFolded.value = folded</span><br><span class="line">&#125;, &#123; deep: true &#125;)</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：双向同步的组件优先收敛为单向数据流（props 进、emit 出），把持久化&#x2F;尺寸常量的能力放到通用组件、调用方按需开关。</li>
+<li><em>来源：admin-workspace &#x2F; 2026-08-11</em></li>
+</ul>
+<h3 id="2-点击事件冒泡与共享组件边界"><a href="#2-点击事件冒泡与共享组件边界" class="headerlink" title="2. 点击事件冒泡与共享组件边界"></a>2. 点击事件冒泡与共享组件边界</h3><ul>
+<li><strong>技能点</strong>：处理嵌套可点区域的事件冒泡问题，并判断修复该落在业务组件还是通用组件，守住公共组件的复用边界。</li>
+<li><strong>坑点</strong>：footer 里的 CopyText 点击冒泡到外层容器的 @click（展开&#x2F;收起），导致复制时误触发；若在通用 copyText.vue 里加 stopPropagation，会把业务语义污染到所有调用方。</li>
+<li><strong>解决方案</strong>：在业务组件上加 @click.stop 并传业务所需 props（如只复制 ID 而展示文案另给），通用组件回退到无 event 参数、无 stopPropagation 的中性实现。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;CopyText :text=&quot;`题目编号: $&#123;data.questionId&#125;`&quot; :copyText=&quot;data.questionId&quot; @click.stop /&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：公共组件只约定「能力」，事件是否拦截交给调用点；可在组件 props 里提供 text &#x2F; copyText 分离的通用约定。</li>
+<li><em>来源：admin-workspace-new &#x2F; 2026-08-11</em></li>
+</ul>
+<h3 id="3-组件配置契约显式化"><a href="#3-组件配置契约显式化" class="headerlink" title="3. 组件配置契约显式化"></a>3. 组件配置契约显式化</h3><ul>
+<li><strong>技能点</strong>：把「能传哪些值」做成常量 + 联合类型导出，让业务侧可自解释地配置组件，减少对内部映射表的依赖。</li>
+<li><strong>坑点</strong>：业务方不知道 :toolbar-order 支持哪些名字，公式&#x2F;填空等按钮必须额外配 customButtons 才生效，配置散落且易漏。</li>
+<li><strong>解决方案</strong>：补全默认按钮映射、内置 handler 改为无条件注册，新增 toolbarButtons.ts 导出 TOOLBAR_BUTTONS 常量与 ToolbarButtonName 联合类型，业务侧用常量声明。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export const TOOLBAR_BUTTONS = [&#x27;undo&#x27;,&#x27;redo&#x27;,&#x27;clean&#x27;,&#x27;divider&#x27;,&#x27;font&#x27;,&#x27;bold&#x27;,&#x27;image&#x27;,&#x27;fillInInsert&#x27;,&#x27;formula&#x27;] as const</span><br><span class="line">export type ToolbarButtonName = typeof TOOLBAR_BUTTONS[number]</span><br><span class="line">// 业务组件</span><br><span class="line">toolbarOrder: [B.undo, B.font, B.bold, B.divider, B.formula]</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：同类可配置组件都可沉淀一份「可用键常量 + 类型」，并考虑自动生成文档或名称校验提示。</li>
+<li><em>来源：admin-workspace-new &#x2F; 2026-08-11</em></li>
+</ul>
+<h3 id="4-删减过度设计回归最小实现"><a href="#4-删减过度设计回归最小实现" class="headerlink" title="4. 删减过度设计回归最小实现"></a>4. 删减过度设计回归最小实现</h3><ul>
+<li><strong>技能点</strong>：按需求边界做减法：砍掉尺寸记忆、持久化与双向同步，只保留拖拽&#x2F;折叠&#x2F;最小宽，并保证删除无残留引用。</li>
+<li><strong>坑点</strong>：功能是在上一次「可拖拽 + 记忆尺寸 + 双向同步」的基础上长出来的，需求收窄后遗留大量联动代码（watch、折叠标志、常量、storageKey 传参），既是死循环源头也是维护负担。</li>
+<li><strong>解决方案</strong>：逐项列出待删符号清单并确认 0 处残留引用；面板显隐改用 v-if 直接由业务开关控制，通用组件的 storageKey 能力保留但调用方不再传，lint 校验无新增错误。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 右栏显隐交给业务开关，不再用 sizes 里的 &#x27;hidden&#x27; 字符串 --&gt;</span><br><span class="line">&lt;template v-if=&quot;isAiReviewer&quot; #panel-2&gt;</span><br><span class="line">  &lt;AiReviewPanel /&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：把「按需开关」的清理流程固化成模板：删符号 → grep 残留 → lint&#x2F;tsc 基线对比 → 只报告与本次无关的存量错误。</li>
+<li><em>来源：admin-workspace &#x2F; 2026-08-11</em></li>
+</ul>
+<h3 id="5-多副本记忆引用前先校验"><a href="#5-多副本记忆引用前先校验" class="headerlink" title="5. 多副本记忆引用前先校验"></a>5. 多副本记忆引用前先校验</h3><ul>
+<li><strong>技能点</strong>：在多 clone &#x2F; 多分支工作区里安全复用历史结论：先确认目标副本的文件与分支存在，再照搬排坑方案。</li>
+<li><strong>坑点</strong>：同一项目的多个副本可能停在不同分支或 commit，部分目录&#x2F;文件只存在于某个副本；直接套用记忆里的结论会改错文件或改在旧码上。</li>
+<li><strong>解决方案</strong>：引用前确认目标副本里对应文件是否存在、所属分支是否正确；跨副本共享的只是记忆与文档，代码本身独立；先 git show &lt;部署分支&gt;:&lt;文件&gt; 对齐线上现象与本地代码。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git show master:src/page/upload/index.vue   # 先确认部署分支的真实代码</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：把「所属副本 + 分支 + 文件是否存在」写进结论条目本身，配合目录联接失效时的重建步骤，形成可自检的知识库。</li>
+<li><em>来源：admin-workspace-hr &#x2F; 2026-10-14</em></li>
+</ul>
+<h3 id="6-重构分支合并主干的正确姿势"><a href="#6-重构分支合并主干的正确姿势" class="headerlink" title="6. 重构分支合并主干的正确姿势"></a>6. 重构分支合并主干的正确姿势</h3><ul>
+<li><strong>技能点</strong>：合并主干冲突治理：判断哪些「先格式化再合并」的直觉做法会放大冲突，改用主干基线上重做语义成果。</li>
+<li><strong>坑点</strong>：先把主干也全量 prettier 再 merge（镜像分支法），合并 base 是未格式化版本，两侧行布局错位，把「仅我方改」的文件变成「双方都改」，冲突量激增。</li>
+<li><strong>解决方案</strong>：直接 git merge 主干 → 冲突处整体采纳主干版 → 统一跑格式化 → 按清单 grep 驱动地在主干基线上重做语义改动。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git merge origin/master</span><br><span class="line"># 冲突整体采纳主干版后</span><br><span class="line">git checkout --theirs &lt;冲突文件&gt; &amp;&amp; npm run format</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：把「直接 merge + 事后格式化」写进团队合并 SOP，并把冲突文件数与冲突块数作为方案取舍的量化依据。</li>
+<li><em>来源：admin-workspace-hr &#x2F; 2026-10-14</em></li>
+</ul>
+<h3 id="7-编辑落盘可靠性与顺序执行"><a href="#7-编辑落盘可靠性与顺序执行" class="headerlink" title="7. 编辑落盘可靠性与顺序执行"></a>7. 编辑落盘可靠性与顺序执行</h3><ul>
+<li><strong>技能点</strong>：保障多文件&#x2F;同文件多次改动的落盘确定性：改后复核磁盘内容，同文件的多个编辑逐条顺序执行。</li>
+<li><strong>坑点</strong>：会话切换后磁盘可能是旧版本，之前的 edit 实际未落盘；同一文件的并行编辑基于同一快照会互相覆盖。</li>
+<li><strong>解决方案</strong>：改完立即复核关键文件的实际内容，必要时重新应用；同一文件的多处修改拆成顺序步骤逐条执行，改动前先 grep 全引用建影响清单。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -rn &quot;syncSizesFromFlags\|isFilePreviewFolded&quot; src/   # 确认 0 处残留引用</span><br></pre></td></tr></table></figure></li>
+<li><strong>拓展</strong>：把「编辑—复核—lint」作为收尾固定动作，重要改动附带命中数断言脚本验证。</li>
+<li><em>来源：admin-workspace-new &#x2F; 2026-08-11</em></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/27/daily/2026-10-27-workbench-daily/">https://litongjin.github.io/2026/10/27/daily/2026-10-27-workbench-daily/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%97%A5%E6%8A%A5/">日报</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF/">前端</a><a class="post-meta__tags" href="/tags/AI%E5%AE%89%E5%85%A8/">AI安全</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a><a class="post-meta__tags" href="/tags/Web%E5%BC%80%E5%8F%91/">Web开发</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/27/foundation/2026-10-27-foundation-tcp-timestamps-paws-rtt/" title="每日基础技术总结 · 2026-10-27 · TCP Timestamps选项在测量RTT与保护PAWS序列号回绕中的作用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-10-27 · TCP Timestamps选项在测量RTT与保护PAWS序列号回绕中的作用</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/27/foundation/2026-10-27-foundation-saga-pattern-compensation/" title="每日基础技术总结 · 2026-10-27 · 分布式事务Saga模式的最终一致性补偿机制设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-10-27 · 分布式事务Saga模式的最终一致性补偿机制设计</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/08/21/daily/2026-08-21-workbench-daily/" title="工作台日报 · 2026-08-21"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-21</div><div class="title">工作台日报 · 2026-08-21</div></div></a></div><div><a href="/2026/09/02/daily/2026-09-02-workbench-daily/" title="工作台日报 · 2026-09-02"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-02</div><div class="title">工作台日报 · 2026-09-02</div></div></a></div><div><a href="/2026/09/10/daily/2026-09-10-workbench-daily/" title="工作台日报 · 2026-09-10"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-10</div><div class="title">工作台日报 · 2026-09-10</div></div></a></div><div><a href="/2026/09/14/daily/2026-09-14-workbench-daily/" title="工作台日报 · 2026-09-14"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-14</div><div class="title">工作台日报 · 2026-09-14</div></div></a></div><div><a href="/2026/10/05/daily/2026-10-05-workbench-daily/" title="工作台日报 · 2026-10-05"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-05</div><div class="title">工作台日报 · 2026-10-05</div></div></a></div><div><a href="/2026/08/25/daily/2026-08-25-workbench-daily/" title="工作台日报 · 2026-08-25"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-25</div><div class="title">工作台日报 · 2026-08-25</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">768</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">94</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8F%B0%E6%97%A5%E6%8A%A5-%C2%B7-2026-10-27"><span class="toc-number">1.</span> <span class="toc-text">工作台日报 · 2026-10-27</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%A5-%E8%A1%8C%E4%B8%9A%E7%83%AD%E7%82%B9"><span class="toc-number">1.1.</span> <span class="toc-text">🔥 行业热点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%8C%9F-GitHub-%E7%83%AD%E9%97%A8%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE"><span class="toc-number">1.2.</span> <span class="toc-text">🌟 GitHub 热门开源项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%9A%80-%E6%8A%80%E8%83%BD%E6%8F%90%E5%8D%87%E7%82%B9%EF%BC%88%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93%E6%B1%87%E6%80%BB%EF%BC%89"><span class="toc-number">1.3.</span> <span class="toc-text">🚀 技能提升点（工作总结汇总）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Vue-watch-%E5%8F%8C%E5%90%91%E5%90%8C%E6%AD%A5%E9%98%B2%E6%AD%BB%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. Vue watch 双向同步防死循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1%E4%B8%8E%E5%85%B1%E4%BA%AB%E7%BB%84%E4%BB%B6%E8%BE%B9%E7%95%8C"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. 点击事件冒泡与共享组件边界</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%BB%84%E4%BB%B6%E9%85%8D%E7%BD%AE%E5%A5%91%E7%BA%A6%E6%98%BE%E5%BC%8F%E5%8C%96"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. 组件配置契约显式化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%88%A0%E5%87%8F%E8%BF%87%E5%BA%A6%E8%AE%BE%E8%AE%A1%E5%9B%9E%E5%BD%92%E6%9C%80%E5%B0%8F%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.4.</span> <span class="toc-text">4. 删减过度设计回归最小实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%A4%9A%E5%89%AF%E6%9C%AC%E8%AE%B0%E5%BF%86%E5%BC%95%E7%94%A8%E5%89%8D%E5%85%88%E6%A0%A1%E9%AA%8C"><span class="toc-number">1.3.5.</span> <span class="toc-text">5. 多副本记忆引用前先校验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E9%87%8D%E6%9E%84%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E4%B8%BB%E5%B9%B2%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF"><span class="toc-number">1.3.6.</span> <span class="toc-text">6. 重构分支合并主干的正确姿势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E7%BC%96%E8%BE%91%E8%90%BD%E7%9B%98%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%B8%8E%E9%A1%BA%E5%BA%8F%E6%89%A7%E8%A1%8C"><span class="toc-number">1.3.7.</span> <span class="toc-text">7. 编辑落盘可靠性与顺序执行</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/27/foundation/2026-10-27-foundation-js-number-bigint-ieee754/" title="每日基础技术总结 · 2026-10-27 · JavaScript BigInt 与 Number 的精度边界：IEEE 754 双精度浮点数陷阱">每日基础技术总结 · 2026-10-27 · JavaScript BigInt 与 Number 的精度边界：IEEE 754 双精度浮点数陷阱</a><time datetime="2026-10-27T03:29:41.000Z" title="发表于 2026-10-27 11:29:41">2026-10-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/27/foundation/2026-10-27-foundation-tcp-timestamps-paws-rtt/" title="每日基础技术总结 · 2026-10-27 · TCP Timestamps选项在测量RTT与保护PAWS序列号回绕中的作用">每日基础技术总结 · 2026-10-27 · TCP Timestamps选项在测量RTT与保护PAWS序列号回绕中的作用</a><time datetime="2026-10-27T03:29:41.000Z" title="发表于 2026-10-27 11:29:41">2026-10-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/27/daily/2026-10-27-workbench-daily/" title="工作台日报 · 2026-10-27">工作台日报 · 2026-10-27</a><time datetime="2026-10-27T03:29:41.000Z" title="发表于 2026-10-27 11:29:41">2026-10-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/27/foundation/2026-10-27-foundation-saga-pattern-compensation/" title="每日基础技术总结 · 2026-10-27 · 分布式事务Saga模式的最终一致性补偿机制设计">每日基础技术总结 · 2026-10-27 · 分布式事务Saga模式的最终一致性补偿机制设计</a><time datetime="2026-10-27T03:29:41.000Z" title="发表于 2026-10-27 11:29:41">2026-10-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/26/daily/2026-10-26-workbench-daily/" title="工作台日报 · 2026-10-26">工作台日报 · 2026-10-26</a><time datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/26/foundation/2026-10-26-foundation-ingress-vs-service-mesh-sidecar/" title="每日基础技术总结 · 2026-10-26 · Kubernetes Ingress Controller与Service Mesh Sidecar在流量治理上的层级区别">每日基础技术总结 · 2026-10-26 · Kubernetes Ingress Controller与Service Mesh Sidecar在流量治理上的层级区别</a><time datetime="2026-10-25T23:01:07.000Z" title="发表于 2026-10-26 07:01:07">2026-10-26</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
