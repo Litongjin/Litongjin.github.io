@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法📚 今日主题 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法（网络基础）  1. 核心概念速览1. 核心概念速览探针（Probe）：负载均衡器、网关或服务网格控制面对上游端点（endpoint，通常是 ip:port 或 pod）周">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法📚 今日主题 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法（网络基础）  1. 核心概念速览1. 核心概念速览探针（Probe）：负载均衡器、网关或服务网格控制面对上游端点（endpoint，通常是 ip:port 或 pod）周">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-30T23:01:34.000Z">
+<meta property="article:modified_time" content="2026-10-30T23:08:18.346Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="网络基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-31 07:08:18'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">784</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">97</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-30T23:08:18.346Z" title="更新于 2026-10-31 07:08:18">2026-10-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-31-·-负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法"><a href="#每日基础技术总结-·-2026-10-31-·-负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法" class="headerlink" title="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法"></a>每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</strong>（网络基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><h3 id="1-核心概念速览-1"><a href="#1-核心概念速览-1" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p><strong>探针（Probe）</strong>：负载均衡器、网关或服务网格控制面对上游端点（endpoint，通常是 ip:port 或 pod）周期性发起的可用性<strong>采样</strong>，结果是离散信号（TCP connect 成功、HTTP 2xx、gRPC SERVING、响应延迟超阈）。被动探测（outlier detection）以真实业务请求的失败统计作为采样源，二者共享同一状态机与调度器。</p>
+<p><strong>本质</strong>：端点真实状态 s(t) ∈ {servable, degraded, dead} 不可直接观测；探针用有限频率、带噪声的采样序列 r1..rn，把它映射为转发决策 d(t) ∈ {in-pool, ejected}。所以它的构成是：<strong>带滞回的双阈值状态机 + 定时调度器 + 相位随机化</strong>，位于控制平面到数据平面状态同步链路的最前端，也直接影响数据平面容量。</p>
+<p><strong>失败重试策略</strong>：不是“失败就重试一次”，而是三个维度的参数组合。</p>
+<ul>
+<li>判定维度：什么算失败——超时、connect refused、HTTP 5xx、自定义 matcher、TLS 握手失败、半开连接。</li>
+<li>计数维度：连续失败阈值 N_fail、连续成功阈值 N_ok，两者共同构成滞回（hysteresis）。</li>
+<li>时间维度：interval、timeout、退避 base&#x2F;cap，决定故障检测延迟 T_detect 与误摘除率 FPR 的取舍。</li>
+</ul>
+<p><strong>抖动消除（Jitter）</strong>：在调度时刻和退避时长上注入随机量，切断多个独立探针之间的<strong>时间相关性</strong>。它解决的根本问题是<strong>同步</strong>，而非“负载高”：同批部署、同一 interval、同一启动时刻会让探测在同一个 tick 叠加成脉冲（probe storm）；同时会与外部周期行为发生锁相（phase locking，如 GC 停顿、cron、缓存 TTL 过期潮、证书&#x2F;配置热轮换）。</p>
+<p><strong>为什么必须掌握</strong>：健康检查是少数能同时制造<strong>可用性事故</strong>与<strong>容量事故</strong>的配置面——阈值过松，流量继续打到死节点；阈值过紧且没有 jitter，会导致 flapping（节点反复进出池、连接被反复 RST、重试放大），而探测流量本身会消耗 conntrack、TLS 握手预算和事件循环时间片。这套语义在 K8s readinessProbe（failureThreshold&#x2F;periodSeconds&#x2F;timeoutSeconds&#x2F;successThreshold）、Envoy outlier_detection（consecutive_5xx&#x2F;interval&#x2F;base_ejection_time）、Nginx（max_fails&#x2F;fail_timeout）、LVS keepalived 中命名不同，但结构同构。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><h3 id="2-底层原理剖析-1"><a href="#2-底层原理剖析-1" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p><strong>A. 状态机：双阈值等于施密特触发器</strong></p>
+<pre><code>state ∈ {HEALTHY, UNHEALTHY}
+on_result(ok):
+  if ok:
+    fail = 0; succ += 1
+    if state == UNHEALTHY and succ &gt;= N_ok:
+      state = HEALTHY; succ = 0; backoff_exp = 0
+  else:
+    succ = 0; fail += 1
+    if state == HEALTHY and fail &gt;= N_fail:
+      state = UNHEALTHY; fail = 0; backoff_exp = 0
+</code></pre>
+<p>上升沿与下降沿使用不同阈值，形成滞回带，这是抑制状态抖动的唯一根本机制。与前端 debounce 的差异在于：debounce 按<strong>时间窗</strong>合并，这里按<strong>计数</strong>合并；在固定频率采样下二者近似等价，但在变频率采样（退避后）下，计数法才是稳定的，因为它对采样间隔不敏感。</p>
+<p><strong>B. 时间维度：坚持 fixed-delay 加单飞，禁止 fixed-rate</strong></p>
+<p>调度基准是 <code>next_at = t_complete + delay</code>，而不是 <code>t_scheduled + interval</code>。用 setInterval 语义（fixed-rate）会带来两个问题：</p>
+<ol>
+<li><strong>探测堆积（probe pileup）</strong>：当 timeout ≥ interval 时，上一轮未返回的结果还没回来，下一轮探测已经发出，并发探测数随故障时长线性增长，形成自 DDoS。必须用 in-flight 标志做单飞（single-flight）。</li>
+<li><strong>乱序覆盖（stale overwrite）</strong>：堆积后结果乱序到达，旧的成功结果可能覆盖新的失败结果。必须给每次探测打代数戳（generation&#x2F;epoch），丢弃 gen 不匹配的回包。</li>
+</ol>
+<p>检测延迟上界：</p>
+<pre><code>T_detect ≈ (N_fail - 1) * interval + timeout + jitter_max
+</code></pre>
+<p>这是 SLA 里“故障发现时间”指标的唯一可推导来源。</p>
+<p><strong>C. 概率视角：N_fail 的指数压制与相关性陷阱</strong></p>
+<p>独立假设下，单次探测失败概率 p，连续 N 次失败概率为 p^N，单位时间窗口数约为 T&#x2F;interval，误摘除期望次数近似为：</p>
+<pre><code>E ≈ (T / interval) * p^N
+</code></pre>
+<p>举例：p&#x3D;1%、N_fail&#x3D;3、interval&#x3D;2s、T&#x3D;24h，则窗口数 43200，E ≈ 0.043（至少发生一次的概率 ≈ 4.2%）。看似 1e-6 可以忽略，但探测<strong>基数</strong>把它放大到可感知量级。</p>
+<p>更关键的是，独立性假设在真实系统中并不成立：同机房、同宿主机、同一次 stop-the-world GC、同一次内核软中断打满，会让 p 高度相关，使 p^N 成为<strong>乐观下界</strong>。所以工程上必须配合：按 zone&#x2F;locality 分组摘除、设置 max_ejection_percent（Envoy 默认 10%）、设置 panic threshold，让摘除动作本身不会造成容量雪崩。</p>
+<p><strong>D. Jitter 的三个层次（必须同时具备）</strong></p>
+<ol>
+<li><strong>相位抖动（phase spread）</strong>：首次 <code>next_at = t0 + U(0, interval)</code>。作用：拆散同时启动的同批探针，直接消灭 thundering herd。</li>
+<li><strong>周期抖动（interval jitter）</strong>：<code>delay = interval * (1 - r * U(0,1))</code>，r ∈ [0,1]（Envoy 的 interval_jitter 用百分比表达）。作用：打破与外部周期行为的锁相，避免周期性地在同一相位采样到同一类瞬时错误。</li>
+<li><strong>退避抖动（backoff jitter）</strong>：对 UNHEALTHY 端点使用 <code>delay = U(0, min(cap, base * 2^k))</code>（full jitter）。作用：不对已知故障端点持续高频探测；同时避免所有故障端点在恢复窗口<strong>同一时刻</strong>被重新探测、同一时刻被重新放量（recovery storm）。变体有 equal jitter（<code>half + U(0, half)</code>）与 decorrelated jitter（<code>min(cap, U(base, prev*3))</code>），full jitter 的期望是 cap&#x2F;2，方差最大、去相关效果最强。</li>
+</ol>
+<p><strong>E. 与前端已有概念的映射与差异</strong></p>
+<ul>
+<li><strong>setTimeout 的 fixed-delay 语义 vs setInterval</strong>：前端定时器受事件循环阻塞，永不保证准时；探针调度同样不能假设准时，所以必须用「下一次绝对时间戳」推进，而不是“累加 interval”，否则漂移会累积成相位偏移。</li>
+<li><strong>debounce&#x2F;throttle vs jitter</strong>：二者都作用于时间轴，但目标相反——debounce 是<strong>收敛</strong>（时间窗内合并调用、降低频次），jitter 是<strong>发散</strong>（把确定性相位概率化、降低并发相关）。用 debounce 解决探测风暴是错的：它只减少次数，不改变“所有端点仍在同一相位”的事实。</li>
+<li><strong>WebSocket 心跳重连 &#x2F; fetch 重试库的 backoff</strong>：与探针退避同构，浏览器端的重连风暴和生产环境的 probe storm 是同一类问题（同步 + 无上限重试）。</li>
+<li><strong>K8s readinessProbe</strong>：<code>periodSeconds / timeoutSeconds / failureThreshold / successThreshold</code> 与本模型的参数一一对应，但没有原生 jitter 字段（只有 initialDelaySeconds），多副本同批启动时相位天然对齐，需要自行在应用侧或通过 startupProbe 错峰。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">### 3. 基础代码与实战验证</span><br><span class="line"></span><br><span class="line">纯标准库 Python，用事件驱动（堆 + 虚拟时钟）模拟，避免 sleep 导致不可复现：</span><br><span class="line"></span><br><span class="line">    import heapq, random</span><br><span class="line"></span><br><span class="line">    HEALTHY, UNHEALTHY = 0, 1</span><br><span class="line"></span><br><span class="line">    class ProbeState:</span><br><span class="line">        def __init__(self, iid, cfg, rng, t0):</span><br><span class="line">            self.iid = iid</span><br><span class="line">            self.cfg = cfg</span><br><span class="line">            self.rng = rng</span><br><span class="line">            self.state = HEALTHY</span><br><span class="line">            self.fail = 0                                  # 连续失败计数（滞回的下行沿）</span><br><span class="line">            self.succ = 0                                  # 连续成功计数（滞回的上行沿）</span><br><span class="line">            self.exp = 0                                   # 指数退避的幂次</span><br><span class="line">            self.gen = 0                                   # 代数戳：用于丢弃过期探测结果</span><br><span class="line">            self.inflight = False                          # 单飞：禁止 timeout &gt; interval 时探测堆积</span><br><span class="line">            # 相位抖动：把同批启动的端点分散到 [0, interval) 内，消灭 thundering herd</span><br><span class="line">            if cfg[&#x27;phase_jitter&#x27;]:</span><br><span class="line">                self.next_at = t0 + rng.uniform(0.0, cfg[&#x27;interval&#x27;])</span><br><span class="line">            else:</span><br><span class="line">                self.next_at = t0</span><br><span class="line"></span><br><span class="line">        def _delay(self):</span><br><span class="line">            cfg, rng = self.cfg, self.rng</span><br><span class="line">            if self.state == UNHEALTHY:</span><br><span class="line">                # 指数退避 + full jitter：期望 = cap/2，方差最大，去相关最强</span><br><span class="line">                cap = min(cfg[&#x27;backoff_cap&#x27;], cfg[&#x27;backoff_base&#x27;] * (2 ** self.exp))</span><br><span class="line">                self.exp += 1</span><br><span class="line">                return rng.uniform(0.0, cap)</span><br><span class="line">            # 健康路径：周期抖动，打断与 GC / cron / TTL 过期潮的锁相</span><br><span class="line">            return cfg[&#x27;interval&#x27;] * (1.0 - cfg[&#x27;interval_jitter&#x27;] * rng.random())</span><br><span class="line"></span><br><span class="line">        def on_result(self, ok, now):</span><br><span class="line">            self.inflight = False</span><br><span class="line">            if ok:</span><br><span class="line">                self.fail = 0</span><br><span class="line">                self.succ += 1</span><br><span class="line">                if self.state == UNHEALTHY and self.succ &gt;= self.cfg[&#x27;healthy_threshold&#x27;]:</span><br><span class="line">                    self.state = HEALTHY</span><br><span class="line">                    self.succ = 0</span><br><span class="line">                    self.exp = 0                           # 恢复后退避归零，避免带着旧指数进入下一轮</span><br><span class="line">            else:</span><br><span class="line">                self.succ = 0</span><br><span class="line">                self.fail += 1</span><br><span class="line">                if self.state == HEALTHY and self.fail &gt;= self.cfg[&#x27;unhealthy_threshold&#x27;]:</span><br><span class="line">                    self.state = UNHEALTHY</span><br><span class="line">                    self.fail = 0</span><br><span class="line">                    self.exp = 0                           # 刚进 UNHEALTHY，从 base 开始退避</span><br><span class="line">            # fixed-delay：以本次完成时刻为基准推进，杜绝 fixed-rate 的漂移累积</span><br><span class="line">            self.next_at = now + self._delay()</span><br><span class="line"></span><br><span class="line">    def simulate(n=200, duration=60.0, phase_jitter=True, interval_jitter=0.2, seed=1, w=0.02):</span><br><span class="line">        rng = random.Random(seed)</span><br><span class="line">        cfg = dict(interval=1.0, unhealthy_threshold=3, healthy_threshold=2,</span><br><span class="line">                   interval_jitter=interval_jitter, backoff_base=1.0, backoff_cap=8.0,</span><br><span class="line">                   phase_jitter=phase_jitter)</span><br><span class="line">        eps = [ProbeState(i, cfg, rng, 0.0) for i in range(n)]</span><br><span class="line">        heap = [(e.next_at, e.iid) for e in eps]</span><br><span class="line">        heapq.heapify(heap)</span><br><span class="line">        buckets = &#123;&#125;</span><br><span class="line">        while heap:</span><br><span class="line">            t, iid = heapq.heappop(heap)</span><br><span class="line">            if t &gt; duration:</span><br><span class="line">                break</span><br><span class="line">            k = int(t / w)                                 # 以 w 秒为粒度统计同一时刻发起的探测数</span><br><span class="line">            buckets[k] = buckets.get(k, 0) + 1</span><br><span class="line">            e = eps[iid]</span><br><span class="line">            e.on_result(True, t)                           # 假设端点全健康，只观察调度分布</span><br><span class="line">            heapq.heappush(heap, (e.next_at, iid))</span><br><span class="line">        peak = max(buckets.values())</span><br><span class="line">        ideal = n * w / cfg[&#x27;interval&#x27;]                    # 完全均匀时的期望并发</span><br><span class="line">        print(&#x27;peak = %d, ideal = %.1f, ratio = %.1f&#x27; % (peak, ideal, peak / ideal))</span><br><span class="line"></span><br><span class="line">    simulate(phase_jitter=False, interval_jitter=0.0)      # 典型错误配置：无抖动</span><br><span class="line">    simulate(phase_jitter=True,  interval_jitter=0.2)      # 相位抖动 + 周期抖动</span><br><span class="line"></span><br><span class="line">运行结果形态：无抖动时 peak ≈ 200（全部端点固定于 t=0,1,2,... 同时发起，与理想值 4 相差约 50 倍，即典型 probe storm）；开启抖动后 peak 落到 8~12 区间，接近泊松波动下的理想值。这段代码同时验证了三件事：滞回状态机在计数维度的行为、fixed-delay 推进不产生漂移、相位抖动对瞬时并发的压制效果。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><h3 id="4-常见误区与进阶思考-1"><a href="#4-常见误区与进阶思考-1" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p><strong>误区一：把 timeout 与 interval 的关系视为无关，且不做单飞保护。</strong><br>典型配置 interval&#x3D;1s、timeout&#x3D;2s、无 in-flight 标志：故障期间并发探测数随时间线性膨胀，回包乱序后旧的成功覆盖新的失败，状态机被拖回 HEALTHY，出现“永远摘不掉”的假健康。正确做法是 <code>timeout &lt; interval</code> 作为硬性约束，并以 generation 戳丢弃过期回包——这与前端 WebSocket 重连必须做“每次连接一个 generation，重连后丢弃旧 socket 的 onmessage”完全同构。</p>
+<p><strong>误区二：只给健康路径加抖动，不给恢复路径加抖动。</strong><br>相位抖动只解决启动时的同步；端点大面积故障后（网络分区恢复、核心交换机重启、配置推送完成）进入 UNHEALTHY 的端点会同时按 <code>base*2^k</code> 退避，若退避无 jitter，它们会在同一时刻同时发恢复探测、同时被判 HEALTHY、同时被放回池中——流量瞬间切换（traffic shift）造成下游连接队列溢出，二次雪崩。必须使用 full jitter，并配合 max_ejection_percent &#x2F; panic threshold 限制单次摘除与单次恢复的比例。</p>
+<p><strong>误区三（易被忽视）：健康检查的语义边界。</strong><br>&#x2F;healthz 里串联 DB、缓存、下游 RPC 会把局部依赖故障放大为<strong>级联摘除</strong>：一个共享 DB 抖动，所有实例同时不健康，被同时摘除，剩余容量归零。健康检查只应反映“本进程能否处理请求”（端口监听、事件循环未阻塞、必需的内存态就绪），依赖健康度属于熔断&#x2F;降级域，不属于探针域。K8s 里 liveness 与 readiness 的分离正是这个边界的制度化表达。</p>
+<p><strong>思考题</strong>：现有 1000 个端点、探测周期 60s，要求探测时刻在一个周期内近似均匀分布，且端点增删不引起大规模相位重排。方案 A 用随机数：简单，但端点重建（pod 重新调度）后相位不可复现，且随机源质量差时会聚集；方案 B 用 <code>phase = hash(endpoint_id) mod interval</code>：无需中心协调即可保证均匀与稳定，但只要端点集合变化（扩容、降级、周期调整）就会出现相位碰撞或重映射，且 hash 的相关性会让同批创建的 id（如单调递增的 pod 序号）落到相邻相位上。请给出一套同时满足“无中心协调、可复现、抗相关性、支持周期动态调整”的相位分配方案，并说明它与一致性哈希 &#x2F; rendezvous hashing 的关系与代价。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/">https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">网络基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/" title="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/31/foundation/2026-10-31-foundation-js-proxy-reflect-invariants/" title="每日基础技术总结 · 2026-10-31 · JavaScript Proxy 与 Reflect API：元编程基础与不可配置属性的处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-10-31 · JavaScript Proxy 与 Reflect API：元编程基础与不可配置属性的处理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/20/foundation/2024-01-20-foundation-https-tls-1-3-pfs/" title="每日基础技术总结 · 2024-01-20 · HTTPS TLS 1.3 握手指令精简过程与前向安全性（PFS）实现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="title">每日基础技术总结 · 2024-01-20 · HTTPS TLS 1.3 握手指令精简过程与前向安全性（PFS）实现</div></div></a></div><div><a href="/2024/01/29/foundation/2024-01-29-foundation-least-connections-vs-weighted-round-robin/" title="每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-29</div><div class="title">每日基础技术总结 · 2024-01-29 · 负载均衡最少连接与加权轮询算法</div></div></a></div><div><a href="/2024/02/26/foundation/2024-02-26-foundation-http-1-1-pipelining/" title="每日基础技术总结 · 2024-02-26 · HTTP&#x2F;1.1 的 Pipelining 与队头阻塞"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-26</div><div class="title">每日基础技术总结 · 2024-02-26 · HTTP&#x2F;1.1 的 Pipelining 与队头阻塞</div></div></a></div><div><a href="/2024/03/29/foundation/2024-03-29-foundation-tcp-syn-flood-syn-cookie/" title="每日基础技术总结 · 2024-03-29 · TCP SYN Flood 与 SYN Cookie 机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-29</div><div class="title">每日基础技术总结 · 2024-03-29 · TCP SYN Flood 与 SYN Cookie 机制</div></div></a></div><div><a href="/2024/05/08/foundation/2024-05-08-foundation-tcp-window-scaling/" title="每日基础技术总结 · 2024-05-08 · TCP 的窗口缩放（Window Scaling）与时间戳选项"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-08</div><div class="title">每日基础技术总结 · 2024-05-08 · TCP 的窗口缩放（Window Scaling）与时间戳选项</div></div></a></div><div><a href="/2024/05/20/foundation/2024-05-20-foundation-tcp-nagle-ack/" title="每日基础技术总结 · 2024-05-20 · TCP Nagle 算法与延迟 ACK 交互"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-20</div><div class="title">每日基础技术总结 · 2024-05-20 · TCP Nagle 算法与延迟 ACK 交互</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">784</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">97</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-31-%C2%B7-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5%E6%8E%A2%E9%92%88%EF%BC%88Probing%EF%BC%89%E7%9A%84%E5%A4%B1%E8%B4%A5%E9%87%8D%E8%AF%95%E7%AD%96%E7%95%A5%E4%B8%8E%E6%8A%96%E5%8A%A8%E6%B6%88%E9%99%A4%EF%BC%88Jitter%EF%BC%89%E7%AE%97%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88-1"><span class="toc-number">1.1.2.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.3.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90-1"><span class="toc-number">1.1.4.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.5.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.6.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83-1"><span class="toc-number">1.1.7.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/daily/2026-10-31-workbench-daily/" title="工作台日报 · 2026-10-31">工作台日报 · 2026-10-31</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/" title="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理">每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/" title="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法">每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/foundation/2026-10-31-foundation-js-proxy-reflect-invariants/" title="每日基础技术总结 · 2026-10-31 · JavaScript Proxy 与 Reflect API：元编程基础与不可配置属性的处理">每日基础技术总结 · 2026-10-31 · JavaScript Proxy 与 Reflect API：元编程基础与不可配置属性的处理</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/30/daily/2026-10-30-workbench-daily/" title="工作台日报 · 2026-10-30">工作台日报 · 2026-10-30</a><time datetime="2026-10-29T23:00:58.000Z" title="发表于 2026-10-30 07:00:58">2026-10-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/30/foundation/2026-10-30-foundation-kafka-rebalance-data-skew/" title="每日基础技术总结 · 2026-10-30 · Kafka Consumer Group rebalance过程中的数据倾斜风险">每日基础技术总结 · 2026-10-30 · Kafka Consumer Group rebalance过程中的数据倾斜风险</a><time datetime="2026-10-29T23:00:58.000Z" title="发表于 2026-10-30 07:00:58">2026-10-30</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

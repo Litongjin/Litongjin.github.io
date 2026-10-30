@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理📚 今日主题 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理（后端基础）  1. 核心概念速览定义：滑动窗口统计是一种数据结构，其核心是「把时间轴切成等长的时间片（桶）+ 用环形数组复用这些桶 + 用世代号惰性重置每个桶」。它的作用是在恒定的内存开销（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理">
+<meta property="og:url" content="https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理📚 今日主题 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理（后端基础）  1. 核心概念速览定义：滑动窗口统计是一种数据结构，其核心是「把时间轴切成等长的时间片（桶）+ 用环形数组复用这些桶 + 用世代号惰性重置每个桶」。它的作用是在恒定的内存开销（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-10-30T23:01:34.000Z">
+<meta property="article:modified_time" content="2026-10-30T23:08:18.345Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-31 07:08:18'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">784</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">97</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-30T23:08:18.345Z" title="更新于 2026-10-31 07:08:18">2026-10-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-10-31-·-微服务熔断器Hystrix-Sentinel的滑动窗口统计原理"><a href="#每日基础技术总结-·-2026-10-31-·-微服务熔断器Hystrix-Sentinel的滑动窗口统计原理" class="headerlink" title="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理"></a>每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p><strong>定义</strong>：滑动窗口统计是一种数据结构，其核心是「把时间轴切成等长的时间片（桶）+ 用环形数组复用这些桶 + 用世代号惰性重置每个桶」。它的作用是在恒定的内存开销（O(N)）、写入开销 O(1)、读取开销 O(N) 下，维护「最近一个时间区间内」按事件类型（成功 &#x2F; 失败 &#x2F; 超时 &#x2F; 拒绝 &#x2F; RT）聚合的<strong>近似</strong>计数与均值，误差上界为一个桶的时长。Hystrix 的 HystrixRollingNumber &#x2F; HystrixRollingPercentile 与 Sentinel 的 LeapArray &#x2F; WindowWrap &#x2F; MetricBucket 都是它的具体实现。</p>
+<p><strong>解决什么问题</strong>：熔断器的开断判定依赖「当前健康度」，而不是「历史总量」。</p>
+<ul>
+<li>全局计数器单调递增、没有时间衰减，故障恢复后失败率仍长期保持高位，无法反映当前状态；</li>
+<li>固定窗口（fixed window）每 T 清零一次，在窗口切换的边界处存在计数突变：t&#x3D;T-1 与 t&#x3D;T+1 的两次突发会被切到两个窗口，各自都不超阈值，但现实中 2ms 内已经产生了 2 倍的错误量，导致判定滞后或抖动。<br>滑动窗口提供一种随时间衰减的滚动聚合，把边界效应压缩进一个桶内。</li>
+</ul>
+<p><strong>机制本质</strong>：三条不变式。</p>
+<ol>
+<li>时间定位：<code>idx = floor(t / w) mod N</code>，任意时刻只有唯一一个「活跃世代」的桶可写；</li>
+<li>世代校验：桶内保存 <code>windowStart</code>（或 <code>windowNumber</code>），读写前比对当前世代，不匹配即判定为「上一轮残留」，写前惰性重置、读时直接跳过；</li>
+<li>聚合读取：遍历全部 N 个桶，只累加世代号落在 <code>[curStart-(N-1)w, curStart]</code> 内的桶。</li>
+</ol>
+<p><strong>体系位置</strong>：位于服务治理 → 稳定性防护这条链路的<strong>数据面最底层</strong>。向上支撑熔断状态机（CLOSED &#x2F; OPEN &#x2F; HALF_OPEN）、Sentinel 的 FlowSlot 限流 QPS 统计、系统自适应保护；横向与后端 Metrics（Micrometer &#x2F; Prometheus 的 counter 快照、histogram）、时序库的 rollup 降采样、前端埋点采样缓冲同源，都是「用有损近似换恒定开销」这一权衡的具体实例。</p>
+<p><strong>为什么必须掌握</strong>：它回答了「高并发热点路径上如何做度量」这一基础问题。不理解桶化滑动的误差结构，就无法正确设置窗口长度 &#x2F; 桶数量 &#x2F; 最小请求数，也无法解释线上两类典型现象：失败率已经很高却没有熔断、刚恢复就立刻再次熔断。集群流控、自适应限流、混沌实验的探针判定全部建立在这一层之上。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p><strong>1. 问题形状：判定「最近 T 内的失败率」</strong></p>
+<ul>
+<li>全局累计：<code>ratio = fail / (pass + fail)</code>，永不衰减，故障恢复后长期高位，无法用于自动闭合。</li>
+<li>固定窗口：每 T 清零。缺陷有二：边界突变（跨边界的两段突发各自不超阈值）；清零瞬间计数归零，可能让刚 OPEN 的熔断器立刻抖动回 CLOSED。</li>
+<li>桶化滑动窗口：把 T 切成 N 份（w &#x3D; T&#x2F;N），窗口以 w 为步长<strong>跳跃</strong>滑动，任意时刻统计的是「最近 N 个槽位中世代有效的桶」，边界效应被限制在 w 之内。</li>
+</ul>
+<p><strong>2. 数据结构</strong><br>    Bucket[N]                         &#x2F;&#x2F; 环形数组，N &#x3D; sampleCount<br>    每个 Bucket:<br>      gen      : 世代号          &#x2F;&#x2F; Hystrix 用 windowNumber &#x3D; floor(t&#x2F;w)（单调绝对编号）<br>                                 &#x2F;&#x2F; Sentinel 用 windowStart &#x3D; floor(t&#x2F;w)*w（桶起点毫秒）<br>      counters : LongAdder[K]    &#x2F;&#x2F; 按事件类型索引；Sentinel 的 MetricBucket 另有 minRt（volatile long）<br>写路径完全不加锁（LongAdder 分段 CAS），仅在世代切换时进入临界区。</p>
+<p><strong>3. 写路径（惰性重置 &#x2F; lazy reset）</strong><br>    write(event, t):<br>      i &#x3D; floor(t &#x2F; w) mod N<br>      s &#x3D; floor(t &#x2F; w) * w<br>      b &#x3D; arr[i]<br>      if b.gen !&#x3D; s:                  &#x2F;&#x2F; 快路径：世代匹配则零同步开销<br>          lock(i)                     &#x2F;&#x2F; Hystrix: 对 windowNumber 做 CAS；Sentinel: ReentrantLock + 二次校验<br>              if b.gen !&#x3D; s:          &#x2F;&#x2F; 必须二次校验，否则会清掉并发线程刚写入的计数<br>                  b.gen &#x3D; s; b.counters.reset()<br>      b.counters[event].increment()<br>不存在任何后台清理线程。桶在被「下一轮的同一槽位」选中之前，一直是历史数据；一旦被选中，靠世代号识别并原地复用。空闲（无请求）期间系统零开销，这是把清理方式从「推送模型（定时扫描）」改成「拉取模型（访问时校验）」的直接收益。</p>
+<p><strong>4. 读路径</strong><br>    count(event, t):<br>      cur &#x3D; floor(t &#x2F; w) * w<br>      low &#x3D; cur - (N - 1) * w          &#x2F;&#x2F; 等价于 cur - T + w<br>      sum &#x3D; 0<br>      for b in arr:<br>          if low &lt;&#x3D; b.gen &lt;&#x3D; cur:      &#x2F;&#x2F; 只累加世代有效的桶<br>              sum +&#x3D; b.counters[event].sum()<br>      return sum<br>这个 <code>low</code> 过滤是正确性的必要条件：环形数组里的 N 个槽位可能全部是「N 个窗口之前残留的桶」，如果跳过世代校验，就会把整轮的错误历史累加进来，在故障恢复后造成误熔断。</p>
+<p><strong>5. 一个必须内化的推论：窗口长度不是常数</strong><br>任意时刻 <code>count()</code> 实际覆盖的区间是 <code>[cur - (N-1)w, t]</code>，长度 &#x3D; <code>(N-1)w + (t mod w) + 1</code>，在 <code>[(N-1)w, Nw]</code> 之间浮动。N&#x3D;2、w&#x3D;500ms 时，「1 秒窗口」实际在 500ms<del>1000ms 之间摆动；N&#x3D;10、w&#x3D;100ms 时在 900</del>1000ms 之间。因此「增大 N」的直接收益不是让窗口变精确，而是<strong>缩小窗口长度的波动与边界误差</strong>；代价是读 O(N)、内存 N×事件类型数、以及更频繁的世代切换（临界区争用上升）。</p>
+<p><strong>6. 熔断状态机如何消费这些统计</strong></p>
+<ul>
+<li>Hystrix：HealthCounts 由 SUCCESS &#x2F; FAILURE &#x2F; TIMEOUT &#x2F; THREAD_POOL_REJECTED &#x2F; SEMAPHORE_REJECTED 聚合；仅当 totalRequests ≥ circuitBreakerRequestVolumeThreshold（默认 20）才计算 errorPercentage，超过 circuitBreakerErrorThresholdPercentage（默认 50%）进入 OPEN；睡眠 sleepWindowInMilliseconds（默认 5s）后进入 HALF_OPEN，放行单请求探测，成功则 CLOSED 并重置窗口。</li>
+<li>Sentinel：三种策略（慢调用比例 SLOW_REQUEST_RATIO、异常比例 ERROR_RATIO、异常数 ERROR_COUNT）都从同一个 ArrayMetric 的滑动窗口取值。注意 RT 是在 entry exit 时写入的，所以窗口内的 RT 统计天然滞后一个完整的请求生命周期。</li>
+</ul>
+<p><strong>7. 与前端已有概念的映射</strong></p>
+<ul>
+<li><code>throttle(fn, T)</code> 是 N&#x3D;1 的固定窗口，状态只有一个 lastTime 变量；滑动窗口是它的 N 桶推广，用 O(N) 空间换取对「最近 T」的连续刻画。</li>
+<li>埋点的「批量缓冲 + 定时 flush」是定时器驱动的<strong>主动清理</strong>；滑动窗口是世代号驱动的<strong>惰性淘汰</strong>，与 LRU、WeakMap、分代 GC 同属「用访问时校验替代周期性扫描」的族。</li>
+<li>rAF 中统计最近 60 帧平均帧时长是<strong>样本窗口</strong>（按条数）；HystrixRollingPercentile 的桶内 int[] 采样与之一致，而 RollingNumber 是<strong>时间窗口</strong>（按时长）。混用两者会造成语义错位。</li>
+<li>类型系统对照：TS 的 interface 是编译期结构化契约、运行期被完全擦除，不占内存、不参与分派；Java 的 interface 是运行期存在的名义类型，方法分派经 vtable&#x2F;itable，但同样不承载状态。这里的 Bucket &#x2F; WindowWrap 是运行期真实对象，其字段 <code>gen</code> 本身就是正确性依据——典型的「编译期约束 vs 运行期状态机」之别。</li>
+</ul>
+<p><strong>8. Hystrix 与 Sentinel 的实现差异</strong></p>
+<ul>
+<li>默认窗口 &#x2F; 桶：Hystrix 10000ms &#x2F; 10 桶（w&#x3D;1s）；Sentinel 1000ms &#x2F; 2 桶（w&#x3D;500ms，并按资源维度另有分钟级 LeapArray）。</li>
+<li>世代标识：Hystrix 用 floor(t&#x2F;w)；Sentinel 用 floor(t&#x2F;w)*w（保留时间语义，便于日志与调试）。</li>
+<li>重置并发控制：Hystrix 对 Bucket.windowNumber 做 CAS，失败即让位；Sentinel 用 per-window 的 ReentrantLock + 双重检查。</li>
+<li>计数器：均为 LongAdder 数组；Sentinel 的 MetricBucket 额外维护 minRt，用于慢调用判定。</li>
+<li>分位数：Hystrix 另有 HystrixRollingPercentile，桶内存 int[] 采样（默认每桶 100 条），读时合并全部桶样本排序取分位，读放大为 O(N·K·log(N·K))，且是近似分位；Sentinel 不提供窗口分位数，只有平均 RT 与 minRt。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">以下实现是 Sentinel LeapArray 的最小骨架（1s 窗口 / 2 桶），去掉了全部框架依赖，可以单文件编译运行；时钟可注入，便于确定性验证。</span><br><span class="line"></span><br><span class="line">    import java.util.concurrent.atomic.LongAdder;</span><br><span class="line">    import java.util.function.LongSupplier;</span><br><span class="line"></span><br><span class="line">    public class MiniSlidingWindow &#123;</span><br><span class="line">        static final int  N        = 2;             // 桶数量</span><br><span class="line">        static final long INTERVAL = 1000L;         // 总窗口</span><br><span class="line">        static final long W        = INTERVAL / N;  // 单桶时长 500ms</span><br><span class="line"></span><br><span class="line">        static final class Bucket &#123;</span><br><span class="line">            volatile long gen = Long.MIN_VALUE;     // 世代号 = 桶起点时间；惰性重置的版本标识</span><br><span class="line">            final LongAdder pass  = new LongAdder();</span><br><span class="line">            final LongAdder block = new LongAdder();</span><br><span class="line">            void reset(long s) &#123; gen = s; pass.reset(); block.reset(); &#125;  // 只能在临界区内调用</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        private final Bucket[] arr   = new Bucket[N];</span><br><span class="line">        private final Object[] locks = new Object[N];</span><br><span class="line">        LongSupplier clock = System::currentTimeMillis;   // 生产环境应使用单调时钟</span><br><span class="line"></span><br><span class="line">        public MiniSlidingWindow() &#123;</span><br><span class="line">            for (int i = 0; i &lt; N; i++) &#123; arr[i] = new Bucket(); locks[i] = new Object(); &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Bucket current(long now) &#123;</span><br><span class="line">            int  i = (int) ((now / W) % N);   // 环形取模：时间轴 -&gt; 槽位，O(1) 定位</span><br><span class="line">            long s = now - now % W;           // 当前桶的左边界，即本代的世代号</span><br><span class="line">            Bucket b = arr[i];</span><br><span class="line">            if (b.gen != s) &#123;                 // 快路径命中则完全不加锁</span><br><span class="line">                synchronized (locks[i]) &#123;     // 判世代 + 清零 + 后续写入 必须构成原子段</span><br><span class="line">                    if (b.gen != s) b.reset(s);   // 二次校验：否则会清掉并发线程刚写入的计数</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            return b;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        void pass()  &#123; current(clock.getAsLong()).pass.increment();  &#125;</span><br><span class="line">        void block() &#123; current(clock.getAsLong()).block.increment(); &#125;</span><br><span class="line"></span><br><span class="line">        long count(boolean isPass, long now) &#123;</span><br><span class="line">            long cur = now - now % W;</span><br><span class="line">            long low = cur - (N - 1) * W;     // 有效世代下界，等价于 cur - INTERVAL + W</span><br><span class="line">            long sum = 0;</span><br><span class="line">            for (Bucket b : arr) &#123;</span><br><span class="line">                long g = b.gen;               // volatile 读：可能读到正在切换的世代，统计场景可容忍</span><br><span class="line">                if (g &gt;= low &amp;&amp; g &lt;= cur)     // 关键：过滤上一轮残留的桶，否则读到脏值造成误熔断</span><br><span class="line">                    sum += isPass ? b.pass.sum() : b.block.sum();  // LongAdder.sum() 是弱一致快照</span><br><span class="line">            &#125;</span><br><span class="line">            return sum;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public static void main(String[] args) &#123;</span><br><span class="line">            long[] t = &#123;0&#125;;</span><br><span class="line">            MiniSlidingWindow w = new MiniSlidingWindow();</span><br><span class="line">            w.clock = () -&gt; t[0];</span><br><span class="line"></span><br><span class="line">            t[0] = 0;   for (int i = 0; i &lt; 3; i++) w.pass();  // 落入桶 [0,500)</span><br><span class="line">            t[0] = 400; for (int i = 0; i &lt; 4; i++) w.pass();  // 仍落桶 [0,500)，累计 7</span><br><span class="line">            t[0] = 600; for (int i = 0; i &lt; 5; i++) w.pass();  // 落入桶 [500,1000)</span><br><span class="line"></span><br><span class="line">            t[0] = 999;  System.out.println(w.count(true, 999));   // 12：低界=0，两桶全计入</span><br><span class="line">            t[0] = 1000; System.out.println(w.count(true, 1000));  // 5 ：低界抬到 500，桶 [0,500) 被过滤</span><br><span class="line">            t[0] = 1400; System.out.println(w.count(true, 1400));  // 5 ：桶 [500,1000) 仍在窗口内</span><br><span class="line">            t[0] = 1500; w.pass();                                 // 触发槽位 1 的世代切换，桶 [500,1000) 就地清零</span><br><span class="line">            t[0] = 1600; System.out.println(w.count(true, 1600));  // 1 ：一次惰性重置回收整桶历史</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">执行输出：</span><br><span class="line">    12</span><br><span class="line">    5</span><br><span class="line">    5</span><br><span class="line">    1</span><br><span class="line"></span><br><span class="line">最关键的两行：count() 中的「世代区间过滤」保证读正确性（不会把上一轮残留的桶算进来），current() 中的「DCL 二次校验」保证写正确性（不会丢掉并发写入）。删掉任意一行，输出都会错。把 N 改成 10、INTERVAL 保持不变，无需改动任何逻辑即可验证第 5 点推论：窗口长度波动从 500ms 收窄到 100ms 量级，但读循环从 2 次变成 10 次。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p><strong>误区一：认为滑动窗口统计的是「固定长度 T 的连续区间」</strong><br>反例：N&#x3D;2、w&#x3D;500ms 时，count() 覆盖的区间长度在 500ms~1000ms 之间浮动（&#x3D; (N-1)w + t mod w + 1）。你以为在判断「最近 1 秒失败率」，实际可能是在判断「最近 0.5 秒」。由此推出两条实践结论：</p>
+<ul>
+<li>调阈值必须连同 N 一起看。N 越小，窗口越短、分母越小，突发更容易被判超阈值（Sentinel 默认 N&#x3D;2 是为 QPS 统计保留平滑性；Hystrix 选 10s&#x2F;10 桶是为了让 5s 的 sleepWindow 有更长的观察期）；</li>
+<li>绝不能把它当精确计数用于对账、计费或审计。它是控制面的近似度量，不是数据面的账本。</li>
+</ul>
+<p><strong>误区二：认为存在后台定时清理，或认为环形数组保留的是「最近 N 个桶的历史快照」</strong><br>实际上是「单活跃桶 + N-1 个待复用槽位」：任意时刻只有当前世代对应的桶可写，其余槽位要么属于窗口内（只读历史），要么是上一轮的残留（读时按世代过滤掉）。既没有定时任务，也没有后台线程，空闲期零开销。推论：它不能回放时间序列，只能回答「当前窗口的聚合值」；要时间序列请用 Metrics 上报。<br>同源的次级误区：认为 <code>LongAdder.sum()</code> 是强一致快照。它是弱一致的，并发累加时可能读到中间态——这在统计场景可接受，但在「一致性校验」场景会导致偶发误判。</p>
+<p><strong>思考题</strong><br>给定 Sentinel 默认配置 N&#x3D;2、w&#x3D;500ms：(a) 写出任意时刻 t 的 <code>count()</code> 实际覆盖的时间区间，并证明其长度落在 <code>[(N-1)w, Nw]</code> 内；(b) 若把 N 提到 10（w&#x3D;100ms），窗口长度波动收窄到 900~1000ms，那么 Sentinel 为什么不默认用 10？请从读放大 O(N)、世代切换频率（临界区争用概率与 LongAdder 数组重建次数）、内存（N × 事件类型数 × LongAdder 分段 cell 数）三个维度给出定量分析，并说明在什么业务特征下你会主动把它调大；(c) 进阶：当发生 NTP 时钟回拨时，<code>floor(t/w) mod N</code> 会指向一个世代号<strong>大于</strong>当前计算值的槽位。Sentinel 的处理是返回该旧桶并标记为 deprecated，而不是重置它。这个选择避免了什么更严重的问题？如果改为「直接重置为当前世代」，环形数组的哪条不变式会被破坏，会引发什么连锁后果？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/">https://litongjin.github.io/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/10/31/daily/2026-10-31-workbench-daily/" title="工作台日报 · 2026-10-31"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">工作台日报 · 2026-10-31</div></div></a></div><div class="next-post pull-right"><a href="/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/" title="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/03/foundation/2024-01-03-foundation-zookeeper-zab-epoch/" title="每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-03</div><div class="title">每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制</div></div></a></div><div><a href="/2024/02/05/foundation/2024-02-05-foundation-consistent-hashing-virtual-nodes/" title="每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-05</div><div class="title">每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点</div></div></a></div><div><a href="/2024/03/04/foundation/2024-03-04-foundation-rocketmq-half-message-op-message/" title="每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-04</div><div class="title">每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message</div></div></a></div><div><a href="/2024/06/23/foundation/2024-06-23-foundation-http-2-hpack/" title="每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-23</div><div class="title">每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新</div></div></a></div><div><a href="/2024/08/14/foundation/2024-08-14-foundation-mysql-redo-log-binlog/" title="每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-14</div><div class="title">每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交</div></div></a></div><div><a href="/2024/08/16/foundation/2024-08-16-foundation-innodb-buffer-pool-lru/" title="每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-16</div><div class="title">每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">784</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">97</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-10-31-%C2%B7-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E5%99%A8Hystrix-Sentinel%E7%9A%84%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%BB%9F%E8%AE%A1%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix&#x2F;Sentinel的滑动窗口统计原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/daily/2026-10-31-workbench-daily/" title="工作台日报 · 2026-10-31">工作台日报 · 2026-10-31</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/foundation/2026-10-31-foundation-circuit-breaker-sliding-window/" title="每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理">每日基础技术总结 · 2026-10-31 · 微服务熔断器Hystrix/Sentinel的滑动窗口统计原理</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/foundation/2026-10-31-foundation-lb-probe-retry-jitter/" title="每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法">每日基础技术总结 · 2026-10-31 · 负载均衡健康检查探针（Probing）的失败重试策略与抖动消除（Jitter）算法</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/31/foundation/2026-10-31-foundation-js-proxy-reflect-invariants/" title="每日基础技术总结 · 2026-10-31 · JavaScript Proxy 与 Reflect API：元编程基础与不可配置属性的处理">每日基础技术总结 · 2026-10-31 · JavaScript Proxy 与 Reflect API：元编程基础与不可配置属性的处理</a><time datetime="2026-10-30T23:01:34.000Z" title="发表于 2026-10-31 07:01:34">2026-10-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/30/daily/2026-10-30-workbench-daily/" title="工作台日报 · 2026-10-30">工作台日报 · 2026-10-30</a><time datetime="2026-10-29T23:00:58.000Z" title="发表于 2026-10-30 07:00:58">2026-10-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/10/30/foundation/2026-10-30-foundation-kafka-rebalance-data-skew/" title="每日基础技术总结 · 2026-10-30 · Kafka Consumer Group rebalance过程中的数据倾斜风险">每日基础技术总结 · 2026-10-30 · Kafka Consumer Group rebalance过程中的数据倾斜风险</a><time datetime="2026-10-29T23:00:58.000Z" title="发表于 2026-10-30 07:00:58">2026-10-30</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
