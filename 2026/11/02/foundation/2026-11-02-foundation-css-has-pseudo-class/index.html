@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性📚 今日主题 CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性（前端底层与计算机基础）  1. 核心概念速览定义：:has() 是 Selectors Level 4 定义的关系伪类（relational pseudo-class），函数式，参数为 &amp;l">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/02/foundation/2026-11-02-foundation-css-has-pseudo-class/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性📚 今日主题 CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性（前端底层与计算机基础）  1. 核心概念速览定义：:has() 是 Selectors Level 4 定义的关系伪类（relational pseudo-class），函数式，参数为 &amp;l">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-01T23:01:51.000Z">
+<meta property="article:modified_time" content="2026-11-01T23:07:03.250Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/02/foundation/2026-11-02-foundation-css-has-pseudo-class/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-02 07:07:03'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">792</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">99</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-01T23:01:51.000Z" title="发表于 2026-11-02 07:01:51">2026-11-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-01T23:07:03.250Z" title="更新于 2026-11-02 07:07:03">2026-11-02</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-02-·-CSS-has-伪类选择器：相对后代选择的历史突破与匹配算法复杂性"><a href="#每日基础技术总结-·-2026-11-02-·-CSS-has-伪类选择器：相对后代选择的历史突破与匹配算法复杂性" class="headerlink" title="每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性"></a>每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p><strong>定义</strong>：<code>:has()</code> 是 Selectors Level 4 定义的<strong>关系伪类（relational pseudo-class）</strong>，函数式，参数为 <code>&lt;relative-selector-list&gt;</code>。形式语义：元素 E 匹配 <code>E:has(rs)</code> 当且仅当存在元素 F，使得以 E 为<strong>锚点（anchor）</strong>对 rs 求值时 F 匹配，即 ∃F : match(F, anchor(E, rs))。</p>
+<p><strong>本质</strong>：CSS2.1 以来，选择器的「主体（subject）」恒为最右侧复合选择器，匹配引擎据此固定为右到左回溯。<code>:has()</code> 把主体留在左侧，将参数内的相对选择器显式锚定在该主体上，使匹配方向翻转为「从锚点沿指定组合符轴做存在量化」。它没有引入新语法范畴，而是把「反向关系查询」封装进函数参数，从而保持了「最右复合选择器即主体」这一引擎不变量。</p>
+<p><strong>解决的问题</strong>：无法基于后代状态选择祖先（「父选择器」的诉求），以及无法基于后继兄弟状态选择前置兄弟。历史上 <code>:contains()</code>、subject indicator（<code>!div &gt; p</code> &#x2F; <code>div! &gt; p</code>）均因语法歧义、破坏主体不变量、表达能力不足（无法表达兄弟轴）而被废弃；<code>:has()</code> 是其等价且更强、且不污染选择器语法的替代。</p>
+<p><strong>体系位置</strong>：CSS 选择器引擎 → 样式系统（Style Resolution &#x2F; RecalcStyle）→ 样式失效（Style Invalidation）。它横跨三个子系统：解析期（语法与特异性）、匹配期（树上的存在量化）、失效期（DOM 变更后的增量重算）。在渲染流水线中，它的成本主要不落在「匹配」，而落在「变更传播」。</p>
+<p><strong>为什么必须掌握</strong>：<code>*:has(...)</code> 本质是「树上带存在量化的模式查询 + 增量视图维护（incremental view maintenance）」，这与数据库物化视图刷新、响应式系统的依赖追踪是同一问题族的极小样本。掌握它，等于同时掌握选择器求值方向、特异性的组合规则，以及浏览器失效传播的成本模型——这是判断「某条 CSS 是语法问题、匹配问题，还是失效抖动问题」的分水岭。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><h2 id="1-语法与形式语义"><a href="#1-语法与形式语义" class="headerlink" title="1. 语法与形式语义"></a>1. 语法与形式语义</h2><pre><code>&lt;complex-real-selector&gt; ::= &lt;compound&gt; ( &lt;combinator&gt; &lt;compound&gt; )*
+&lt;relative-selector&gt;     ::= &lt;combinator&gt;? &lt;complex-real-selector&gt;
+&lt;combinator&gt;            ::= &#39;&gt;&#39; | &#39;+&#39; | &#39;~&#39; | &#39; &#39;      // 省略即后代
+:has( &lt;relative-selector-list&gt; )
+</code></pre>
+<p>锚点集合 Anchor(E, rs) 由 rs 的前导组合符唯一决定：</p>
+<pre><code>&#39; &#39;  -&gt; descendants(E)
+&#39;&gt;&#39;  -&gt; children(E)
+&#39;+&#39;  -&gt; nextSibling(E)
+&#39;~&#39;  -&gt; followingSiblings(E)
+</code></pre>
+<p>关键：相对选择器<strong>没有祖先组合符</strong>，因此 <code>:has()</code> 无法表达「存在某个祖先满足 S」；同时 <code>+</code>&#x2F;<code>~</code> 使匹配目标可以落在锚点子树<strong>之外</strong>，这直接决定了失效传播的边界。</p>
+<h2 id="2-特异性"><a href="#2-特异性" class="headerlink" title="2. 特异性"></a>2. 特异性</h2><p><code>:has()</code> 对特异性的贡献 &#x3D; 参数列表中<strong>单条复杂选择器特异性的最大值</strong>（与 <code>:is()</code>&#x2F;<code>:not()</code> 同规则），不是求和，组合符本身不计分。</p>
+<pre><code>li:has(&gt; input:checked)  -&gt;  li(0,0,1) + max{(0,1,1)} = (0,1,2)
+p:has(.a, #k)            -&gt;  p(0,0,1)  + max{(0,1,0),(1,0,0)} = (1,0,1)
+</code></pre>
+<h2 id="3-语法约束"><a href="#3-语法约束" class="headerlink" title="3. 语法约束"></a>3. 语法约束</h2><ul>
+<li><strong>非宽容（non-forgiving）</strong>：参数列表中任意一项无效，整个 <code>:has()</code> 无效，整条规则被丢弃。规范在 2022 年由 forgiving 改为 non-forgiving，以对齐 jQuery 的 <code>:has()</code> 并避免「静默降级导致语义漂移」。对比 <code>:is()</code>&#x2F;<code>:where()</code> 是宽容的（丢弃无效项、保留其余）。</li>
+<li>参数内禁止伪元素；<code>:has()</code> 内部不可再嵌套 <code>:has()</code>。</li>
+<li><code>:has()</code> 只能作用于元素，不能挂在伪元素上。</li>
+</ul>
+<h2 id="4-匹配算法：右到左-局部前向量化"><a href="#4-匹配算法：右到左-局部前向量化" class="headerlink" title="4. 匹配算法：右到左 + 局部前向量化"></a>4. 匹配算法：右到左 + 局部前向量化</h2><p>标准匹配自右向左。含 <code>:has()</code> 时，锚点 E 本身就是最右复合选择器，命中后对参数做前向存在量化，且必须短路：</p>
+<pre><code>function matchesComplex(E, sel):
+    if !matchCompound(E, sel.rightmost): return false
+    if sel.rightmost has :has(rsList):
+        if !matchHas(E, rsList): return false
+    return matchLeftward(E, sel.rest)       // 常规右到左回溯祖先
+
+function matchHas(E, rsList):
+    for rs in rsList:
+        for F in axisOf(rs.leadingCombinator, E):
+            if matchRightToLeft(F, rs.body, stopAt = E):
+                return true                  // 存在量化：一命中即返回
+    return false
+</code></pre>
+<p>朴素的「每次样式重算都全量跑上述算法」在 N 个节点上最坏是 O(N·|subtree|)，<code>*:has(* *)</code> 逼近 O(N²)。因此生产引擎采用的是<strong>失效驱动 + 静态剪枝 + 结果缓存</strong>，而非重算：</p>
+<pre><code>onMutation(node N, change):
+    for rule in styleRules where rule.containsHasPseudo:
+        // (a) 祖先传播：N 的任意祖先都可能成为 :has() 的锚点
+        for A in N.ancestors():
+            if fastReject(A, rule.descendantBloomFilter): continue
+            markStyleDirty(A)
+
+        // (b) 兄弟轴：rs 以 &#39;+&#39; / &#39;~&#39; 前导时，锚点可能在前驱兄弟上
+        if rule.hasSiblingRelativeSelector:
+            for S in N.precedingSiblingsAndTheirAncestors():
+                markStyleDirty(S)
+
+        // (c) 动态状态：:hover/:focus/:checked 等位变化无法静态剪枝
+        if rule.containsDynamicState:
+            propagateAncestorsAffectedByHas(N)
+</code></pre>
+<p>工程实现要点（以 Blink 为例）：<code>SelectorFilter</code> 为每个锚点维护后代 class&#x2F;id&#x2F;tag 的 Bloom Filter（descendant filter），<code>FastRejectSelector</code> 在向子树下降前先判定「该子树里根本不可能出现参数中的复合选择器」，把绝大多数候选剪掉；<code>:has()</code> 的匹配结果按 <code>(selector, anchor)</code> 进 <code>RelationCache</code>，失效时精确驱逐；而锚点元素会被打上 <code>AncestorsAffectedByHas</code> 标记，使后续变更能快速定位受影响的锚点集。</p>
+<h2 id="5-复杂度结论"><a href="#5-复杂度结论" class="headerlink" title="5. 复杂度结论"></a>5. 复杂度结论</h2><ul>
+<li>静态 <code>:has(&gt; .x)</code>：Bloom Filter 可拒绝大量候选 + RelationCache 命中，摊销后近似线性。</li>
+<li>动态 <code>:has(:hover)</code>：状态位无法用静态过滤器剪枝，任何后代的状态翻转都要向祖先广播，成本与「鼠标移动频率 × 祖先链长度」成正比。</li>
+<li>危险形态是「<strong>高扇出锚点 × 动态伪类</strong>」：<code>body:has(.x:hover)</code> 会让每次 mousemove 触发整条祖先链的候选失效。</li>
+</ul>
+<h2 id="6-与前端已有概念的异同"><a href="#6-与前端已有概念的异同" class="headerlink" title="6. 与前端已有概念的异同"></a>6. 与前端已有概念的异同</h2><ul>
+<li><code>:is()</code>&#x2F;<code>:not()</code>&#x2F;<code>:where()</code>：参数是复杂选择器列表，但<strong>不跨越组合符</strong>，只在同一主体的匹配路径上做布尔运算；特异性规则与 <code>:has()</code> 相同。</li>
+<li><code>:focus-within</code>：引擎内建的、针对特定状态的特化反向伪类；<code>:has(:focus)</code> 是它的泛化，但前者有专用的状态位与更廉价的失效通道。</li>
+<li><code>el.querySelector(sel) !== null</code>：命令式一次性求值，结果不随 DOM 变化自动更新；<code>:has()</code> 是声明式，参与引擎失效传播，状态由内核维护。</li>
+<li><code>Element.closest()</code>：沿祖先轴向上，方向与 <code>:has()</code> 相反且不可互换——<code>E:has(F)</code> ≠ <code>F:has(E)</code>。</li>
+<li><code>:nth-child(An+B of S)</code>：同样是对「其他元素集合」求值并按 S 过滤，但作用于兄弟集合，特异性规则亦为取最大值。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">以下为无框架、可直接运行的最小验证页，覆盖形式语义、失效传播、语法约束、特异性四条原理。</span><br><span class="line"></span><br><span class="line">    &lt;style&gt;</span><br><span class="line">      /* [1] 子轴：锚点是 li，先匹配 li 复合选择器，再前向检查 children 轴 */</span><br><span class="line">      li:has(&gt; input:checked) &#123; background: #d7f5d7; &#125;</span><br><span class="line"></span><br><span class="line">      /* [2] 兄弟轴：锚点是 h2；&#x27;+&#x27; 使匹配目标落在 h2 的兄弟，位于其子树之外 */</span><br><span class="line">      h2:has(+ p) &#123; margin-bottom: 0; &#125;</span><br><span class="line"></span><br><span class="line">      /* [3] 特异性取参数中最高者而非求和：</span><br><span class="line">             p:has(.a, #k)  -&gt; (1,0,1)（id 单列胜出）</span><br><span class="line">             p:has(.a.b.c)  -&gt; (0,3,1)</span><br><span class="line">             若误认为 :has() 不计特异性，则蓝色会胜出 */</span><br><span class="line">      p:has(.a, #k) &#123; color: red; &#125;</span><br><span class="line">      p:has(.a.b.c) &#123; color: blue; &#125;</span><br><span class="line"></span><br><span class="line">      /* [4] 非宽容：只要有一项无效，整条规则被丢弃（对比 :is() 会丢弃无效项保留其余） */</span><br><span class="line">      /* p:has(.x, :bogus) &#123; color: green; &#125; */</span><br><span class="line">    &lt;/style&gt;</span><br><span class="line"></span><br><span class="line">    &lt;ul id=&quot;list&quot;&gt;</span><br><span class="line">      &lt;li&gt;&lt;input type=&quot;checkbox&quot;&gt;A&lt;/li&gt;</span><br><span class="line">      &lt;li&gt;&lt;input type=&quot;checkbox&quot;&gt;B&lt;/li&gt;</span><br><span class="line">    &lt;/ul&gt;</span><br><span class="line">    &lt;p id=&quot;k&quot; class=&quot;a b c&quot;&gt;probe&lt;/p&gt;</span><br><span class="line"></span><br><span class="line">    &lt;script&gt;</span><br><span class="line">      const li  = document.querySelector(&#x27;#list li&#x27;);</span><br><span class="line">      const box = li.querySelector(&#x27;input&#x27;);</span><br><span class="line"></span><br><span class="line">      // A. 存在量化的直接求值：matches() 以 li 为锚点跑 matchHas()</span><br><span class="line">      console.log(li.matches(&#x27;:has(&gt; input)&#x27;));         // true  —— children 轴存在 input</span><br><span class="line">      console.log(li.matches(&#x27;:has(&gt; input:checked)&#x27;)); // false —— 初始 checkedness 为 false</span><br><span class="line"></span><br><span class="line">      // B. 失效传播验证：全程不写任何 class 操作，只改表单状态位;</span><br><span class="line">      //    引擎在属性/状态变更后沿祖先链标记 :has() 锚点脏，并精确重算 li 的声明</span><br><span class="line">      box.checked = true;</span><br><span class="line">      console.log(getComputedStyle(li).backgroundColor); // rgb(215, 245, 215)</span><br><span class="line">      // 注意：样式翻转由内核 invalidation 驱动，主线程未参与选择器求值；</span><br><span class="line">      // getComputedStyle 只是强制同步一次 style recalc，不触发我们的 JS 逻辑</span><br><span class="line"></span><br><span class="line">      // C. 语法约束验证</span><br><span class="line">      try &#123; document.querySelector(&#x27;#list li:has(&gt; input, :bogus)&#x27;); &#125;</span><br><span class="line">      catch (e) &#123; console.log(e.name); &#125;  // SyntaxError —— :has() 非宽容，整条无效</span><br><span class="line"></span><br><span class="line">      try &#123; document.querySelector(&#x27;#list li:has(::before)&#x27;); &#125;</span><br><span class="line">      catch (e) &#123; console.log(e.name); &#125;  // SyntaxError —— 参数内禁止伪元素</span><br><span class="line"></span><br><span class="line">      // D. 特异性验证：(1,0,1) vs (0,3,1)，id 列优先 -&gt; red</span><br><span class="line">      console.log(getComputedStyle(document.querySelector(&#x27;#k&#x27;)).color); // rgb(255, 0, 0)</span><br><span class="line"></span><br><span class="line">      // E. 复杂度对比（在同一大 DOM 上取样）</span><br><span class="line">      //    &#x27;:has(.leaf)&#x27; 每次 querySelectorAll 都全量前向量化；</span><br><span class="line">      //    而静态子轴 :has(&gt; .leaf) 可被 descendant Bloom Filter 快速拒绝，</span><br><span class="line">      //    两者在深树 + 稀疏匹配场景下的耗时差可达数量级。</span><br><span class="line">    &lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><h2 id="误区一：把-has-当「父选择器」"><a href="#误区一：把-has-当「父选择器」" class="headerlink" title="误区一：把 :has() 当「父选择器」"></a>误区一：把 <code>:has()</code> 当「父选择器」</h2><p><code>:has()</code> 是对<strong>相对选择器</strong>的存在量化，语义由前导组合符决定，默认是后代。<code>h2:has(+ p)</code> 匹配的目标完全不在 h2 的子树内；<code>:has(~ .x)</code> 甚至指向 h2 之后的所有兄弟。更关键的是，相对选择器语法里<strong>不存在祖先组合符</strong>，所以 <code>:has()</code> 根本无法表达「存在某个祖先满足 S」——那属于 <code>:is()</code> 配合后代选择器，或 JS 的 <code>closest()</code>。同理 <code>E:has(F)</code> 与 <code>F:has(E)</code> 不可互换：前者的主体是 E、量化方向向前，后者相反。把它理解成「反向后代选择器」会在兄弟轴和特异性上连续出错。</p>
+<h2 id="误区二：认为-has-的性能问题出在「选择器匹配」"><a href="#误区二：认为-has-的性能问题出在「选择器匹配」" class="headerlink" title="误区二：认为 :has() 的性能问题出在「选择器匹配」"></a>误区二：认为 <code>:has()</code> 的性能问题出在「选择器匹配」</h2><p>真正的成本在<strong>失效传播</strong>。静态 <code>:has(&gt; .x)</code> 有 Bloom Filter 静态剪枝和 <code>(selector, anchor)</code> 级缓存，摊销后可接受；一旦参数里出现动态伪类（<code>:hover</code>、<code>:focus</code>、<code>:focus-within</code>、<code>:checked</code>），状态位的变化无法用静态过滤器排除，必须把脏标记向祖先链广播，且兄弟轴（<code>+</code>&#x2F;<code>~</code>）还要求把失效集扩展到锚点的<strong>前驱兄弟</strong>——这比单纯的祖先传播更难剪枝。因此 <code>body:has(.item:hover)</code>、<code>:root:has(dialog[open])</code> 这类高扇出锚点，是典型的高频抖动来源，与「选择器写得长不长」毫无关系。</p>
+<p>另有一个次级误区：把 <code>:has()</code> 的宽容性与 <code>:is()</code> 混同。<code>:has()</code> 是非宽容的，一个拼错的伪类会让整条规则消失，且不会报错到控制台——排查时容易被误判为「样式没生效」而非「规则被丢弃」。</p>
+<h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><p>设有选择器 <code>A:has(~ B C)</code>：A 与 B 是兄弟，C 是 B 的后代。现在在 C 的子树深处插入一个匹配 C 复合选择器的节点。该节点的祖先链覆盖 C、…、B、其父节点，但 <strong>A 只是 B 的前驱兄弟，不在这条祖先链上</strong>。</p>
+<p>请回答：</p>
+<ol>
+<li>引擎必须如何扩展失效集，才能保证 A 的样式被重算？为什么这个扩展方向（沿兄弟轴做「反向」传播）比纯祖先传播更难做剪枝？</li>
+<li>据此判断，在动态 DOM（频繁增删节点）场景下，<code>:has(~ ...)</code> 与 <code>:has(&gt; ...)</code> 的成本差异体现在哪一层：匹配层、失效传播层，还是样式重算层？</li>
+<li>若把选择器改写为 <code>A:has(.x)</code> 且保证 <code>.x</code> 不会动态变化，成本模型会如何改变？</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/02/foundation/2026-11-02-foundation-css-has-pseudo-class/">https://litongjin.github.io/2026/11/02/foundation/2026-11-02-foundation-css-has-pseudo-class/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/02/foundation/2026-11-02-foundation-redis-zset-skiplist-probability-memory/" title="每日基础技术总结 · 2026-11-02 · Redis ZSet跳跃列表SkipList的插入概率控制与内存优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-02 · Redis ZSet跳跃列表SkipList的插入概率控制与内存优化</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/01/daily/2026-11-01-workbench-daily/" title="工作台日报 · 2026-11-01"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-11-01</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">792</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">99</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-02-%C2%B7-CSS-has-%E4%BC%AA%E7%B1%BB%E9%80%89%E6%8B%A9%E5%99%A8%EF%BC%9A%E7%9B%B8%E5%AF%B9%E5%90%8E%E4%BB%A3%E9%80%89%E6%8B%A9%E7%9A%84%E5%8E%86%E5%8F%B2%E7%AA%81%E7%A0%B4%E4%B8%8E%E5%8C%B9%E9%85%8D%E7%AE%97%E6%B3%95%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%AF%AD%E6%B3%95%E4%B8%8E%E5%BD%A2%E5%BC%8F%E8%AF%AD%E4%B9%89"><span class="toc-number">1.2.</span> <span class="toc-text">1. 语法与形式语义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%89%B9%E5%BC%82%E6%80%A7"><span class="toc-number">1.3.</span> <span class="toc-text">2. 特异性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%AF%AD%E6%B3%95%E7%BA%A6%E6%9D%9F"><span class="toc-number">1.4.</span> <span class="toc-text">3. 语法约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%8C%B9%E9%85%8D%E7%AE%97%E6%B3%95%EF%BC%9A%E5%8F%B3%E5%88%B0%E5%B7%A6-%E5%B1%80%E9%83%A8%E5%89%8D%E5%90%91%E9%87%8F%E5%8C%96"><span class="toc-number">1.5.</span> <span class="toc-text">4. 匹配算法：右到左 + 局部前向量化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%BB%93%E8%AE%BA"><span class="toc-number">1.6.</span> <span class="toc-text">5. 复杂度结论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E4%B8%8E%E5%89%8D%E7%AB%AF%E5%B7%B2%E6%9C%89%E6%A6%82%E5%BF%B5%E7%9A%84%E5%BC%82%E5%90%8C"><span class="toc-number">1.7.</span> <span class="toc-text">6. 与前端已有概念的异同</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.7.1.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.7.2.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA%E4%B8%80%EF%BC%9A%E6%8A%8A-has-%E5%BD%93%E3%80%8C%E7%88%B6%E9%80%89%E6%8B%A9%E5%99%A8%E3%80%8D"><span class="toc-number">1.8.</span> <span class="toc-text">误区一：把 :has() 当「父选择器」</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA%E4%BA%8C%EF%BC%9A%E8%AE%A4%E4%B8%BA-has-%E7%9A%84%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%E5%87%BA%E5%9C%A8%E3%80%8C%E9%80%89%E6%8B%A9%E5%99%A8%E5%8C%B9%E9%85%8D%E3%80%8D"><span class="toc-number">1.9.</span> <span class="toc-text">误区二：认为 :has() 的性能问题出在「选择器匹配」</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E9%A2%98"><span class="toc-number">1.10.</span> <span class="toc-text">思考题</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/02/daily/2026-11-02-workbench-daily/" title="工作台日报 · 2026-11-02">工作台日报 · 2026-11-02</a><time datetime="2026-11-01T23:01:51.000Z" title="发表于 2026-11-02 07:01:51">2026-11-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/02/foundation/2026-11-02-foundation-spring-transaction-propagation/" title="每日基础技术总结 · 2026-11-02 · Spring 事务传播行为">每日基础技术总结 · 2026-11-02 · Spring 事务传播行为</a><time datetime="2026-11-01T23:01:51.000Z" title="发表于 2026-11-02 07:01:51">2026-11-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/02/foundation/2026-11-02-foundation-redis-zset-skiplist-probability-memory/" title="每日基础技术总结 · 2026-11-02 · Redis ZSet跳跃列表SkipList的插入概率控制与内存优化">每日基础技术总结 · 2026-11-02 · Redis ZSet跳跃列表SkipList的插入概率控制与内存优化</a><time datetime="2026-11-01T23:01:51.000Z" title="发表于 2026-11-02 07:01:51">2026-11-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/02/foundation/2026-11-02-foundation-css-has-pseudo-class/" title="每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性">每日基础技术总结 · 2026-11-02 · CSS :has() 伪类选择器：相对后代选择的历史突破与匹配算法复杂性</a><time datetime="2026-11-01T23:01:51.000Z" title="发表于 2026-11-02 07:01:51">2026-11-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/01/daily/2026-11-01-workbench-daily/" title="工作台日报 · 2026-11-01">工作台日报 · 2026-11-01</a><time datetime="2026-10-31T23:02:11.000Z" title="发表于 2026-11-01 07:02:11">2026-11-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/01/foundation/2026-11-01-foundation-tls-session-ticket-rotation/" title="每日基础技术总结 · 2026-11-01 · TLS Session Resumption通过Session Ticket实现的无状态续连与票据轮转机制">每日基础技术总结 · 2026-11-01 · TLS Session Resumption通过Session Ticket实现的无状态续连与票据轮转机制</a><time datetime="2026-10-31T23:02:11.000Z" title="发表于 2026-11-01 07:02:11">2026-11-01</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
