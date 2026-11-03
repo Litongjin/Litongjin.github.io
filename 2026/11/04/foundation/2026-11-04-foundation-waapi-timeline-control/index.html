@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理📚 今日主题 Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理（前端底层与计算机基础）  1. 核心概念速览Web Animations API（WAAPI）是 W3C Web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/04/foundation/2026-11-04-foundation-waapi-timeline-control/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理📚 今日主题 Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理（前端底层与计算机基础）  1. 核心概念速览Web Animations API（WAAPI）是 W3C Web">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-03T23:01:40.000Z">
+<meta property="article:modified_time" content="2026-11-03T23:07:35.296Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/04/foundation/2026-11-04-foundation-waapi-timeline-control/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-04 07:07:35'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">800</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">100</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-03T23:01:40.000Z" title="发表于 2026-11-04 07:01:40">2026-11-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-03T23:07:35.296Z" title="更新于 2026-11-04 07:07:35">2026-11-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-04-·-Web-Animations-API-WAAPI-：取代-CSS-Transition-的控制力与时间轴管理"><a href="#每日基础技术总结-·-2026-11-04-·-Web-Animations-API-WAAPI-：取代-CSS-Transition-的控制力与时间轴管理" class="headerlink" title="每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理"></a>每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Web Animations API（WAAPI）是 W3C Web Animations 规范把浏览器内部动画模型（timing model + keyframe effect + 播放状态机）暴露为 JavaScript 可持有、可读取、可修改的接口。它的本质是一套可寻址的时间状态机，并非又多了一套动画语法。</p>
+<p>对象图：<br>Animation（播放器：状态机 + 时间控制）<br>  ├─ startTime &#x2F; holdTime &#x2F; playbackRate &#x2F; currentTime &#x2F; playState<br>  └─ effect: KeyframeEffect（把时间映射为属性值的纯函数）<br>        └─ keyframes + { duration, delay, endDelay, easing, iterations, direction, fill, composite }<br>AnimationTimeline（时间源）：document.timeline（随文档帧推进）&#x2F; ScrollTimeline &#x2F; ViewTimeline</p>
+<p>关键事实：CSS Transition 与 CSS Animation 在引擎内部同样被编译为这套模型的实例（el.getAnimations() 返回的 CSSTransition、CSSAnimation 都是 Animation 的子类）。也就是说，CSS 是“样式变更 diff 隐式派生动画”的声明式入口，WAAPI 是“显式构造并持有动画对象”的命令式入口，两者共享同一时间模型与同一条渲染管线。</p>
+<p>它解决的问题（全部来自 CSS Transition 的结构性缺陷）：</p>
+<ol>
+<li>不可寻址：transition 对象没有句柄，随 style recalc 生灭，无法在运行时针对某个具体动画做操作。</li>
+<li>不可精确控制：不能 pause、seek、变速、倒放、finish，只能通过 duration&#x2F;delay 间接影响。</li>
+<li>中断语义不可预测：连续修改目标值会触发 reversing shortening factor 与 transition 重定向规则，实际时长被缩短且不可控。</li>
+<li>无运行时可变性：无法在播放中替换 keyframes 或更新 timing。</li>
+<li>生命周期通知粗糙：只有 transitionend&#x2F;transitioncancel 事件，无 Promise 语义，被打断时的行为不明确。</li>
+<li>无统一时间源：无法与滚动、视图进入等时间源编排。</li>
+</ol>
+<p>在整个体系中的位置：它位于 JavaScript 主线程与 Blink 的 animation 层、合成器（cc::AnimationHost &#x2F; cc::AnimationTimeline）之间，是渲染流水线中“时间维度”的公开接口。掌握它，是判断一个动画是否掉帧、是否占用主线程、是否触发 layout&#x2F;paint 的唯一可靠依据；也是实现手势联动、可逆中断过渡、FLIP、滚动驱动动画、View Transitions 的前提。对于有工程经验但缺乏渲染层认知的开发者，这里是从“写样式”跨到“理解引擎如何按帧推进状态”的分界线。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>一、时间模型的分层（Web Animations timing model，规范定义，不是实现细节）</p>
+<p>timeline time（document.timeline.currentTime，约等于当前帧时间）<br>  → animation currentTime：<br>      running: (timelineTime - startTime) * playbackRate<br>      paused &#x2F; idle: holdTime<br>  → effect local time &#x3D; currentTime<br>  → active time &#x3D; localTime - delay，再 clamp 到 [0, activeDuration]<br>  → phase 判定：before &#x2F; active &#x2F; after（由 delay、activeDuration、endDelay 与 fill 决定该阶段是否仍应用样式）<br>  → iteration progress：overallProgress &#x3D; activeTime &#x2F; iterationDuration；再按 iterations 取整取余得 simpleIterationProgress；按 direction 翻转得 directedProgress；施加 easing 得 transformedProgress<br>  → keyframe 插值：在相邻 keyframe 的 offset 区间内 lerp，再按 composite（replace &#x2F; add &#x2F; accumulate）合成到目标属性值</p>
+<p>核心洞察：Animation 只存三个独立状态——startTime（时间轴锚点）、holdTime（冻结值）、playbackRate（时间缩放因子）。currentTime 是这三者的纯函数，不独立存储。这正是“可 seek、可倒放、可变速而不破坏 keyframes”的根本原因。</p>
+<p>伪代码：</p>
+<p>play():<br>  if playState &#x3D;&#x3D; finished: currentTime &#x3D; (playbackRate &gt;&#x3D; 0 ? 0 : activeDuration)<br>  startTime &#x3D; null; holdTime &#x3D; null; playState &#x3D; pending<br>  &#x2F;&#x2F; pending 阶段浏览器在下一个 rendering opportunity 前 resolve ready，并写入 startTime &#x3D; timelineTime<br>pause():<br>  holdTime &#x3D; currentTime; startTime &#x3D; null; playState &#x3D; paused<br>cancel():<br>  清空 startTime &#x2F; holdTime，effect 不再应用到目标元素，finished 以 AbortError reject<br>finish():<br>  currentTime &#x3D; (playbackRate &gt;&#x3D; 0 ? activeDuration : 0)<br>setKeyframes() &#x2F; updateTiming():<br>  只改 effect（值映射），不触碰 Animation 的时间状态，因此可在播放中热替换</p>
+<p>二、线程模型：什么时候真的“不占主线程”</p>
+<ol>
+<li>仅当（a）动画属性属于可合成集合（transform、opacity、filter 等），且（b）目标元素已被提升为合成层时，动画才会被序列化为 cc::AnimationCurve 下发到 compositor 线程。此时主线程被长任务阻塞，动画仍按 timeline 推进——因为时间模型副本在合成器侧。</li>
+<li>非可合成属性（width &#x2F; left &#x2F; margin &#x2F; background-color &#x2F; box-shadow &#x2F; top）走 main-thread ticking：每帧由 timeline 采样 → 修改 style → Recalc Style → Layout → Paint → Commit。</li>
+<li>在 rAF 中每帧读 getComputedTiming()、getBoundingClientRect() 再写样式，会强制主线程同步布局（layout thrashing），等于主动放弃合成器路径。</li>
+</ol>
+<p>三、与 requestAnimationFrame 手写插值的差异（前端已有的最接近概念）</p>
+<p>rAF 方案把时间模型放在 JS 里：你持有 t，自己算 progress，自己写 style。主线程掉一帧，这个 t 就“丢”了，动画在时间轴上被拉长，且无法与浏览器其它动画同步。<br>WAAPI 的时间模型由引擎持有，采样发生在渲染流水线的固定位置（与合成器时钟同源），主线程卡顿不会让动画时间轴失真，且 getAnimations() 能把 CSS 侧与 JS 侧的动画纳入同一批对象统一编排。</p>
+<p>四、与 CSS Transition 的本质异同（类比“结构化类型 vs 名义类型”）</p>
+<p>| 维度 | CSS Transition | WAAPI |<br>| 对象身份 | 无句柄，样式 diff 的副产物，形状由外部状态推断（结构化） | 有独立身份的实例，有生命周期与引用（名义） |<br>| 触发模型 | 计算值变化隐式生成 | 构造函数显式声明 |<br>| 时间控制 | 仅 duration&#x2F;delay | currentTime 读写、seek、变速、倒放、finish |<br>| 运行时可变更 | 只能改类名&#x2F;变量间接影响 | setKeyframes &#x2F; updateTiming 直接改 effect |<br>| 完成通知 | transitionend 事件，冒泡、语义粗糙 | ready &#x2F; finished Promise，cancel 时 AbortError reject |<br>| 时间源 | 固定为文档时钟 | document.timeline &#x2F; ScrollTimeline &#x2F; ViewTimeline |<br>| 中断行为 | reversing shortening factor，时长被缩短，不可预测 | 在中断点精确续播，位置与速率完全可控 |</p>
+<p>五、动画替换（Animation.replaceState）</p>
+<p>fill 生效且已 finished 的动画会被浏览器自动移除（removed），以释放合成层与样式优先级。若要保留终态视觉效果，必须 commitStyles() 把计算值写回元素内联样式，再 persist() 阻止自动移除；否则 getAnimations() 中的对象消失、样式回退。这是 WAAPI 从 CSS 动画继承来的“填充只负责呈现，不负责持久化”的语义边界。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">// index.html</span><br><span class="line">// &lt;div id=box style=width:100px;height:100px;background:#333&gt;&lt;/div&gt;</span><br><span class="line">// &lt;button id=seek&gt;seek&lt;/button&gt;</span><br><span class="line"></span><br><span class="line">const box = document.getElementById(&#x27;box&#x27;);</span><br><span class="line"></span><br><span class="line">// 1) KeyframeEffect 只描述「时间 → 属性值」的纯映射，不携带任何播放状态</span><br><span class="line">const effect = new KeyframeEffect(</span><br><span class="line">  box,</span><br><span class="line">  [</span><br><span class="line">    &#123; transform: &#x27;translateX(0px)&#x27;,   opacity: 1,   offset: 0 &#125;,</span><br><span class="line">    &#123; transform: &#x27;translateX(200px)&#x27;, opacity: 0.5, offset: 0.5, easing: &#x27;ease-in&#x27; &#125;,</span><br><span class="line">    &#123; transform: &#x27;translateX(400px)&#x27;, opacity: 1,   offset: 1 &#125;</span><br><span class="line">  ],</span><br><span class="line">  &#123;</span><br><span class="line">    duration: 1000,        // iterationDuration：iteration progress 的分母</span><br><span class="line">    delay: 200,            // 决定 localTime -&gt; activeTime 的偏移与 before phase 长度</span><br><span class="line">    iterations: 1,         // 影响 simpleIterationProgress 的取整取余</span><br><span class="line">    direction: &#x27;normal&#x27;,   // 决定 directedProgress 是否翻转</span><br><span class="line">    fill: &#x27;both&#x27;,          // 决定 before/after phase 是否仍然应用样式</span><br><span class="line">    composite: &#x27;replace&#x27;   // 与其它动画叠加时的合成算子</span><br><span class="line">  &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">// 2) Animation = (timeline, effect) 的绑定；时间源与值映射完全解耦</span><br><span class="line">const anim = new Animation(effect, document.timeline);</span><br><span class="line"></span><br><span class="line">// 3) idle -&gt; pending -&gt; running：startTime 在首个渲染时机才被写入</span><br><span class="line">anim.play();</span><br><span class="line">console.log(anim.playState);   // pending：startTime === null，此时 currentTime 由 holdTime 承载</span><br><span class="line">anim.ready.then(() =&gt; &#123;</span><br><span class="line">  // 到这里 startTime 才非 null；currentTime = (timelineTime - startTime) * playbackRate</span><br><span class="line">  console.log(&#x27;startTime&#x27;, anim.startTime, &#x27;currentTime&#x27;, anim.currentTime);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 4) 精确 seek：写 currentTime 只是修改引擎内部时间状态，渲染在下一帧采样时发生</span><br><span class="line">document.getElementById(&#x27;seek&#x27;).onclick = () =&gt; &#123;</span><br><span class="line">  anim.pause();            // 冻结：holdTime = currentTime，startTime = null</span><br><span class="line">  anim.currentTime = 500;  // localTime=500 -&gt; activeTime=500-200=300 -&gt; progress=30%</span><br><span class="line">  const ct = effect.getComputedTiming();</span><br><span class="line">  // 读取引擎按规范算出的中间量，验证上面的分层映射</span><br><span class="line">  console.log(ct.localTime, ct.activeDuration, ct.progress, ct.currentIteration);</span><br><span class="line">  // 注意：此处不会触发同步样式重算，视觉更新在下一个 rendering opportunity</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 5) playbackRate 是时间缩放因子，负值即倒放，不改变 keyframes</span><br><span class="line">function setSpeed(v) &#123;</span><br><span class="line">  const t = anim.currentTime;   // 变速前先取锚点，保证位置连续</span><br><span class="line">  anim.playbackRate = v;</span><br><span class="line">  anim.currentTime = t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 6) 生命周期 Promise：cancel 会以 AbortError reject，用于可取消的动画编排</span><br><span class="line">anim.finished</span><br><span class="line">  .then(() =&gt; console.log(&#x27;finished&#x27;))</span><br><span class="line">  .catch((e) =&gt; console.log(&#x27;aborted&#x27;, e.name));  // DOMException: AbortError</span><br><span class="line"></span><br><span class="line">// 7) 同构验证：声明式产生的 CSS transition 也是同一批 Animation 对象</span><br><span class="line">box.style.transition = &#x27;transform 300ms&#x27;;</span><br><span class="line">box.style.transform = &#x27;translateX(50px)&#x27;;</span><br><span class="line">requestAnimationFrame(() =&gt; &#123;</span><br><span class="line">  box.getAnimations().forEach((a) =&gt; &#123;</span><br><span class="line">    console.log(a.constructor.name);  // CSSTransition —— 与手动构造的 Animation 同类</span><br><span class="line">    a.pause();                        // 声明式动画同样可被命令式接管</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 8) fill 生效且 finished 的动画会被自动移除，需显式持久化终态</span><br><span class="line">// anim.commitStyles();  // 把当前计算值写回内联样式</span><br><span class="line">// anim.persist();       // 阻止 replaceState 变为 removed</span><br><span class="line"></span><br><span class="line">// 9) 性能验证：给它改成 anim.effect.target.style.width 的动画（非可合成属性），</span><br><span class="line">// 在 DevTools Performance 面板中会看到每帧 Recalc Style + Layout，而 transform 版本没有。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>误区一：把 WAAPI 当成“CSS 动画的 JS 语法糖”。方向恰好相反：CSS 动画是 WAAPI 模型的上层投影。由此衍生出两个具体错误：(a) 认为 anim.currentTime &#x3D; x 会立刻触发渲染——它只改写引擎内部时间状态，样式值在下一个 rendering opportunity 才被采样，同步读取 getComputedTiming() 读到的是“时间模型真值”，而非“已渲染的像素真值”；(b) 忽略 pending 阶段——play() 之后、ready resolve 之前 startTime 为 null，currentTime 实际由 holdTime 承载，此时用 (now - startTime) 手算进度会得到 NaN 或错值。</p>
+<p>误区二：认为“用了 WAAPI 就自动走合成器、零主线程开销”。合成器路径有三个必要条件：属性可合成（transform&#x2F;opacity&#x2F;filter）、元素已提升为合成层、没有同属性的非可合成动画或每帧读写样式的代码干扰它。给 width&#x2F;left&#x2F;background 做 WAAPI 动画依然是每帧 Recalc Style + Layout + Paint；在 rAF 里轮询 getComputedTiming() 或 getBoundingClientRect() 再写样式，会额外引入强制同步布局，反而比 CSS 路径更慢。另一处被忽略的语义是 fill：’forwards’ 的动画在 finished 后会被浏览器按 replace 规范自动移除，导致视觉回退——必须 commitStyles() + persist() 显式接管终态。</p>
+<p>思考题：实现一个“可中断、可反向、且中断瞬间位置与速度都连续”的拖拽回弹过渡（例如手指拖到任意位置后释放，元素带初速度弹性归位）。</p>
+<ol>
+<li>请只用 WAAPI 的时间模型（startTime &#x2F; holdTime &#x2F; playbackRate &#x2F; currentTime，配合 effect.updateTiming() 与多个并行 Animation 的 composite: ‘add’）设计完整的状态迁移，说明在哪些时刻必须把 currentTime 反解回 startTime、哪些时刻必须切换为 holdTime。</li>
+<li>为什么 CSS transition 在连续两次修改目标值时必然触发 reversing shortening factor、导致实际 duration 短于声明值，并且无法表达“以当前速度为初速度”的物理回弹？请从“transition 是由计算值 diff 派生”这一点出发论证。</li>
+<li>若把时间源换成 ScrollTimeline，playbackRate 与 currentTime 的语义分别发生什么变化？此时 pause() 意味着什么，为什么 scroll 驱动的动画不允许自由 seek？</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/04/foundation/2026-11-04-foundation-waapi-timeline-control/">https://litongjin.github.io/2026/11/04/foundation/2026-11-04-foundation-waapi-timeline-control/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/04/foundation/2026-11-04-foundation-rabbitmq-dlx-message-ttl/" title="每日基础技术总结 · 2026-11-04 · RabbitMQ死信队列（DLX）配置与消息TTL的配合逻辑"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-04 · RabbitMQ死信队列（DLX）配置与消息TTL的配合逻辑</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/04/foundation/2026-11-04-foundation-tcp-zero-window-probe/" title="每日基础技术总结 · 2026-11-04 · TCP零窗口探测（Zero Window Probe）的定时器触发与避免死锁机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-11-04 · TCP零窗口探测（Zero Window Probe）的定时器触发与避免死锁机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">800</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">100</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-04-%C2%B7-Web-Animations-API-WAAPI-%EF%BC%9A%E5%8F%96%E4%BB%A3-CSS-Transition-%E7%9A%84%E6%8E%A7%E5%88%B6%E5%8A%9B%E4%B8%8E%E6%97%B6%E9%97%B4%E8%BD%B4%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/04/daily/2026-11-04-workbench-daily/" title="工作台日报 · 2026-11-04">工作台日报 · 2026-11-04</a><time datetime="2026-11-03T23:01:40.000Z" title="发表于 2026-11-04 07:01:40">2026-11-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/04/foundation/2026-11-04-foundation-rabbitmq-dlx-message-ttl/" title="每日基础技术总结 · 2026-11-04 · RabbitMQ死信队列（DLX）配置与消息TTL的配合逻辑">每日基础技术总结 · 2026-11-04 · RabbitMQ死信队列（DLX）配置与消息TTL的配合逻辑</a><time datetime="2026-11-03T23:01:40.000Z" title="发表于 2026-11-04 07:01:40">2026-11-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/04/foundation/2026-11-04-foundation-waapi-timeline-control/" title="每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理">每日基础技术总结 · 2026-11-04 · Web Animations API (WAAPI)：取代 CSS Transition 的控制力与时间轴管理</a><time datetime="2026-11-03T23:01:40.000Z" title="发表于 2026-11-04 07:01:40">2026-11-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/04/foundation/2026-11-04-foundation-tcp-zero-window-probe/" title="每日基础技术总结 · 2026-11-04 · TCP零窗口探测（Zero Window Probe）的定时器触发与避免死锁机制">每日基础技术总结 · 2026-11-04 · TCP零窗口探测（Zero Window Probe）的定时器触发与避免死锁机制</a><time datetime="2026-11-03T23:01:40.000Z" title="发表于 2026-11-04 07:01:40">2026-11-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/03/foundation/2026-11-03-foundation-innodb-page-split-merge-fragmentation/" title="每日基础技术总结 · 2026-11-03 · MySQL InnoDB页分裂与页合并对碎片率的具体影响">每日基础技术总结 · 2026-11-03 · MySQL InnoDB页分裂与页合并对碎片率的具体影响</a><time datetime="2026-11-02T23:01:23.000Z" title="发表于 2026-11-03 07:01:23">2026-11-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/03/daily/2026-11-03-workbench-daily/" title="工作台日报 · 2026-11-03">工作台日报 · 2026-11-03</a><time datetime="2026-11-02T23:01:23.000Z" title="发表于 2026-11-03 07:01:23">2026-11-03</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
