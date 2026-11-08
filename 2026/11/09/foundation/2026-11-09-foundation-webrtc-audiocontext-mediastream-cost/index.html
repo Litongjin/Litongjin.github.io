@@ -1,0 +1,234 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析📚 今日主题 WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析（前端底层与计算机基础）  1. 核心概念速览定义与本质 MediaStream：Media Capture and Streams 规范定义的容器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/09/foundation/2026-11-09-foundation-webrtc-audiocontext-mediastream-cost/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析📚 今日主题 WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析（前端底层与计算机基础）  1. 核心概念速览定义与本质 MediaStream：Media Capture and Streams 规范定义的容器">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-08T23:03:21.000Z">
+<meta property="article:modified_time" content="2026-11-08T23:09:50.629Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/09/foundation/2026-11-09-foundation-webrtc-audiocontext-mediastream-cost/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-09 07:09:50'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">820</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">100</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-08T23:03:21.000Z" title="发表于 2026-11-09 07:03:21">2026-11-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-08T23:09:50.629Z" title="更新于 2026-11-09 07:09:50">2026-11-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-09-·-WebRTC-媒体流处理：AudioContext-与-MediaStream-的资源占用分析"><a href="#每日基础技术总结-·-2026-11-09-·-WebRTC-媒体流处理：AudioContext-与-MediaStream-的资源占用分析" class="headerlink" title="每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析"></a>每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><h3 id="定义与本质"><a href="#定义与本质" class="headerlink" title="定义与本质"></a>定义与本质</h3><ul>
+<li><strong>MediaStream</strong>：Media Capture and Streams 规范定义的容器，持有零到多个 <code>MediaStreamTrack</code>。Track 是<strong>单向、有状态（<code>live</code> &#x2F; <code>ended</code>）、由原生管线供数</strong>的媒体源抽象。JS 侧对象只是句柄（handle）；真实数据产生在浏览器进程的 capture service &#x2F; audio service 中（设备驱动 → 采集线程 → 有界环形缓冲 → 各消费者）。它解决的问题是把设备级媒体源以可组合、可跨 API 传递的方式暴露给 Web。</li>
+<li><strong>AudioContext</strong>：Web Audio API 的图渲染上下文，本质是<strong>由音频硬件时钟驱动的 pull 模型数据流图执行器</strong>。它把 <code>AudioNode</code> 组成的有向无环图按拓扑序、以固定 <strong>128 帧（render quantum，48kHz 下 2.67ms）</strong> 为周期，在独立的高优先级实时线程上求值，输出经 <code>AudioDestinationNode</code> 写入与 audio service 共享的环形缓冲，最终由设备 DMA 取走。它解决的问题是在 JS 中做采样级精确、低延迟的音频合成与处理。</li>
+</ul>
+<h3 id="二者的关系"><a href="#二者的关系" class="headerlink" title="二者的关系"></a>二者的关系</h3><ul>
+<li>MediaStream 是 <strong>push</strong>：采集线程推帧进 track 缓冲。</li>
+<li>AudioContext 是 <strong>pull</strong>：destination 每量子拉取一次。</li>
+<li><code>MediaStreamAudioSourceNode</code> 是两者之间的<strong>适配器</strong>：时钟域转换 + 采样率转换（SRC）+ 缓冲水位控制，不是零成本引用。</li>
+</ul>
+<h3 id="资源占用模型（三类，必须分开核算）"><a href="#资源占用模型（三类，必须分开核算）" class="headerlink" title="资源占用模型（三类，必须分开核算）"></a>资源占用模型（三类，必须分开核算）</h3><ol>
+<li><strong>AudioContext 的固定成本</strong>：一条实时优先级渲染线程；一段与 audio service 跨进程共享的环形缓冲（与 <code>baseLatency</code> 成正比）；一个硬件输出流（独占 OS 音频会话，移动端会切换音频路由，并阻止设备进入低功耗态）；每量子一次线程唤醒的调度成本（48kHz 下约 375 次&#x2F;秒，<strong>静默时依然发生</strong>）。</li>
+<li><strong>MediaStreamTrack 的成本</strong>：设备采集会话（麦克风&#x2F;摄像头，部分平台独占）；原生帧缓冲（音频按 10ms 粒度，视频为帧池）；进入 <code>RTCPeerConnection</code> 后追加 encoder&#x2F;decoder 实例、jitter buffer、pacer、带宽估计器。</li>
+<li><strong>变动成本</strong>：图中每个节点的缓冲与计算；跨采样率时每个 context 独立的 SRC 实例；视频每帧的格式转换拷贝。</li>
+</ol>
+<h3 id="为什么专业工程师必须掌握"><a href="#为什么专业工程师必须掌握" class="headerlink" title="为什么专业工程师必须掌握"></a>为什么专业工程师必须掌握</h3><p>实时音视频的资源几乎全部是<strong>非 JS 堆、非 GC 可见、非 DevTools 堆快照可见</strong>的。泄漏不表现为 OOM，而表现为：设备指示灯常亮、移动端发热耗电、<code>getUserMedia</code> 因设备忙失败、AudioContext 数量达到上限后新实例永久 <code>suspended</code> 且静音。这是从「前端内存管理」跨到「系统资源生命周期管理」的关键一步，也是做端到端延迟预算（采集 → SRC → 编码 → jitter buffer → 解码 → 渲染）的前提。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><h3 id="1-AudioContext-的状态机与生命周期（资源释放确定性的来源）"><a href="#1-AudioContext-的状态机与生命周期（资源释放确定性的来源）" class="headerlink" title="1. AudioContext 的状态机与生命周期（资源释放确定性的来源）"></a>1. AudioContext 的状态机与生命周期（资源释放确定性的来源）</h3><p>构造路径（简化）：</p>
+<p>main thread                          audio service                OS<br>  new AudioContext(options)<br>    ├─ 解析 sampleRate &#x2F; latencyHint<br>    ├─ 创建 AudioDestinationNode<br>    ├─ 申请 output stream  ──────────►  open device (period ≈ baseLatency)<br>    │                          ◄──────  shared memory ring (N 个 quantum)<br>    ├─ 启动 render thread（实时优先级，非主线程）<br>    └─ state &#x3D; ‘running’ | ‘suspended’</p>
+<p>状态迁移：<code>suspended → running → suspended → ... → closed</code>，<code>closed</code> 是终态、不可复用。<code>close()</code> 是唯一能<strong>确定性</strong>释放渲染线程与设备句柄的入口；<code>suspend()</code> 的语义只是「停止拉取」，是否顺带关闭底层设备流属实现细节（Chromium 倾向关闭以降功耗，代价是 <code>resume()</code> 有非零且不确定的延迟）。</p>
+<h3 id="2-采样率是隐性的转换点"><a href="#2-采样率是隐性的转换点" class="headerlink" title="2. 采样率是隐性的转换点"></a>2. 采样率是隐性的转换点</h3><p><code>ctx.sampleRate</code> 在构造时确定，通常等于设备&#x2F;会话采样率（iOS 强绑定 AVAudioSession，路由切换会改变硬件采样率并可能中断 context，需监听 <code>statechange</code> 重建）。<code>track.getSettings().sampleRate</code> 是采集侧参数。二者不等时，浏览器在 <code>MediaStreamAudioSourceNode</code> 内部插入重采样器，且<strong>转换比是分数且随时间微调</strong>，用于吸收采集时钟与输出时钟之间 ppm 级频差（clock drift compensation）；否则有界 FIFO 水位必然长期漂移到溢出或欠载。</p>
+<h3 id="3-渲染量子与图求值规则"><a href="#3-渲染量子与图求值规则" class="headerlink" title="3. 渲染量子与图求值规则"></a>3. 渲染量子与图求值规则</h3><ul>
+<li>单位固定 128 帧，与 <code>sampleRate</code> 无关；量子边界对齐是 AudioWorklet 全部时序语义的基础。</li>
+<li>只有从 <code>AudioDestinationNode</code> <strong>反向可达</strong>的节点才会被求值；未连到 destination 的节点不产生 pull，<code>process()</code> 不被调用。</li>
+<li>单量子内禁止阻塞、禁止大对象分配、禁止跨线程同步等待（实时安全约束）。</li>
+</ul>
+<h3 id="4-Track-的消费者模型"><a href="#4-Track-的消费者模型" class="headerlink" title="4. Track 的消费者模型"></a>4. Track 的消费者模型</h3><p>capture thread（10ms 一批）<br>   → MediaStreamTrack 内部有界环形缓冲<br>       → MediaStreamAudioSourceNode（pull + SRC）<br>       → RTCRtpSender（encode）<br>       → HTMLMediaElement.srcObject（playout）</p>
+<p>每个消费者独立读取、独立缓冲；同一 track 接入两个 AudioContext，就产生两个 source、跑两份 SRC。桥接节点的取数逻辑：</p>
+<p>MediaStreamAudioSourceNode.process(128):<br>  if track.sampleRate !&#x3D; context.sampleRate:<br>      out &#x3D; resample(fifo.pull(ceil(128 * ratio) + filter_taps), ratio)<br>  else:<br>      out &#x3D; fifo.pull(128)<br>  if fifo.overflow(): drop oldest      # 水位失控 → 可听 glitch</p>
+<h3 id="与前端已有概念的异同"><a href="#与前端已有概念的异同" class="headerlink" title="与前端已有概念的异同"></a>与前端已有概念的异同</h3><table>
+<thead>
+<tr>
+<th>对照</th>
+<th>相同点</th>
+<th>关键差异</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AudioContext</code> vs <code>requestAnimationFrame</code></td>
+<td>都是周期性回调，都由外部时钟驱动</td>
+<td>rAF 由 vsync 驱动且<strong>可丢帧</strong>；音频时钟不可丢，欠载即爆音；音频回调在浏览器实时线程，主线程长任务不直接阻塞它</td>
+</tr>
+<tr>
+<td><code>AudioContext</code> vs <code>Worker</code></td>
+<td>都是独立执行上下文</td>
+<td>Worker 由你创建、可阻塞；音频线程由浏览器内部持有，你只能经 AudioWorkletGlobalScope 进入，且必须实时安全</td>
+</tr>
+<tr>
+<td><code>track.stop()</code> vs <code>AbortController.abort()</code></td>
+<td>都是幂等的一次性终止</td>
+<td><code>stop()</code> 释放的是<strong>原生设备会话</strong>，且<strong>不派发 <code>ended</code> 事件</strong>；<code>ended</code> 只由外部原因（设备拔出、权限撤销、被抢占）触发</td>
+</tr>
+<tr>
+<td>Audio 图 vs 组件树</td>
+<td>都是节点组合</td>
+<td>图是<strong>数据流</strong>而非状态；<code>connect/disconnect</code> 即拓扑生命周期操作，重建边即重建通路</td>
+</tr>
+</tbody></table>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">// probe.js — 无框架，粘贴到空白页 Console 执行（Chrome / Firefox）</span><br><span class="line"></span><br><span class="line">// ── 1. AudioContext 构造即刻产生原生资源：打开设备 + 启动实时线程 ──</span><br><span class="line">const ctx = new AudioContext();</span><br><span class="line">console.log(</span><br><span class="line">  ctx.state,        // &#x27;running&#x27; | &#x27;suspended&#x27;：无用户手势时被 autoplay policy 挂起</span><br><span class="line">  ctx.sampleRate,   // 会话采样率（44100 / 48000），构造后不可变</span><br><span class="line">  ctx.baseLatency,  // 底层输出缓冲时长(s) = bufferFrames / sampleRate，与内存占用正相关</span><br><span class="line">  ctx.outputLatency // baseLatency + 设备/DSP 链延迟</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">// ── 2. 用 AudioWorklet 观测渲染量子：恒定 128 帧一次，运行在音频线程 ──</span><br><span class="line">const mod = `</span><br><span class="line">class Probe extends AudioWorkletProcessor &#123;</span><br><span class="line">  constructor() &#123; super(); this.n = 0; &#125;</span><br><span class="line">  process(inputs, outputs) &#123;</span><br><span class="line">    this.n += 128;                       // 每量子固定 128 帧，与 sampleRate 无关</span><br><span class="line">    if (this.n &gt;= 48000) &#123; this.n = 0; this.port.postMessage(1); &#125;</span><br><span class="line">    return true;                          // 返回 false 且无输出连接 → 节点被剔除，不再调用</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">registerProcessor(&#x27;probe&#x27;, Probe);`;</span><br><span class="line">const url = URL.createObjectURL(new Blob([mod], &#123; type: &#x27;application/javascript&#x27; &#125;));</span><br><span class="line">await ctx.audioWorklet.addModule(url);    // 模块在音频线程求值，不在主线程</span><br><span class="line">const probe = new AudioWorkletNode(ctx, &#x27;probe&#x27;);</span><br><span class="line">let sec = 0;</span><br><span class="line">probe.port.onmessage = () =&gt; console.log(&#x27;render quanta/s ≈&#x27;, ++sec); // 期望 ≈ sampleRate / 128</span><br><span class="line">probe.connect(ctx.destination);            // 不 connect 则 destination 反向不可达，process 根本不会被调用</span><br><span class="line"></span><br><span class="line">// ── 3. MediaStream：每个 track 是一份独立的原生采集会话 ──</span><br><span class="line">const stream = await navigator.mediaDevices.getUserMedia(&#123; audio: true &#125;);</span><br><span class="line">const track = stream.getAudioTracks()[0];</span><br><span class="line">console.log(track.readyState, track.getSettings()); // 采集侧 sampleRate 未必等于 ctx.sampleRate</span><br><span class="line"></span><br><span class="line">// ── 4. 桥接节点：pull 侧适配器，内含 FIFO + 采样率转换器 ──</span><br><span class="line">const src = ctx.createMediaStreamSource(stream);</span><br><span class="line">src.connect(ctx.destination);              // 采样率不等时此处发生实时重采样，是真实 CPU 成本</span><br><span class="line"></span><br><span class="line">// ── 5. 释放路径：JS 引用归零 ≠ 原生资源释放 ──</span><br><span class="line">track.stop();                               // 关闭采集会话，readyState → &#x27;ended&#x27;；不派发 ended 事件</span><br><span class="line">console.log(track.readyState);              // &#x27;ended&#x27;</span><br><span class="line">src.disconnect();                           // 断开图边，节点失去 pull，进入可回收状态</span><br><span class="line">await ctx.close();                          // 唯一确定性释放：停渲染线程 + 归还设备句柄</span><br><span class="line">console.log(ctx.state);                     // &#x27;closed&#x27;，终态，需要时重新 new</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><h3 id="误区一：把-AudioContext-当普通-JS-对象"><a href="#误区一：把-AudioContext-当普通-JS-对象" class="headerlink" title="误区一：把 AudioContext 当普通 JS 对象"></a>误区一：把 AudioContext 当普通 JS 对象</h3><p>认为「没有引用就会被 GC 回收」「<code>suspend()</code> 等于释放资源」。实际：规范未要求 GC 必须执行 <code>close()</code>；Chromium 对同时存在的硬件输出流有上限（历史实现为 6 个），触顶后新 context 永久停留在 <code>suspended</code>，<code>resume()</code> 静默失败，表现为「不报错但没声音」。<code>suspend()</code> 只停止拉取，是否关闭底层设备流是实现相关的，且 <code>resume()</code> 的重建延迟不确定（蓝牙 A2DP 路由下可达数百毫秒）。</p>
+<p>工程结论：全局维护<strong>一个</strong>长生命周期 AudioContext，用 <code>connect/disconnect</code> 增删子图；确需销毁时 <code>await ctx.close()</code>；<code>pagehide</code> 时统一 <code>close()</code> 并对每个 track 调 <code>stop()</code>。</p>
+<h3 id="误区二：把成本算在节点数上，而非-track-与拷贝上"><a href="#误区二：把成本算在节点数上，而非-track-与拷贝上" class="headerlink" title="误区二：把成本算在节点数上，而非 track 与拷贝上"></a>误区二：把成本算在节点数上，而非 track 与拷贝上</h3><p>认为 WebAudio 图越简单越省、<code>createMediaStreamSource</code> 只是引用同一份数据。实际：</p>
+<ul>
+<li>每个 AudioContext 各自跑一份 SRC，同一个 44.1kHz 的 track 接入两个 48kHz 的 context 就是两份重采样。</li>
+<li>同一个 stream 同时给 <code>&lt;video&gt;</code>、WebAudio、<code>RTCPeerConnection</code>，是三个独立消费者、三份缓冲；视频侧还有每帧 I420&#x2F;NV12 的格式转换与拷贝（720p30 原始数据量级约 40MB&#x2F;s），这才是主要成本。</li>
+<li><code>ScriptProcessorNode</code> 在主线程执行并强制整块双缓冲拷贝，应一律由 <code>AudioWorklet</code> 替代。</li>
+</ul>
+<h3 id="进阶思考题"><a href="#进阶思考题" class="headerlink" title="进阶思考题"></a>进阶思考题</h3><blockquote>
+<p>一个标称 48kHz 的 AudioContext，接入了标称 44.1kHz 的麦克风 track。两个设备由<strong>彼此独立的物理时钟</strong>驱动，即使标称值相同也存在 ppm 级频差。</p>
+<ol>
+<li>若浏览器不做时钟漂移补偿，内部有界 FIFO 的水位会如何随 <code>currentTime</code> 演化？最终以哪种方式失效（溢出丢帧，还是欠载插帧），二者在听感与端到端延迟上分别意味着什么？</li>
+<li>为什么「track 直接 <code>addTrack</code> 给 RTCPeerConnection」与「先进 WebAudio 图、再从 <code>MediaStreamAudioDestinationNode</code> 取出送入 PeerConnection」在延迟与资源上不是同一量级？后者的额外延迟具体由哪几个缓冲（track FIFO、SRC 滤波群延迟、render quantum 量化、destination 侧环形缓冲）叠加而成？</li>
+</ol>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/09/foundation/2026-11-09-foundation-webrtc-audiocontext-mediastream-cost/">https://litongjin.github.io/2026/11/09/foundation/2026-11-09-foundation-webrtc-audiocontext-mediastream-cost/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/09/foundation/2026-11-09-foundation-websocket-heartbeat-reconnect/" title="每日基础技术总结 · 2026-11-09 · WebSocket心跳机制（Ping/Pong）的设计：间隔计算与异常断开自动重连逻辑"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-09 · WebSocket心跳机制（Ping/Pong）的设计：间隔计算与异常断开自动重连逻辑</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/08/daily/2026-11-08-workbench-daily/" title="工作台日报 · 2026-11-08"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-11-08</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">820</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">100</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-09-%C2%B7-WebRTC-%E5%AA%92%E4%BD%93%E6%B5%81%E5%A4%84%E7%90%86%EF%BC%9AAudioContext-%E4%B8%8E-MediaStream-%E7%9A%84%E8%B5%84%E6%BA%90%E5%8D%A0%E7%94%A8%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E4%B8%8E%E6%9C%AC%E8%B4%A8"><span class="toc-number">1.1.2.</span> <span class="toc-text">定义与本质</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E8%80%85%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">1.1.3.</span> <span class="toc-text">二者的关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E5%8D%A0%E7%94%A8%E6%A8%A1%E5%9E%8B%EF%BC%88%E4%B8%89%E7%B1%BB%EF%BC%8C%E5%BF%85%E9%A1%BB%E5%88%86%E5%BC%80%E6%A0%B8%E7%AE%97%EF%BC%89"><span class="toc-number">1.1.4.</span> <span class="toc-text">资源占用模型（三类，必须分开核算）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%93%E4%B8%9A%E5%B7%A5%E7%A8%8B%E5%B8%88%E5%BF%85%E9%A1%BB%E6%8E%8C%E6%8F%A1"><span class="toc-number">1.1.5.</span> <span class="toc-text">为什么专业工程师必须掌握</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.6.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-AudioContext-%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA%E4%B8%8E%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%88%E8%B5%84%E6%BA%90%E9%87%8A%E6%94%BE%E7%A1%AE%E5%AE%9A%E6%80%A7%E7%9A%84%E6%9D%A5%E6%BA%90%EF%BC%89"><span class="toc-number">1.1.7.</span> <span class="toc-text">1. AudioContext 的状态机与生命周期（资源释放确定性的来源）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%87%87%E6%A0%B7%E7%8E%87%E6%98%AF%E9%9A%90%E6%80%A7%E7%9A%84%E8%BD%AC%E6%8D%A2%E7%82%B9"><span class="toc-number">1.1.8.</span> <span class="toc-text">2. 采样率是隐性的转换点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%B8%B2%E6%9F%93%E9%87%8F%E5%AD%90%E4%B8%8E%E5%9B%BE%E6%B1%82%E5%80%BC%E8%A7%84%E5%88%99"><span class="toc-number">1.1.9.</span> <span class="toc-text">3. 渲染量子与图求值规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Track-%E7%9A%84%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.10.</span> <span class="toc-text">4. Track 的消费者模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8E%E5%89%8D%E7%AB%AF%E5%B7%B2%E6%9C%89%E6%A6%82%E5%BF%B5%E7%9A%84%E5%BC%82%E5%90%8C"><span class="toc-number">1.1.11.</span> <span class="toc-text">与前端已有概念的异同</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.12.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.13.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA%E4%B8%80%EF%BC%9A%E6%8A%8A-AudioContext-%E5%BD%93%E6%99%AE%E9%80%9A-JS-%E5%AF%B9%E8%B1%A1"><span class="toc-number">1.1.14.</span> <span class="toc-text">误区一：把 AudioContext 当普通 JS 对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA%E4%BA%8C%EF%BC%9A%E6%8A%8A%E6%88%90%E6%9C%AC%E7%AE%97%E5%9C%A8%E8%8A%82%E7%82%B9%E6%95%B0%E4%B8%8A%EF%BC%8C%E8%80%8C%E9%9D%9E-track-%E4%B8%8E%E6%8B%B7%E8%B4%9D%E4%B8%8A"><span class="toc-number">1.1.15.</span> <span class="toc-text">误区二：把成本算在节点数上，而非 track 与拷贝上</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83%E9%A2%98"><span class="toc-number">1.1.16.</span> <span class="toc-text">进阶思考题</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/09/daily/2026-11-09-workbench-daily/" title="工作台日报 · 2026-11-09">工作台日报 · 2026-11-09</a><time datetime="2026-11-08T23:03:21.000Z" title="发表于 2026-11-09 07:03:21">2026-11-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/09/foundation/2026-11-09-foundation-token-bucket-vs-leaky-bucket/" title="每日基础技术总结 · 2026-11-09 · 微服务API网关限流算法：令牌桶与漏桶的区别与应用">每日基础技术总结 · 2026-11-09 · 微服务API网关限流算法：令牌桶与漏桶的区别与应用</a><time datetime="2026-11-08T23:03:21.000Z" title="发表于 2026-11-09 07:03:21">2026-11-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/09/foundation/2026-11-09-foundation-websocket-heartbeat-reconnect/" title="每日基础技术总结 · 2026-11-09 · WebSocket心跳机制（Ping/Pong）的设计：间隔计算与异常断开自动重连逻辑">每日基础技术总结 · 2026-11-09 · WebSocket心跳机制（Ping/Pong）的设计：间隔计算与异常断开自动重连逻辑</a><time datetime="2026-11-08T23:03:21.000Z" title="发表于 2026-11-09 07:03:21">2026-11-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/09/foundation/2026-11-09-foundation-webrtc-audiocontext-mediastream-cost/" title="每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析">每日基础技术总结 · 2026-11-09 · WebRTC 媒体流处理：AudioContext 与 MediaStream 的资源占用分析</a><time datetime="2026-11-08T23:03:21.000Z" title="发表于 2026-11-09 07:03:21">2026-11-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/08/daily/2026-11-08-workbench-daily/" title="工作台日报 · 2026-11-08">工作台日报 · 2026-11-08</a><time datetime="2026-11-07T23:01:21.000Z" title="发表于 2026-11-08 07:01:21">2026-11-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/08/foundation/2026-11-08-foundation-performance-observer-web-vitals/" title="每日基础技术总结 · 2026-11-08 · PerformanceObserver 监听长任务：LCP、FID 等核心 Web 指标的采集原理">每日基础技术总结 · 2026-11-08 · PerformanceObserver 监听长任务：LCP、FID 等核心 Web 指标的采集原理</a><time datetime="2026-11-07T23:01:21.000Z" title="发表于 2026-11-08 07:01:21">2026-11-08</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
