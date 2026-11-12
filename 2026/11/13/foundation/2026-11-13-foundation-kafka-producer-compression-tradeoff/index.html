@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy/LZ4）对CPU与带宽的权衡 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡📚 今日主题 Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡（后端基础）  1. 核心概念速览Kafka Producer端压缩是在RecordBatch级别对已经攒批的消息字节流执行无损压缩：序列化产生的rec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/13/foundation/2026-11-13-foundation-kafka-producer-compression-tradeoff/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡📚 今日主题 Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡（后端基础）  1. 核心概念速览Kafka Producer端压缩是在RecordBatch级别对已经攒批的消息字节流执行无损压缩：序列化产生的rec">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-12T23:02:18.000Z">
+<meta property="article:modified_time" content="2026-11-12T23:15:41.408Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="后端基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/13/foundation/2026-11-13-foundation-kafka-producer-compression-tradeoff/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy/LZ4）对CPU与带宽的权衡',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-13 07:15:41'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">836</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">104</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy/LZ4）对CPU与带宽的权衡</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-12T23:15:41.408Z" title="更新于 2026-11-13 07:15:41">2026-11-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy/LZ4）对CPU与带宽的权衡"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-13-·-Kafka-Producer端压缩算法（Snappy-LZ4）对CPU与带宽的权衡"><a href="#每日基础技术总结-·-2026-11-13-·-Kafka-Producer端压缩算法（Snappy-LZ4）对CPU与带宽的权衡" class="headerlink" title="每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡"></a>每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡</strong>（后端基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Kafka Producer端压缩是在RecordBatch级别对已经攒批的消息字节流执行无损压缩：序列化产生的record&#x2F;value bytes先聚合成batch，再由snappy&#x2F;lz4等codec压缩，最后封装进ProduceRequest。它解决的核心问题是降低网络传输字节、Broker落盘字节与跨节点复制字节，代价是在Producer与Consumer&#x2F;Broker增加编解码CPU、内存分配与批延迟。它在计算机&#x2F;AI体系中的位置：后端消息数据面性能调优，并延伸到AI训练样本流、特征管道、向量payload传输等场景；连接序列化、批量传输、网络拥塞控制与CPU缓存&#x2F;指令流水线。专业工程师必须掌握它，因为它决定端到端p99延迟、吞吐上限、成本结构，并受消息大小分布、batch粒度、硬件架构与压缩算法输入数据冗余度影响；盲目开启压缩可能让CPU或GC成为新瓶颈。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>流程伪代码：<br>send(record):<br>  bytes &#x3D; valueSerializer.serialize(record)<br>  appendToRecordBatch(batch, bytes)<br>  if batch.size &gt;&#x3D; configuredBatchSize or lingerMsExpired:<br>    raw &#x3D; batch.bytes<br>    compressed &#x3D; codec.compress(raw) &#x2F;&#x2F; Snappy&#x2F;LZ4: LZ77-family block compression, literal&#x2F;match encoding, no heavy entropy coding<br>    crc &#x3D; checksum(compressed)<br>    socket.write(ProduceRequest(topic, partition, compressed, crc))</p>
+<p>机制剖析：</p>
+<ol>
+<li>Kafka Producer压缩的输入不是单个消息，而是RecordBatch。batch越小，压缩窗口越短，冗余度越低，CPU摊销越差。</li>
+<li>Snappy与LZ4都围绕低延迟无损压缩：以固定或轻量状态寻找重复串，输出字面量与匹配长度，避免复杂Huffman&#x2F;算术编码，因此CPU路径短、吞吐高、压缩率低于gzip&#x2F;zstd。</li>
+<li>权衡本质是减少network bytes与增加CPU cycles、memory traffic、GC allocation之间的交换。若网络带宽、Broker复制、Consumer拉取字节是瓶颈，压缩提升吞吐；若Producer CPU、内存带宽或GC是瓶颈，压缩降低吞吐并抬高尾延迟。</li>
+<li>端到端延迟包含linger等待、compression耗时、Broker处理、Consumer解压。压缩可能减少排队在NIC上的字节时间，但增加CPU与等待；对小包高频生产通常不利。</li>
+<li>跨端成本转移：Producer压缩后，Broker可保留原batch落盘，Consumer解压；但若Broker执行消息格式转换、重新压缩或按副本协议重写，压缩收益与成本会在集群中重新分布。</li>
+</ol>
+<p>前端体系对比：<br>与HTTP请求体使用gzip或CompressionStream类似，都是在传输前减少bytes；区别是Kafka压缩发生在应用协议层的RecordBatch二进制流上，且由batch策略决定输入粒度。与前端构建期minify&#x2F;tree-shaking不同，Kafka压缩是运行期热路径CPU换网络&#x2F;磁盘字节。与Web Worker处理ArrayBuffer&#x2F;Uint8Array类似，性能直接受SIMD、缓存、内存带宽和分配策略影响，而不是抽象对象遍历。</p>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.kafka.clients.producer.KafkaProducer;</span><br><span class="line">import org.apache.kafka.clients.producer.Producer;</span><br><span class="line">import org.apache.kafka.clients.producer.ProducerRecord;</span><br><span class="line">import java.util.Properties;</span><br><span class="line"></span><br><span class="line">public class ProducerCompressionTradeoffDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        Properties props = new Properties();</span><br><span class="line">        props.put(&quot;bootstrap.servers&quot;, &quot;localhost:9092&quot;);</span><br><span class="line">        props.put(&quot;key.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);</span><br><span class="line">        props.put(&quot;value.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);</span><br><span class="line"></span><br><span class="line">        // compression.type是Producer端codec选择开关：lz4/snappy在写出网络前对RecordBatch字节流执行无损压缩</span><br><span class="line">        props.put(&quot;compression.type&quot;, &quot;lz4&quot;);</span><br><span class="line">        // linger.ms控制Producer等待凑批的时间；批次越大压缩率通常越高，但会直接增加端到端延迟</span><br><span class="line">        props.put(&quot;linger.ms&quot;, &quot;10&quot;);</span><br><span class="line">        // batch.size是内存中单个RecordBatch的目标字节上限，也是codec.compress的输入粒度</span><br><span class="line">        props.put(&quot;batch.size&quot;, &quot;32768&quot;);</span><br><span class="line"></span><br><span class="line">        // KafkaProducer内部序列化后把record写入RecordBatch，flush时调用codec.compress(batchBytes)并放入ProduceRequest</span><br><span class="line">        try (Producer&lt;String, String&gt; producer = new KafkaProducer&lt;&gt;(props)) &#123;</span><br><span class="line">            producer.send(new ProducerRecord&lt;&gt;(&quot;demo-topic&quot;, &quot;user-1&quot;, &quot;high-throughput-message-payload&quot;));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区与进阶思考：</p>
+<p>误区1：认为开启Snappy&#x2F;LZ4一定会提升吞吐并降低延迟。真实吞吐取决于瓶颈资源。网络、Broker复制或Consumer fetch字节数饱和时，压缩减少wire bytes有收益；Producer CPU、内存带宽、GC或linger等待成为瓶颈时，codec增加cycle与分配，压缩反而降低吞吐并抬高p99。小消息、单条发送、batch未攒满时尤其明显。</p>
+<p>误区2：把Snappy&#x2F;LZ4选择简化为算法压缩率排名。生产决策必须绑定payload结构、batch大小、硬件架构、JIT&#x2F;SIMD、缓存、线程数与Broker消息格式版本。LZ4在部分重复数据上可能同时比Snappy更快且压缩率更高，但这不是普适结论；不同JSON&#x2F;Avro&#x2F;protobuf payload和不同字节分布会反转结果，必须用真实消息分布与生产级别benchmark验证。</p>
+<p>思考题：Producer进程CPU已稳定在75%-85%，Consumer线程池存在空闲，网络带宽仍有约30%余量，当前使用snappy。若改用lz4并调大batch.size，预期wire bytes下降、Producer压缩CPU可能上升、Consumer解码时间可能下降或上升。此时应优先观测哪些指标、如何判断该操作是否真正改善端到端SLO而不是把瓶颈从网络迁到CPU？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/13/foundation/2026-11-13-foundation-kafka-producer-compression-tradeoff/">https://litongjin.github.io/2026/11/13/foundation/2026-11-13-foundation-kafka-producer-compression-tradeoff/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%9F%BA%E7%A1%80/">后端基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/13/foundation/2026-11-13-foundation-http2-server-push-deprecation/" title="每日基础技术总结 · 2026-11-13 · HTTP/2 HTTP2 Push 的原理与浏览器限制：为何现代开发中已不推荐使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-13 · HTTP/2 HTTP2 Push 的原理与浏览器限制：为何现代开发中已不推荐使用</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/12/daily/2026-11-12-workbench-daily/" title="工作台日报 · 2026-11-12"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-11-12</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/03/foundation/2024-01-03-foundation-zookeeper-zab-epoch/" title="每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-03</div><div class="title">每日基础技术总结 · 2024-01-03 · Zookeeper ZAB 协议的 Epoch 轮次管理与脑裂恢复机制</div></div></a></div><div><a href="/2024/02/05/foundation/2024-02-05-foundation-consistent-hashing-virtual-nodes/" title="每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-05</div><div class="title">每日基础技术总结 · 2024-02-05 · 一致性哈希与虚拟节点</div></div></a></div><div><a href="/2024/03/04/foundation/2024-03-04-foundation-rocketmq-half-message-op-message/" title="每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-04</div><div class="title">每日基础技术总结 · 2024-03-04 · RocketMQ 事务消息：Half Message 与 Op Message</div></div></a></div><div><a href="/2024/06/23/foundation/2024-06-23-foundation-http-2-hpack/" title="每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-23</div><div class="title">每日基础技术总结 · 2024-06-23 · HTTP&#x2F;2 HPACK 头压缩与动态表更新</div></div></a></div><div><a href="/2024/08/14/foundation/2024-08-14-foundation-mysql-redo-log-binlog/" title="每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-14</div><div class="title">每日基础技术总结 · 2024-08-14 · MySQL redo log 与 binlog 的两阶段提交</div></div></a></div><div><a href="/2024/08/16/foundation/2024-08-16-foundation-innodb-buffer-pool-lru/" title="每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-16</div><div class="title">每日基础技术总结 · 2024-08-16 · InnoDB Buffer Pool 的冷热分离 LRU 与预读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">836</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">104</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-13-%C2%B7-Kafka-Producer%E7%AB%AF%E5%8E%8B%E7%BC%A9%E7%AE%97%E6%B3%95%EF%BC%88Snappy-LZ4%EF%BC%89%E5%AF%B9CPU%E4%B8%8E%E5%B8%A6%E5%AE%BD%E7%9A%84%E6%9D%83%E8%A1%A1"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy&#x2F;LZ4）对CPU与带宽的权衡</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/13/daily/2026-11-13-workbench-daily/" title="工作台日报 · 2026-11-13">工作台日报 · 2026-11-13</a><time datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/13/foundation/2026-11-13-foundation-typescript-generics-conditional-types/" title="每日基础技术总结 · 2026-11-13 · TypeScript 泛型与条件类型">每日基础技术总结 · 2026-11-13 · TypeScript 泛型与条件类型</a><time datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/13/foundation/2026-11-13-foundation-http2-server-push-deprecation/" title="每日基础技术总结 · 2026-11-13 · HTTP/2 HTTP2 Push 的原理与浏览器限制：为何现代开发中已不推荐使用">每日基础技术总结 · 2026-11-13 · HTTP/2 HTTP2 Push 的原理与浏览器限制：为何现代开发中已不推荐使用</a><time datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/13/foundation/2026-11-13-foundation-kafka-producer-compression-tradeoff/" title="每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy/LZ4）对CPU与带宽的权衡">每日基础技术总结 · 2026-11-13 · Kafka Producer端压缩算法（Snappy/LZ4）对CPU与带宽的权衡</a><time datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/12/daily/2026-11-12-workbench-daily/" title="工作台日报 · 2026-11-12">工作台日报 · 2026-11-12</a><time datetime="2026-11-11T23:02:24.000Z" title="发表于 2026-11-12 07:02:24">2026-11-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/12/foundation/2026-11-12-foundation-row-gap-next-key-locks/" title="每日基础技术总结 · 2026-11-12 · 行锁、间隙锁与临键锁">每日基础技术总结 · 2026-11-12 · 行锁、间隙锁与临键锁</a><time datetime="2026-11-11T23:02:24.000Z" title="发表于 2026-11-12 07:02:24">2026-11-12</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
