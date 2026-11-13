@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案📚 今日主题 JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案（前端底层与计算机基础）  1. 核心概念速览Temporal 是 TC39 的 ECMAScript 日期时间提案，提供不可变值对象语">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/14/foundation/2026-11-14-foundation-js-temporal-immutable-polyfill/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案📚 今日主题 JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案（前端底层与计算机基础）  1. 核心概念速览Temporal 是 TC39 的 ECMAScript 日期时间提案，提供不可变值对象语">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-13T23:01:47.000Z">
+<meta property="article:modified_time" content="2026-11-13T23:20:17.844Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/14/foundation/2026-11-14-foundation-js-temporal-immutable-polyfill/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-14 07:20:17'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">840</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">104</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-13T23:20:17.844Z" title="更新于 2026-11-14 07:20:17">2026-11-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-14-·-JavaScript-Temporal-提案：不可变日期对象的设计哲学与当前-polyfill-方案"><a href="#每日基础技术总结-·-2026-11-14-·-JavaScript-Temporal-提案：不可变日期对象的设计哲学与当前-polyfill-方案" class="headerlink" title="每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案"></a>每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Temporal 是 TC39 的 ECMAScript 日期时间提案，提供不可变值对象语义的时间基础类型。它解决 Date 的三个根本问题：Date 内部只有 epoch milliseconds 且暴露可变状态；Date 的本地视图依赖运行环境时区；Date 字符串解析与输出不能可靠区分日历日、墙钟时刻与时间线时刻。Temporal 机制是拆分时间线、日历、时钟、时区、间隔五种语义：PlainDate&#x2F;PlainYearMonth 表达日历，PlainTime&#x2F;PlainDateTime 表达墙钟，ZonedDateTime 表达绑定 IANA 时区的时间线点，Duration 表达不可无条件互转的日历&#x2F;时间差。它在整个体系中位于语言运行时、Intl 国际化、操作系统时区数据库、后端数据库 epoch&#x2F;calendar 类型、AI 时间序列特征之间；专业工程师必须掌握，因为日期时间不是展示问题，而是可执行协议与数据一致性问题。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层机制：</p>
+<ol>
+<li>不可变值对象：构造函数建立记录，方法返回新记录。可抽象为 TemporalRecord { fields, calendar?, timeZone?, timeLine? }；比较使用 compare&#x2F;toString&#x2F;epoch，不使用对象引用。不存在 Date 式 setter，运算天然可安全共享。</li>
+<li>时间线、日历、墙钟分离：PlainDate 是日历日，不是时刻；PlainTime 是时钟时间，不是日期；PlainDateTime 是本地年月日时分秒，不绑定唯一时间线；ZonedDateTime 将本地字段绑定 IANA 时区并由时区规则解析为唯一时刻；Duration 分为日历单位与 SI 单位，年&#x2F;月&#x2F;日与小时&#x2F;分钟&#x2F;秒不能仅按固定毫秒数互相换算。</li>
+<li>时区解析：ZonedDateTime.from({ year, month, day, hour, minute, timeZone }) 的底层步骤是：验证字段 -&gt; 读取 IANA 时区规则 -&gt; 计算 UTC offset -&gt; 构造时间线点。同一本地墙钟在 DST overlap 可能对应两个时刻，在 gap 可能对应无效时刻；ZonedDateTime 必须通过 disambiguation 选择语义。PlainDateTime 无法回答这类问题。</li>
+<li>日历算法：monthCode、era、calendar 与 ISO 年月日分离；Intl.Calendar 决定月长、闰月、岁首；Temporal.add({ months: 1 }) 使用日历算术，不是加 30&#x2F;31 天固定毫秒数；天数也可能按业务日历日而非物理 86400 秒解释。</li>
+<li>序列化与精度：PlainDate 输出 YYYY-MM-DD，PlainDateTime 输出本地 ISO 形式，ZonedDateTime 输出带 offset 与 timeZone 注解的形式；时间线使用整数域，避免 Number 浮点累积误差。字符串解析走严格 ISO&#x2F;RFC3339，不像 Date 兼容大量方言。</li>
+<li>Polyfill 机制：常见实现包括 @js-temporal&#x2F;polyfill 或其演进包 temporal-polyfill，以及 temporal-shim。前者用纯 JS 实现提案对象图，依赖 Intl.DateTimeFormat、Intl.Calendar、系统 IANA 时区数据完成时区偏移、日历换算和格式化；覆盖度较高但体积与性能开销来自时间线对象分配和 Intl 查询。后者提供较窄兼容层，优先复用 Date&#x2F;Intl 与字符串转换，适合迁移基础用法，但不能作为完整提案语义依据。</li>
+</ol>
+<p>与已有概念对比：</p>
+<ul>
+<li>JS Date 是可变 epoch-milliseconds 对象加本地格式化视图；Temporal 是多个不可变语义对象组成的日期时间代数。</li>
+<li>Intl.DateTimeFormat 是格式化器，只能把 Date 或时间字段按 locale&#x2F;timezone 渲染；Temporal 是数据模型，能持有 calendar&#x2F;timezone&#x2F;precision&#x2F;duration 语义。</li>
+<li>Java java.time 与 Temporal 高度同构：LocalDate&#x2F;LocalDateTime&#x2F;ZonedDateTime&#x2F;Duration 同样强调值语义、时区规则、日历分离。TS interface 是编译期契约，运行时被擦除；Temporal 的接口是运行时对象状态转换协议，改变的是对象生命周期和不变性，而不是类型检查能力。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">import &#123; Temporal &#125; from &#x27;@js-temporal/polyfill&#x27;;</span><br><span class="line"></span><br><span class="line">// 1) PlainDate 是 ISO 日历日值对象；add 不改写原对象，底层创建新记录。</span><br><span class="line">const day = Temporal.PlainDate.from(&#x27;2025-03-08&#x27;);</span><br><span class="line">const nextDay = day.add(&#123; days: 1 &#125;);</span><br><span class="line">// console.assert(day.toString() === &#x27;2025-03-08&#x27;);</span><br><span class="line">// console.assert(nextDay.toString() === &#x27;2025-03-09&#x27;);</span><br><span class="line">// console.assert(Temporal.PlainDate.compare(day, nextDay) &lt; 0);</span><br><span class="line"></span><br><span class="line">// 2) PlainDateTime 只有墙钟，无时区；它不能回答纽约 2025-11-02 01:30 是否唯一。</span><br><span class="line">const wall = Temporal.PlainDateTime.from(&#x27;2025-11-02T01:30:00&#x27;);</span><br><span class="line">// console.assert(wall.toString() === &#x27;2025-11-02T01:30&#x27;);</span><br><span class="line"></span><br><span class="line">// 3) ZonedDateTime 把本地字段绑定 IANA 时区，由时区规则解析成唯一时间线点。</span><br><span class="line">const zdt = Temporal.ZonedDateTime.from(&#123;</span><br><span class="line">  year: 2025,</span><br><span class="line">  month: 11,</span><br><span class="line">  day: 2,</span><br><span class="line">  hour: 1,</span><br><span class="line">  minute: 30,</span><br><span class="line">  timeZone: &#x27;America/New_York&#x27;</span><br><span class="line">&#125;);</span><br><span class="line">// 若 DST overlap，from 会按默认或显式 disambiguation 选择一个有效时刻。</span><br><span class="line"></span><br><span class="line">// 4) Duration 的 months 与 days 不等价；months 依赖日历，days 依赖业务日历日。</span><br><span class="line">const oneMonth = Temporal.Duration.from(&#123; months: 1 &#125;);</span><br><span class="line">const thirtyDays = Temporal.Duration.from(&#123; days: 30 &#125;);</span><br><span class="line">const a = day.add(oneMonth);</span><br><span class="line">const b = day.add(thirtyDays);</span><br><span class="line">// console.assert(a.toString() === &#x27;2025-04-08&#x27;);</span><br><span class="line">// console.assert(b.toString() === &#x27;2025-04-07&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区：</p>
+<ol>
+<li>把 PlainDateTime 当作时间线点。PlainDateTime 只有本地墙钟，跨时区排序、数据库索引、事件去重、重试幂等都需要 ZonedDateTime 或 UTC epoch；否则 DST gap&#x2F;overlap 会导致逻辑错误，且同一 PlainDateTime 在不同时区对应不同物理时刻。</li>
+<li>把 Temporal 当成 Date 的语法糖或用 Date 字符串思维做转换。Date.toISOString 是 UTC 视图，Date.toString 受 locale&#x2F;timezone 影响；用 slice(0,10) 从 ISO 字符串取“本地日期”通常得到 UTC 日期而不是用户日历日期。Polyfill 又依赖完整 IANA 时区数据与 Intl 能力，最小 ICU、旧浏览器或服务端容器时区数据缺失会让输出与原生环境不一致。</li>
+</ol>
+<p>进阶思考题：<br>如果产品需要同时保存“用户生日&#x2F;账单到期日”和“会议开始时刻”，你会分别选择 PlainDate、ZonedDateTime 还是 UTC epoch？当操作系统的时区数据库升级导致历史 DST 规则变化，为什么会议时刻应保持稳定而生日&#x2F;到期日通常不变？这背后要求数据层、API 协议和 UI 各自承担什么语义？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/14/foundation/2026-11-14-foundation-js-temporal-immutable-polyfill/">https://litongjin.github.io/2026/11/14/foundation/2026-11-14-foundation-js-temporal-immutable-polyfill/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/14/daily/2026-11-14-workbench-daily/" title="工作台日报 · 2026-11-14"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">工作台日报 · 2026-11-14</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/13/daily/2026-11-13-workbench-daily/" title="工作台日报 · 2026-11-13"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-11-13</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">840</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">104</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-14-%C2%B7-JavaScript-Temporal-%E6%8F%90%E6%A1%88%EF%BC%9A%E4%B8%8D%E5%8F%AF%E5%8F%98%E6%97%A5%E6%9C%9F%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E4%B8%8E%E5%BD%93%E5%89%8D-polyfill-%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/14/foundation/2026-11-14-foundation-cookie-samesite-csrf/" title="每日基础技术总结 · 2026-11-14 · HTTP Cookie属性SameSite=Lax/Strict/None的安全性与跨站请求伪造（CSRF）防护">每日基础技术总结 · 2026-11-14 · HTTP Cookie属性SameSite=Lax/Strict/None的安全性与跨站请求伪造（CSRF）防护</a><time datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/14/foundation/2026-11-14-foundation-snowflake-clock-rollback/" title="每日基础技术总结 · 2026-11-14 · 分布式ID生成Snowflake算法时钟回拨解决方案">每日基础技术总结 · 2026-11-14 · 分布式ID生成Snowflake算法时钟回拨解决方案</a><time datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/14/daily/2026-11-14-workbench-daily/" title="工作台日报 · 2026-11-14">工作台日报 · 2026-11-14</a><time datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/14/foundation/2026-11-14-foundation-js-temporal-immutable-polyfill/" title="每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案">每日基础技术总结 · 2026-11-14 · JavaScript Temporal 提案：不可变日期对象的设计哲学与当前 polyfill 方案</a><time datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/13/daily/2026-11-13-workbench-daily/" title="工作台日报 · 2026-11-13">工作台日报 · 2026-11-13</a><time datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/13/foundation/2026-11-13-foundation-typescript-generics-conditional-types/" title="每日基础技术总结 · 2026-11-13 · TypeScript 泛型与条件类型">每日基础技术总结 · 2026-11-13 · TypeScript 泛型与条件类型</a><time datetime="2026-11-12T23:02:18.000Z" title="发表于 2026-11-13 07:02:18">2026-11-13</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
