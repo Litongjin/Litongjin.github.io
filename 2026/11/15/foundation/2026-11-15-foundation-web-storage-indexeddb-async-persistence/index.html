@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案📚 今日主题 Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案（前端底层与计算机基础）  1. 核心概念速览Web Storage 是浏览器暴露的同步键值持久化接口，包含 localStorage 与 sessio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/15/foundation/2026-11-15-foundation-web-storage-indexeddb-async-persistence/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案📚 今日主题 Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案（前端底层与计算机基础）  1. 核心概念速览Web Storage 是浏览器暴露的同步键值持久化接口，包含 localStorage 与 sessio">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-14T23:01:22.000Z">
+<meta property="article:modified_time" content="2026-11-14T23:15:08.660Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/15/foundation/2026-11-15-foundation-web-storage-indexeddb-async-persistence/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-15 07:15:08'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">844</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">105</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-14T23:01:22.000Z" title="发表于 2026-11-15 07:01:22">2026-11-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-14T23:15:08.660Z" title="更新于 2026-11-15 07:15:08">2026-11-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-15-·-Web-Storage-与-IndexedDB：同步-API-阻塞主线程的风险与异步替代方案"><a href="#每日基础技术总结-·-2026-11-15-·-Web-Storage-与-IndexedDB：同步-API-阻塞主线程的风险与异步替代方案" class="headerlink" title="每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案"></a>每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>Web Storage 是浏览器暴露的同步键值持久化接口，包含 localStorage 与 sessionStorage；本质是把字符串状态写入与来源同隔离的 UA 存储后端，解决小体量会话或跨会话用户状态保存。IndexedDB 是浏览器暴露的异步事务型对象数据库；本质是把结构化数据持久化交给 UA 的后台存储层，通过请求事件和事务回调与 JS 堆通信，解决大数据、二进制、可恢复事务与避免主线程同步 I&#x2F;O。二者位于浏览器运行时的客户端存储层：上承应用状态与缓存，下接文件、SQLite 或平台存储系统。专业工程师必须掌握，因为前端性能瓶颈常来自事件循环延迟预算被同步 API 侵占，而 AI 或数据密集型前端又需要可中断、可批量提交的结构化持久化。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>Web Storage 机制：</p>
+<ol>
+<li>JS 调用 localStorage.setItem(key, value)。</li>
+<li>WebIDL 同步绑定进入 UA 存储实现；实现可能执行序列化、配额检查、跨标签同源锁、内存写回、WAL 或数据库落盘。</li>
+<li>调用栈等待返回；期间无法执行渲染、事件分发、定时器或 Promise 微任务。</li>
+<li>若耗时超过单帧预算，产生长任务、掉帧、输入延迟。</li>
+</ol>
+<p>IndexedDB 机制：</p>
+<ol>
+<li>indexedDB.open(name, version) 返回 IDBDatabase 连接对象。</li>
+<li>版本变更事务由 UA 存储层执行，主线程只接收 onupgradeneeded&#x2F;onsuccess&#x2F;onerror 事件。</li>
+<li>transaction(‘store’,’readwrite’) 创建事务边界；put&#x2F;get 返回 IDBRequest，不等待落盘完成。</li>
+<li>事务提交触发 oncomplete，回滚或错误触发 onerror&#x2F;abort；事件经任务队列回到主线程执行。</li>
+<li>数据可在后台线程或进程完成序列化与持久化，主线程只承担状态机与回调。</li>
+</ol>
+<p>与已有概念对比：</p>
+<ul>
+<li>TS 接口只定义编译期形状，不决定调用是否阻塞；Java 接口定义运行时方法契约，是否阻塞取决于实现是否做同步 I&#x2F;O。Web Storage 与 IndexedDB 的核心区别也不是接口名称，而是 WebIDL 执行模型：同步调用在调用线程内完成，异步调用通过请求、事务与事件队列解耦。</li>
+<li>对比 fs.readFileSync 与 fs.promises.readFile：前者占用当前线程直到返回，后者提交内核异步 I&#x2F;O 并在完成事件触发回调；IndexedDB 更接近后者，且额外提供事务一致性。</li>
+</ul>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">// 验证 localStorage 同步调用会占用当前任务时间：大 value 下主线程可能出现长任务</span><br><span class="line">const big = new Uint8Array(4 * 1024 * 1024);</span><br><span class="line">const t0 = performance.now();</span><br><span class="line">localStorage.setItem(&#x27;blob&#x27;, Array.from(big)); // 同步序列化并写入 UA 存储后端，调用栈等待返回</span><br><span class="line">const cost = performance.now() - t0; // 若 cost 接近或超过 16.7ms，说明已威胁渲染帧</span><br><span class="line">console.log(&#x27;localStorage sync cost(ms):&#x27;, cost);</span><br><span class="line"></span><br><span class="line">// 使用 IndexedDB 提供异步替代：持久化提交不阻塞调用栈，结果通过事件回调返回</span><br><span class="line">function openKvDb() &#123;</span><br><span class="line">  return new Promise((resolve, reject) =&gt; &#123;</span><br><span class="line">    const req = indexedDB.open(&#x27;kv&#x27;, 1); // 创建异步连接请求，版本与存储层初始化在 UA 内执行</span><br><span class="line">    req.onupgradeneeded = (event) =&gt; &#123;</span><br><span class="line">      const db = event.target.result; // 版本事务提供唯一 schema 修改入口</span><br><span class="line">      if (!db.objectStoreNames.contains(&#x27;kv&#x27;)) db.createObjectStore(&#x27;kv&#x27;); // 建立对象仓库</span><br><span class="line">    &#125;;</span><br><span class="line">    req.onsuccess = (event) =&gt; resolve(event.target.result); // 连接成功事件回到主线程</span><br><span class="line">    req.onerror = (event) =&gt; reject(event.target.error); // 错误由请求对象异步传递</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function idbPut(db, value) &#123;</span><br><span class="line">  return new Promise((resolve, reject) =&gt; &#123;</span><br><span class="line">    const tx = db.transaction(&#x27;kv&#x27;, &#x27;readwrite&#x27;); // 创建可写事务，作为原子提交边界</span><br><span class="line">    const store = tx.objectStore(&#x27;kv&#x27;); // 获取对象仓库代理</span><br><span class="line">    store.put(value, &#x27;blob&#x27;); // 发起写请求，返回后不等待磁盘或存储层落盘完成</span><br><span class="line">    tx.oncomplete = () =&gt; resolve(); // 事务提交后触发完成事件</span><br><span class="line">    tx.onerror = () =&gt; reject(tx.error); // 事务错误触发错误事件</span><br><span class="line">    tx.onabort = () =&gt; reject(tx.error); // 回滚或异常终止触发 abort 事件</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">const db = await openKvDb();</span><br><span class="line">await idbPut(db, big); // 调用方 await 异步完成信号，但主线程可继续处理事件队列</span><br><span class="line">console.log(&#x27;IndexedDB async put done&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><ol>
+<li>误区：localStorage 是内存操作，因此很快。实际同步语义由 API 决定，底层可能是写穿磁盘、数据库 WAL、平台加密存储或跨进程锁；移动端、低内存、隐私模式和配额压力下，同步写入会形成长任务。</li>
+<li>误区：IndexedDB 完全无阻塞。正确说法是它把持久化调度移出调用栈，但事件回调、数据克隆、任务队列延迟、事务提交通知和跨标签协调仍可能消耗主线程；真正避免长任务需控制 value 大小、批量读写、索引与事务边界。</li>
+</ol>
+<p>进阶思考：若一个页面需要同时满足 UI 16ms 响应、跨标签状态最终一致、崩溃后可恢复，应如何设计状态模型：哪些数据保留在内存并同步更新，哪些数据必须进入 IndexedDB 事务，localStorage 是否还能作为缓存，写回失败或版本冲突时如何回滚 UI？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/15/foundation/2026-11-15-foundation-web-storage-indexeddb-async-persistence/">https://litongjin.github.io/2026/11/15/foundation/2026-11-15-foundation-web-storage-indexeddb-async-persistence/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/15/foundation/2026-11-15-foundation-grpc-health-client-state-sync/" title="每日基础技术总结 · 2026-11-15 · gRPC Health Checking Protocol客户端连接状态同步机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-15 · gRPC Health Checking Protocol客户端连接状态同步机制</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/15/foundation/2026-11-15-foundation-tcp-nagle-nodelay-framing/" title="每日基础技术总结 · 2026-11-15 · TCP Nagle算法与TCP_NODELAY禁用场景下的应用层协议粘包/拆包影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-11-15 · TCP Nagle算法与TCP_NODELAY禁用场景下的应用层协议粘包/拆包影响</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">844</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">105</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-15-%C2%B7-Web-Storage-%E4%B8%8E-IndexedDB%EF%BC%9A%E5%90%8C%E6%AD%A5-API-%E9%98%BB%E5%A1%9E%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%9A%84%E9%A3%8E%E9%99%A9%E4%B8%8E%E5%BC%82%E6%AD%A5%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/15/daily/2026-11-15-workbench-daily/" title="工作台日报 · 2026-11-15">工作台日报 · 2026-11-15</a><time datetime="2026-11-14T23:01:22.000Z" title="发表于 2026-11-15 07:01:22">2026-11-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/15/foundation/2026-11-15-foundation-grpc-health-client-state-sync/" title="每日基础技术总结 · 2026-11-15 · gRPC Health Checking Protocol客户端连接状态同步机制">每日基础技术总结 · 2026-11-15 · gRPC Health Checking Protocol客户端连接状态同步机制</a><time datetime="2026-11-14T23:01:22.000Z" title="发表于 2026-11-15 07:01:22">2026-11-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/15/foundation/2026-11-15-foundation-web-storage-indexeddb-async-persistence/" title="每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案">每日基础技术总结 · 2026-11-15 · Web Storage 与 IndexedDB：同步 API 阻塞主线程的风险与异步替代方案</a><time datetime="2026-11-14T23:01:22.000Z" title="发表于 2026-11-15 07:01:22">2026-11-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/15/foundation/2026-11-15-foundation-tcp-nagle-nodelay-framing/" title="每日基础技术总结 · 2026-11-15 · TCP Nagle算法与TCP_NODELAY禁用场景下的应用层协议粘包/拆包影响">每日基础技术总结 · 2026-11-15 · TCP Nagle算法与TCP_NODELAY禁用场景下的应用层协议粘包/拆包影响</a><time datetime="2026-11-14T23:01:22.000Z" title="发表于 2026-11-15 07:01:22">2026-11-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/14/foundation/2026-11-14-foundation-cookie-samesite-csrf/" title="每日基础技术总结 · 2026-11-14 · HTTP Cookie属性SameSite=Lax/Strict/None的安全性与跨站请求伪造（CSRF）防护">每日基础技术总结 · 2026-11-14 · HTTP Cookie属性SameSite=Lax/Strict/None的安全性与跨站请求伪造（CSRF）防护</a><time datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/14/foundation/2026-11-14-foundation-snowflake-clock-rollback/" title="每日基础技术总结 · 2026-11-14 · 分布式ID生成Snowflake算法时钟回拨解决方案">每日基础技术总结 · 2026-11-14 · 分布式ID生成Snowflake算法时钟回拨解决方案</a><time datetime="2026-11-13T23:01:47.000Z" title="发表于 2026-11-14 07:01:47">2026-11-14</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
