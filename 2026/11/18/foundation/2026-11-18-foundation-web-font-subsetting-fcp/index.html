@@ -1,0 +1,188 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化📚 今日主题 Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化（前端底层与计算机基础）  1. 核心概念速览核心概念速览 Web Font Subsetting 是对字体二进制文件做 glyph 级裁剪：从 TTF&#x2F;OTF&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/18/foundation/2026-11-18-foundation-web-font-subsetting-fcp/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化📚 今日主题 Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化（前端底层与计算机基础）  1. 核心概念速览核心概念速览 Web Font Subsetting 是对字体二进制文件做 glyph 级裁剪：从 TTF&#x2F;OTF&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-17T23:02:03.000Z">
+<meta property="article:modified_time" content="2026-11-17T23:16:23.492Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/18/foundation/2026-11-18-foundation-web-font-subsetting-fcp/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-18 07:16:23'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">856</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">107</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-17T23:16:23.492Z" title="更新于 2026-11-18 07:16:23">2026-11-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-18-·-Web-Font-Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化"><a href="#每日基础技术总结-·-2026-11-18-·-Web-Font-Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化" class="headerlink" title="每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化"></a>每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p>核心概念速览</p>
+<p>Web Font Subsetting 是对字体二进制文件做 glyph 级裁剪：从 TTF&#x2F;OTF&#x2F;WOFF&#x2F;WOFF2 中删除未被目标码点使用的字形轮廓、cmap 子表、glyf&#x2F;CFF charstring、hmtx 度量、kern&#x2F;shape&#x2F;hint 数据，只保留首屏或指定字符集所需内容。其解决的是 Web 字体作为渲染依赖造成的首屏文本可见延迟，尤其是 CJK 字体全量可达 10MB 级；机制是通过 unicode-range 与按需子集把字体从全量资源拆成与文档实际码点匹配的小资源，降低 HTTP 传输、woff2&#x2F;Brotli 解码、字体表解析、cmap 查询与 layout 前处理成本。它在性能链路中位于网络层、CSSOM&#x2F;Font Face 状态机与渲染树之间：FCP 记录第一次有效内容绘制，如果首屏关键文本的可用字体尚未 ready，浏览器会在 block 状态下隐藏文本或推迟 paint；专业工程师必须掌握，因为它决定首屏文本是否被字体字节、解析和状态机门控，也决定 preload、font-display、unicode-range 与 CLS 的组合策略。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>底层原理剖析</p>
+<ol>
+<li><p>字体文件是 glyph 索引表族，不是纯文本表。TrueType&#x2F;OpenType 的核心表决定可裁剪边界：<br>cmap：Unicode code point 到 glyph id 的映射；<br>glyf + loca：TrueType 轮廓与指令；<br>CFF：OpenType&#x2F;CFF 字形 charstring；<br>hmtx&#x2F;hhea&#x2F;OS2：advance width、global metrics、垂直度量；<br>kern&#x2F;GPOS&#x2F;GSUB：字距与 shaping；hint：栅格化控制。<br>若某 Unicode 字符不在保留集合，其 cmap entry、glyph 数据与 loca&#x2F;CFF index 记录可删除；若保留，则必须同步重建映射和偏移，否则 layout 会取错 advance&#x2F;bounding box。</p>
+</li>
+<li><p>Subsetting 的精确流程可表达为：<br>retain &#x3D; codepoints_from_html_or_css_text_nodes<br>for each cmap_subtable in font:<br>  old_gids &#x3D; cmap_subtable.lookup_gids(retain)<br>  new_glyph_ids &#x3D; old_gids + default_notdef + required_punctuation<br>collect &#x3D; {gid in font.glyf or CFF if gid in new_glyph_ids}<br>write_glyf_and_rebuild_loca(collect)<br>write_CFF_charset_and_charstrings(collect)<br>rebuild_cmap(retain -&gt; compact_ids)<br>keep_or_recompute_hmtx(OS2_metrics, advance_widths_for_retained)<br>optionally_prune_kern_GPOS_GSUB_when_no_complex_shape_needed</p>
+</li>
+<li><p>FCP 与字体状态机耦合。浏览器链路是：<br>parse HTML -&gt; build DOM -&gt; parse CSS -&gt; build CSSOM<br>for text_node in render_tree:<br>  font_stack &#x3D; computed_style(font-family)<br>  needed &#x3D; codepoints(text_node)<br>  for face in font_stack:<br> if intersects(face.unicode_range, needed):<br>   require_face(face)<br>   if face.status &#x3D;&#x3D; unloaded and face.is_render_critical:<br> fetch(face.src)<br> decode_woff2_or_brotli(bytes)<br> parse_font_tables(font)<br> build_glyph_caches()<br> face.status &#x3D; ready<br>   paint_gate:<br> if face.status &#x3D;&#x3D; ready:<br>   layout_text_with_advance_widths_and_kerning<br>   paint_glyph_outlines<br> else:<br>   apply_font_display(block hides or swaps fallback)</p>
+</li>
+</ol>
+<p>  FCP &#x3D; first paint of any non-empty content</p>
+<p>Subsetting shortens fetch + decode + parse + lookup, but only moves FCP earlier when the first required paint is gated by that face. If fallback already paints first text, FCP may not depend on subset size. If first paint is a background or image, font subsetting can still improve perceived text stability, but FCP timestamp may remain unchanged.</p>
+<ol start="4">
+<li>与已有概念的本质差异。Java interface 是 JVM 运行时方法表契约，class 必须实现；TS interface 是编译期结构契约，发布后被擦除。Web Font Subsetting 中的 @font-face unicode-range 是浏览器下载&#x2F;启用决策契约，pyftsubset 生成的字体二进制是数据实现；只声明 unicode-range 不会缩小实际文件，只裁剪文件而不治理 CSS 与 preload 也不会让浏览器精准请求。它与 code splitting 同构：subsetting 是 glyph 级 tree-shaking，可达性集合来自页面码点；JS tree-shaking 是模块符号级 dead-code elimination，可达性集合来自 import graph。区别在于字体裁剪发生在二进制资源与渲染字体解析层，影响 FCP 的方式是缩短关键字体资源的 ready 时间。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">基础代码与实战验证</span><br><span class="line"></span><br><span class="line">验证目标：只保留首屏文本码点，观察 subset 对字体 ready 时间与 FCP 门控的影响。</span><br><span class="line"></span><br><span class="line">步骤：</span><br><span class="line">1. 抽取首屏实际使用的 Unicode 码点集合。</span><br><span class="line">python - &lt;&lt; PY</span><br><span class="line"># text 必须是真实首屏文本节点拼接；每个码点都会被 cmap 映射检查</span><br><span class="line">import sys</span><br><span class="line">text = &#x27;中文测试Aa0&#x27;</span><br><span class="line">with open(&#x27;chars.txt&#x27;, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:</span><br><span class="line">    for ch in sorted(set(text)):</span><br><span class="line">        print(ch, file=f)</span><br><span class="line">PY</span><br><span class="line"></span><br><span class="line">2. 用 fonttools 生成按码点裁剪的 WOFF2。</span><br><span class="line">pyftsubset noto-sc-full.otf --text-file=chars.txt --flavor=woff2 --output-file=noto-sc-subset.woff2 --layout-features=&#x27;&#x27; --hinting-instructions --ignore-missing-glyphs</span><br><span class="line"># --text-file: 保留 chars.txt 中字符；未命中字符的 cmap/glyph/loca 记录删除。</span><br><span class="line"># --flavor=woff2: 生成 WOFF2，传输层再走 Brotli；文件字节显著下降。</span><br><span class="line"># --hinting-instructions: 小字号保留 hint，降低 rasterization 质量波动。</span><br><span class="line"># --layout-features=&#x27;&#x27;: 对简单 CJK 首屏可裁剪 shaping，多语言连字场景不要清空。</span><br><span class="line"></span><br><span class="line">3. CSS 将子集接入字体状态机。</span><br><span class="line">@font-face &#123;</span><br><span class="line">  font-family: NotoSCSubset;</span><br><span class="line">  src: url(&#x27;/fonts/noto-sc-subset.woff2&#x27;) format(&#x27;woff2&#x27;);</span><br><span class="line">  unicode-range: U+4E00-9FFF, U+0041-005A, U+0061-007A, U+0030-0039;</span><br><span class="line">  /* 浏览器用 unicode-range 判断文本码点是否需要此 face；不匹配则不下载或不启用 */</span><br><span class="line">  font-display: block;</span><br><span class="line">  /* block 用于验证 FCP 被字体 ready 门控；swap 会先绘制 fallback，FCP 可能不依赖 subset */</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">4. 预加载关键子集，避免 CSSOM 发现资源后才排队。</span><br><span class="line">link rel=preload as=font href=/fonts/noto-sc-subset.woff2 crossorigin=anonymous type=font/woff2</span><br><span class="line"># crossorigin 必须与 fetch 一致，否则会产生独立请求并无法复用缓存；字体 CORS 默认匿名。</span><br><span class="line"></span><br><span class="line">5. 验证指标：</span><br><span class="line">Performance trace 中观察三个区间：</span><br><span class="line">request start 到 first paint candidate：网络与字节；</span><br><span class="line">font download 到 font parse 到 font active：字体表解析；</span><br><span class="line">first text paint / FCP：是否从 block hidden 变为 ready paint。</span><br><span class="line">工具可用 Chrome DevTools Performance、Web Vitals FCP 与 PerformanceObserver entryTypes first-contentful-paint。</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><p>常见误区与进阶思考</p>
+<ol>
+<li><p>误区一：字体裁剪必然提升 FCP。FCP 是第一次有效绘制时间，不是第一次文本最终样式时间。如果首屏第一像素来自背景、图片或已经可见的 fallback 文本，子集不会改变 FCP；如果页面使用 font-display&#x3D;swap，fallback 已绘制文本，FCP 往往提前于字体 ready，子集更多改善 CLS、布局宽度和最终 glyph fidelity。只有当关键首屏文本被字体 ready 门控，例如 font-display&#x3D;block 且首屏没有更早可绘制内容时，subset 才会把 FCP 从字体下载与解析尾部前移。</p>
+</li>
+<li><p>误区二：只裁剪文件，不治理下载契约。若仍提供全量 font-face 或未声明 unicode-range，浏览器可能按全量字体请求；若 unicode-range 与实际码点不一致，子集虽未被请求，但仍可能缺字形；若 preload 缺少 crossorigin&#x3D;anonymous 或与 CSS 请求参数不一致，会产生重复请求。更隐蔽的是：删除 kern&#x2F;ligature&#x2F;GSUB 后英文排版和复杂文字可能退化，小字号删除 hint 后 rasterization 质量下降；CJK 常用字可裁剪 shaping，但混排标点、全角空格、数字比例宽度与全局 metrics 必须保留，否则 layout 会错位或产生 tofu。</p>
+</li>
+<li><p>进阶思考：一个页面首屏文本包含 1000 个 CJK 码点和 30 个拉丁码点。若把字体拆成 CJK 与 Latin 两个 subset，并 preload 两者，但首屏第一个可绘制节点是 CJK 段落，Latin 字体先解析、CJK 字体后解析。请从 unicode-range 匹配顺序、font-load scheduling、font-display:block、HTTP&#x2F;2 多路复用优先级、glyph cache 与 FCP 记录规则推导：为什么增加子集数量有时会让 FCP 变差？为什么最优策略通常不是单纯减少单文件体积，而是把关键 paint 所需字体集合压到最小，并保证非关键子集不进入首屏关键路径？</p>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/18/foundation/2026-11-18-foundation-web-font-subsetting-fcp/">https://litongjin.github.io/2026/11/18/foundation/2026-11-18-foundation-web-font-subsetting-fcp/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/18/foundation/2026-11-18-foundation-async-await-coroutine-state-machine/" title="每日基础技术总结 · 2026-11-18 · async/await 背后的协程状态机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-18 · async/await 背后的协程状态机</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/18/daily/2026-11-18-workbench-daily/" title="工作台日报 · 2026-11-18"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">工作台日报 · 2026-11-18</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">856</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">107</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-18-%C2%B7-Web-Font-Subsetting%EF%BC%9A%E5%AD%97%E4%BD%93%E8%A3%81%E5%89%AA%E6%8A%80%E6%9C%AF%E5%AF%B9%E9%A6%96%E6%AC%A1%E7%BB%98%E5%88%B6%E6%97%B6%E9%97%B4%EF%BC%88FCP%EF%BC%89%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/foundation/2026-11-18-foundation-mq-order-message-shard-key/" title="每日基础技术总结 · 2026-11-18 · 消息队列顺序消息实现：Shard Key设计与单分区串行化">每日基础技术总结 · 2026-11-18 · 消息队列顺序消息实现：Shard Key设计与单分区串行化</a><time datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/foundation/2026-11-18-foundation-async-await-coroutine-state-machine/" title="每日基础技术总结 · 2026-11-18 · async/await 背后的协程状态机">每日基础技术总结 · 2026-11-18 · async/await 背后的协程状态机</a><time datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/foundation/2026-11-18-foundation-web-font-subsetting-fcp/" title="每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化">每日基础技术总结 · 2026-11-18 · Web Font Subsetting：字体裁剪技术对首次绘制时间（FCP）的优化</a><time datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/daily/2026-11-18-workbench-daily/" title="工作台日报 · 2026-11-18">工作台日报 · 2026-11-18</a><time datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/17/foundation/2026-11-17-foundation-dns-soa-refresh-retry-expire/" title="每日基础技术总结 · 2026-11-17 · DNS过期的SOA记录中Refresh/Retry/Expire字段的具体时序意义">每日基础技术总结 · 2026-11-17 · DNS过期的SOA记录中Refresh/Retry/Expire字段的具体时序意义</a><time datetime="2026-11-16T23:02:36.000Z" title="发表于 2026-11-17 07:02:36">2026-11-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/17/daily/2026-11-17-workbench-daily/" title="工作台日报 · 2026-11-17">工作台日报 · 2026-11-17</a><time datetime="2026-11-16T23:02:36.000Z" title="发表于 2026-11-17 07:02:36">2026-11-17</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
