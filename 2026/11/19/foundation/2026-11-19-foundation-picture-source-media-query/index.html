@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每日基础技术总结 · 2026-11-19 · HTML `&lt;picture&gt;` 元素与 Source 媒体查询：响应式图片加载决策树 | 我的工作台</title><meta name="author" content="Litongjin"><meta name="copyright" content="Litongjin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="每日基础技术总结 · 2026-11-19 · HTML &lt;picture&gt; 元素与 Source 媒体查询：响应式图片加载决策树📚 今日主题 HTML &lt;picture&gt; 元素与 Source 媒体查询：响应式图片加载决策树（前端底层与计算机基础）  1. 核心概念速览 是 HTML 解析器中的声明式图像候选源选择容器，由一个  后备元素与零个或多个  候选元素组成。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每日基础技术总结 · 2026-11-19 · HTML &#96;&lt;picture&gt;&#96; 元素与 Source 媒体查询：响应式图片加载决策树">
+<meta property="og:url" content="https://litongjin.github.io/2026/11/19/foundation/2026-11-19-foundation-picture-source-media-query/index.html">
+<meta property="og:site_name" content="我的工作台">
+<meta property="og:description" content="每日基础技术总结 · 2026-11-19 · HTML &lt;picture&gt; 元素与 Source 媒体查询：响应式图片加载决策树📚 今日主题 HTML &lt;picture&gt; 元素与 Source 媒体查询：响应式图片加载决策树（前端底层与计算机基础）  1. 核心概念速览 是 HTML 解析器中的声明式图像候选源选择容器，由一个  后备元素与零个或多个  候选元素组成。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2026-11-18T23:01:28.000Z">
+<meta property="article:modified_time" content="2026-11-18T23:15:15.308Z">
+<meta property="article:author" content="Litongjin">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="前端底层与计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://litongjin.github.io/2026/11/19/foundation/2026-11-19-foundation-picture-source-media-query/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每日基础技术总结 · 2026-11-19 · HTML `<picture>` 元素与 Source 媒体查询：响应式图片加载决策树',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-19 07:15:15'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="我的工作台" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">860</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">107</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: url(/img/background.webp)"><nav id="nav"><span id="blog-info"><a href="/" title="我的工作台"><span class="site-name">我的工作台</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%B7%A5%E4%BD%9C%E6%97%A5%E8%AE%B0/"><i class="fa-fw fas fa-calendar-alt"></i><span> 工作日记</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"><i class="fa-fw fas fa-book-open"></i><span> 技术分享</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">每日基础技术总结 · 2026-11-19 · HTML `&lt;picture&gt;` 元素与 Source 媒体查询：响应式图片加载决策树</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-18T23:01:28.000Z" title="发表于 2026-11-19 07:01:28">2026-11-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-18T23:15:15.308Z" title="更新于 2026-11-19 07:15:15">2026-11-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="每日基础技术总结 · 2026-11-19 · HTML `&lt;picture&gt;` 元素与 Source 媒体查询：响应式图片加载决策树"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="每日基础技术总结-·-2026-11-19-·-HTML-元素与-Source-媒体查询：响应式图片加载决策树"><a href="#每日基础技术总结-·-2026-11-19-·-HTML-元素与-Source-媒体查询：响应式图片加载决策树" class="headerlink" title="每日基础技术总结 · 2026-11-19 · HTML &lt;picture&gt; 元素与 Source 媒体查询：响应式图片加载决策树"></a>每日基础技术总结 · 2026-11-19 · HTML <code>&lt;picture&gt;</code> 元素与 Source 媒体查询：响应式图片加载决策树</h1><h2 id="📚-今日主题"><a href="#📚-今日主题" class="headerlink" title="📚 今日主题"></a>📚 今日主题</h2><blockquote>
+<p><strong>HTML <code>&lt;picture&gt;</code> 元素与 Source 媒体查询：响应式图片加载决策树</strong>（前端底层与计算机基础）</p>
+</blockquote>
+<h3 id="1-核心概念速览"><a href="#1-核心概念速览" class="headerlink" title="1. 核心概念速览"></a>1. 核心概念速览</h3><p><picture> 是 HTML 解析器中的声明式图像候选源选择容器，由一个 <img> 后备元素与零个或多个 <source> 候选元素组成。<source> 的 media 属性表达 CSS Media Queries 条件，type 属性表达 MIME&#x2F;解码能力约束，srcset&#x2F;sizes 表达同一候选源内部的像素候选集合。浏览器图像加载算法按文档顺序执行 first-match-wins：先评估媒体条件与类型支持，再从第一个通过的 source 的 srcset 中选择最终 URL；若无 source 通过，则由 img 自身 src&#x2F;srcset 决定。它解决三类正交问题：1) art direction：不同视口或环境使用不同裁切与构图；2) format negotiation：优先使用 AVIF&#x2F;WebP 等更高效编码并跳过不支持的 UA；3) density&#x2F;resolution selection：按设备像素比、目标显示宽度与 UA 启发选择像素量。位于 HTML parsing、preload scanner、CSS media query 求值、network fetch、image decode pipeline 的交界，是前端资源调度的第一层决策树。工程师必须掌握它，因为它直接影响关键渲染路径、LCP、带宽成本、预加载请求时序与可回退能力；错误的 source 顺序会导致多余下载或次优资源选择。</p>
+<h3 id="2-底层原理剖析"><a href="#2-底层原理剖析" class="headerlink" title="2. 底层原理剖析"></a>2. 底层原理剖析</h3><p>机制本质是客户端声明式内容协商。与 HTTP Accept 的服务端内容协商不同，picture 把格式与媒体条件选择前置到浏览器 HTML 解析与图像加载调度阶段。</p>
+<p>伪代码：<br>selectCurrentSource(picture):<br>  for source in documentOrder(picture.sources):<br>    if source.media and !evalMediaQuery(source.media, uaEnv): continue<br>    if source.type and !uaCanDecodeType(source.type): continue<br>    if source.srcset and parseCandidates(source.srcset): return source<br>  return picture.img</p>
+<p>selectFinalURL(selectedSource):<br>  candidates &#x3D; parseSrcset(selectedSource.srcset)<br>  if candidates empty: return selectedSource.src<br>  if usesWidthDescriptors:<br>    targetWidth &#x3D; evaluateSizes(selectedSource.sizes, uaEnv, layout)<br>    choose candidate closest to targetWidth * dpr under UA heuristics<br>  if usesDensityDescriptors:<br>    choose candidate based on currentScale&#x2F;dpr<br>  return candidate.url</p>
+<p>关键机制：</p>
+<ol>
+<li>source.media 过滤的是候选源集合，不是 CSS 样式；常用 viewport 特征，如 width、height、orientation、resolution、display-mode、prefers-*，不等价于 container width。</li>
+<li>first-match-wins 是有序决策：type 不支持会跳过并继续后续 source；但第一个同时满足 media&#x2F;type&#x2F;srcset 的 source 一旦通过，后面的 source 不再参与同次加载。</li>
+<li>srcset&#x2F;sizes 在同一 source 内部做二次选择，输入包括设备像素比、视口尺寸、sizes、UA 对解码成本、内存与网络条件的启发。</li>
+<li>preload scanner 可提前发现候选 URL，但完整决策仍依赖媒体与大小上下文；source 顺序与 type 决定浏览器是否能在发起请求前跳过不支持或不适配资源。</li>
+<li>对比 Java&#x2F;TS interface：Java interface 是运行时类型与多态入口；TS interface 是编译期结构契约且类型擦除；picture&#x2F;source 是浏览器运行时的声明式选择契约，选择逻辑由 UA 执行且直接驱动网络请求。</li>
+</ol>
+<h3 id="3-基础代码与实战验证"><a href="#3-基础代码与实战验证" class="headerlink" title="3. 基础代码与实战验证"></a>3. 基础代码与实战验证</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&lt;!doctype html&gt;</span><br><span class="line">&lt;html lang=&#x27;zh-CN&#x27;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">  &lt;picture&gt;</span><br><span class="line">    &lt;!-- 候选 1：宽屏 AVIF。media=false 或 type 不支持则跳过，不下载 --&gt;</span><br><span class="line">    &lt;source</span><br><span class="line">      srcset=&#x27;hero-avif-1200.avif 1200w, hero-avif-2400.avif 2400w&#x27;</span><br><span class="line">      sizes=&#x27;(min-width: 1024px) 70vw, 100vw&#x27;</span><br><span class="line">      media=&#x27;(min-width: 1024px)&#x27;</span><br><span class="line">      type=&#x27;image/avif&#x27;</span><br><span class="line">    /&gt;</span><br><span class="line">    &lt;!-- 候选 2：宽屏 WebP。只有候选 1 被 media/type/srcset 规则跳过时才会进入 --&gt;</span><br><span class="line">    &lt;source</span><br><span class="line">      srcset=&#x27;hero-webp-1200.webp 1200w, hero-webp-2400.webp 2400w&#x27;</span><br><span class="line">      sizes=&#x27;(min-width: 1024px) 70vw, 100vw&#x27;</span><br><span class="line">      media=&#x27;(min-width: 1024px)&#x27;</span><br><span class="line">      type=&#x27;image/webp&#x27;</span><br><span class="line">    /&gt;</span><br><span class="line">    &lt;!-- 候选 3：窄屏 art direction。宽屏候选 media=false，窄屏继续到此 --&gt;</span><br><span class="line">    &lt;source</span><br><span class="line">      srcset=&#x27;hero-mobile-webp-480.webp 480w, hero-mobile-webp-960.webp 960w&#x27;</span><br><span class="line">      sizes=&#x27;100vw&#x27;</span><br><span class="line">      media=&#x27;(max-width: 1023px)&#x27;</span><br><span class="line">      type=&#x27;image/webp&#x27;</span><br><span class="line">    /&gt;</span><br><span class="line">    &lt;!-- 后备：所有 source 未匹配或无法形成有效候选时，由 img 的 src 或 img srcset 决定 --&gt;</span><br><span class="line">    &lt;img src=&#x27;hero-mobile.jpg&#x27; alt=&#x27;产品主图&#x27; width=&#x27;480&#x27; height=&#x27;360&#x27; /&gt;</span><br><span class="line">  &lt;/picture&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-常见误区与进阶思考"><a href="#4-常见误区与进阶思考" class="headerlink" title="4. 常见误区与进阶思考"></a>4. 常见误区与进阶思考</h3><ol>
+<li>将 source media 误解为实时 CSS 媒体查询。它本质是图像资源选择条件，通常发生在加载决策路径中；视口变化后的重选行为不等同于 CSS，依赖 picture 做运行期断点切换可能出现不更新。需要动态 art direction 时，应结合 JS 或 CSS background 策略。</li>
+<li>混淆三种属性职责：srcset 只在已选 source 内选择像素候选，不切换裁切&#x2F;构图；sizes 是目标宽度输入，不是加载条件；media&#x2F;type 在 source 层过滤候选集合。错误顺序会导致支持更优格式却先被次优 source 命中，或没有 type 时提前下载无法解码资源。</li>
+<li>深度思考题：若需求是宽屏优先 AVIF、其次 WebP；窄屏优先 WebP、其次 JPEG，并且宽窄屏使用不同裁切，source 列表应如何排序才能同时满足 art direction 与格式协商？为什么单纯按格式优先级或单纯按断点优先级都无法保证最优？</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://litongjin.github.io">Litongjin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://litongjin.github.io/2026/11/19/foundation/2026-11-19-foundation-picture-source-media-query/">https://litongjin.github.io/2026/11/19/foundation/2026-11-19-foundation-picture-source-media-query/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://litongjin.github.io" target="_blank">我的工作台</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/">技术分享</a><a class="post-meta__tags" href="/tags/%E5%89%8D%E7%AB%AF%E5%BA%95%E5%B1%82%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">前端底层与计算机基础</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/11/19/foundation/2026-11-19-foundation-frontend-first-paint-performance/" title="每日基础技术总结 · 2026-11-19 · 前端首屏性能优化体系"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">每日基础技术总结 · 2026-11-19 · 前端首屏性能优化体系</div></div></a></div><div class="next-post pull-right"><a href="/2026/11/19/foundation/2026-11-19-foundation-gray-release-header-routing/" title="每日基础技术总结 · 2026-11-19 · 微服务灰度发布流量染色：Header注入与路由匹配规则"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日基础技术总结 · 2026-11-19 · 微服务灰度发布流量染色：Header注入与路由匹配规则</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/02/12/foundation/2024-02-12-foundation-reflow-triggers-incremental-layout-dirty-flag/" title="每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-12</div><div class="title">每日基础技术总结 · 2024-02-12 · 重排触发条件与增量布局脏标记</div></div></a></div><div><a href="/2024/03/10/foundation/2024-03-10-foundation-css-containment-content-visibility-auto/" title="每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">每日基础技术总结 · 2024-03-10 · CSS Containment (content-visibility&#x2F;auto) 如何切断渲染依赖以提升性能</div></div></a></div><div><a href="/2024/03/20/foundation/2024-03-20-foundation-samesite-cookie/" title="每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-20</div><div class="title">每日基础技术总结 · 2024-03-20 · 浏览器安全策略 SameSite Cookie 属性对第三方跨域请求的影响</div></div></a></div><div><a href="/2024/03/24/foundation/2024-03-24-foundation-web-animations-api-waapi-css-transitions/" title="每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-24</div><div class="title">每日基础技术总结 · 2024-03-24 · Web Animations API (WAAPI) 相对于 CSS Transitions 的性能优势：合成器层管理</div></div></a></div><div><a href="/2024/04/18/foundation/2024-04-18-foundation-html-parser-recovery/" title="每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">每日基础技术总结 · 2024-04-18 · HTML Parser 的解析错误恢复策略（Recovery）及容错性带来的性能损耗</div></div></a></div><div><a href="/2024/06/08/foundation/2024-06-08-foundation-intersectionobserver-intersectionrect/" title="每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-08</div><div class="title">每日基础技术总结 · 2024-06-08 · IntersectionObserver 中的 IntersectionRect 计算误差与视口边界判定</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Litongjin</div><div class="author-info__description">个人工作台 · 行业热点 / 工作总结 / 基础技术</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">860</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">107</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Litongjin"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%8F%E6%97%A5%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93-%C2%B7-2026-11-19-%C2%B7-HTML-%E5%85%83%E7%B4%A0%E4%B8%8E-Source-%E5%AA%92%E4%BD%93%E6%9F%A5%E8%AF%A2%EF%BC%9A%E5%93%8D%E5%BA%94%E5%BC%8F%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%86%B3%E7%AD%96%E6%A0%91"><span class="toc-number">1.</span> <span class="toc-text">每日基础技术总结 · 2026-11-19 · HTML &lt;picture&gt; 元素与 Source 媒体查询：响应式图片加载决策树</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E4%BB%8A%E6%97%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">📚 今日主题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%80%9F%E8%A7%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 核心概念速览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 底层原理剖析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%AE%9E%E6%88%98%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 基础代码与实战验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E8%BF%9B%E9%98%B6%E6%80%9D%E8%80%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 常见误区与进阶思考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/19/daily/2026-11-19-workbench-daily/" title="工作台日报 · 2026-11-19">工作台日报 · 2026-11-19</a><time datetime="2026-11-18T23:01:28.000Z" title="发表于 2026-11-19 07:01:28">2026-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/19/foundation/2026-11-19-foundation-frontend-first-paint-performance/" title="每日基础技术总结 · 2026-11-19 · 前端首屏性能优化体系">每日基础技术总结 · 2026-11-19 · 前端首屏性能优化体系</a><time datetime="2026-11-18T23:01:28.000Z" title="发表于 2026-11-19 07:01:28">2026-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/19/foundation/2026-11-19-foundation-picture-source-media-query/" title="每日基础技术总结 · 2026-11-19 · HTML `&lt;picture&gt;` 元素与 Source 媒体查询：响应式图片加载决策树">每日基础技术总结 · 2026-11-19 · HTML `&lt;picture&gt;` 元素与 Source 媒体查询：响应式图片加载决策树</a><time datetime="2026-11-18T23:01:28.000Z" title="发表于 2026-11-19 07:01:28">2026-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/19/foundation/2026-11-19-foundation-gray-release-header-routing/" title="每日基础技术总结 · 2026-11-19 · 微服务灰度发布流量染色：Header注入与路由匹配规则">每日基础技术总结 · 2026-11-19 · 微服务灰度发布流量染色：Header注入与路由匹配规则</a><time datetime="2026-11-18T23:01:28.000Z" title="发表于 2026-11-19 07:01:28">2026-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/foundation/2026-11-18-foundation-mq-order-message-shard-key/" title="每日基础技术总结 · 2026-11-18 · 消息队列顺序消息实现：Shard Key设计与单分区串行化">每日基础技术总结 · 2026-11-18 · 消息队列顺序消息实现：Shard Key设计与单分区串行化</a><time datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/foundation/2026-11-18-foundation-async-await-coroutine-state-machine/" title="每日基础技术总结 · 2026-11-18 · async/await 背后的协程状态机">每日基础技术总结 · 2026-11-18 · async/await 背后的协程状态机</a><time datetime="2026-11-17T23:02:03.000Z" title="发表于 2026-11-18 07:02:03">2026-11-18</time></div></div></div></div></div></div></main><footer id="footer" style="background: url(/img/background.webp)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Litongjin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
